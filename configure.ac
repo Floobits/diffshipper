@@ -9,7 +9,7 @@ m4_ifdef(
     [AM_SILENT_RULES([yes])]
 )
 
-CFLAGS="$CFLAGS -framework CoreFoundation -framework CoreServices -Wall -Wextra -std=c89 -D_GNU_SOURCE -g"
+CFLAGS="$CFLAGS -Iextern/diff-match-patch-c/src/ -framework CoreFoundation -framework CoreServices -Wall -Wextra -std=c89 -D_GNU_SOURCE -g"
 LDFLAGS="$LDFLAGS"
 
 AC_CONFIG_FILES([Makefile])
