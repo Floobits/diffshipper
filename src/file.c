@@ -7,9 +7,6 @@
 #include <unistd.h>
 #include <errno.h>
 
-#include "dmp.h"
-#include "dmp_pool.h"
-
 #include "file.h"
 #include "log.h"
 

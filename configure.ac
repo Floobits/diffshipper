@@ -10,7 +10,7 @@ m4_ifdef(
 )
 
 CFLAGS="$CFLAGS -Iextern/diff-match-patch-c/src/ -Wall -Wextra -std=c89 -D_GNU_SOURCE -g"
-LDFLAGS="$LDFLAGS -framework CoreFoundation -framework CoreServices"
+LDFLAGS="$LDFLAGS -Lextern/diff-match-patch-c/ -framework CoreFoundation -framework CoreServices"
 
 AC_CONFIG_FILES([Makefile])
 AC_CONFIG_HEADERS([config.h])
