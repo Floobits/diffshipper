@@ -1,7 +1,7 @@
 ACLOCAL_AMFLAGS = ${ACLOCAL_FLAGS}
 
 bin_PROGRAMS = diffmon
-diffmon_SOURCES = src/main.c
+diffmon_SOURCES = src/log.c src/main.c
 #dist_bin_SCRIPTS = auto_rsync notify_loop
 
 #man_MANS = doc/diffmon.1
