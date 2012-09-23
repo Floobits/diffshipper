@@ -4,19 +4,23 @@
 #include <sys/time.h>
 #include <unistd.h>
 
-#include "dmp.h"
-#include "dmp_pool.h"
-
 #include <CoreFoundation/CoreFoundation.h>
 #include <CoreServices/CoreServices.h>
+
+#include "diff.h"
+#include "log.h"
+
 
 void event_cb(ConstFSEventStreamRef streamRef, void *cb_data, size_t count, void *paths,
               const FSEventStreamEventFlags flags[], const FSEventStreamEventId ids[]) {
     size_t i;
+    const char *path;
 
     for (i = 0; i < count; i++) {
+        path = ((char**)paths)[i];
         /* flags are unsigned long, IDs are uint64_t */
-        printf("Change %llu in %s, flags %lu\n", ids[i], ((char**)paths)[i], (long)flags[i]);
+        log_debug("Change %llu in %s, flags %lu", ids[i], path, (long)flags[i]);
+        get_changes(path);
     }
 
     if (count > 0) {
@@ -25,8 +29,10 @@ void event_cb(ConstFSEventStreamRef streamRef, void *cb_data, size_t count, void
 }
 
 int main(int argc, char **argv) {
+    set_log_level(LOG_LEVEL_DEBUG);
+
     if (argc < 2) {
-        printf("No path to watch specified\n");
+        log_err("No path to watch specified");
         exit(1);
     }
 
