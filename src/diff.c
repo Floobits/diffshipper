@@ -10,17 +10,20 @@
 
 void push_changes(const char *path) {
     char orig_base[] = "/tmp/fuck_yo_couch";
-    char *old_path;
+    char *orig_path;
     dmp_diff *diff;
 
-    old_path = malloc(strlen(orig_base) + strlen(path) + 1);
+    int orig_path_len = strlen(orig_base) + strlen(path) + 1;
+    orig_path = malloc(orig_path_len);
+    strlcpy(orig_path, orig_base, orig_path_len);
+    strlcat(orig_path, path, orig_path_len);
     log_debug("Getting changes for %s", path);
-    diff = diff_files(old_path, path);
+    diff = diff_files(orig_path, path);
     log_debug("diff: ");
     if (diff) {
         dmp_diff_free(diff);
     }
-    free(old_path);
+    free(orig_path);
 }
 
 
