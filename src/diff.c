@@ -9,13 +9,20 @@
 
 
 void push_changes(const char *path) {
-    const char *old_path;
+    char orig_base[] = "/tmp/fuck_yo_couch";
+    char *old_path;
+    dmp_diff *diff;
+
+    old_path = malloc(strlen(orig_base) + strlen(path) + 1);
     log_debug("Getting changes for %s", path);
-    diff_files(old_path, path);
+    diff = diff_files(old_path, path);
+    log_debug("diff: ");
+    dmp_diff_free(diff);
+    free(old_path);
 }
 
 
-void diff_files(const char *f1, const char *f2) {
+dmp_diff *diff_files(const char *f1, const char *f2) {
     mmapped_file_t *mf1;
     mmapped_file_t *mf2;
     dmp_diff *diff;
@@ -30,5 +37,6 @@ void diff_files(const char *f1, const char *f2) {
     munmap_file(mf2);
     free(mf1);
     free(mf2);
+    return diff;
 }
 

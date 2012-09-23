@@ -1,7 +1,9 @@
 #ifndef DIFF_H
 #define DIFF_H
 
+#include "dmp.h"
+
 void push_changes(const char *path);
-void diff_files(const char *orig, const char *new);
+dmp_diff *diff_files(const char *f1, const char *f2);
 
 #endif
