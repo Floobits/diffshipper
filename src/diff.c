@@ -17,7 +17,9 @@ void push_changes(const char *path) {
     log_debug("Getting changes for %s", path);
     diff = diff_files(old_path, path);
     log_debug("diff: ");
-    dmp_diff_free(diff);
+    if (diff) {
+        dmp_diff_free(diff);
+    }
     free(old_path);
 }
 
@@ -30,6 +32,11 @@ dmp_diff *diff_files(const char *f1, const char *f2) {
 
     mf1 = mmap_file(f1);
     mf2 = mmap_file(f2);
+
+    if (mf1 == NULL || mf2 == NULL) {
+        log_err("SHIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIT! AVENGE ME!");
+        return NULL;
+    }
 
     dmp_diff_new(&diff, &opts, mf1->buf, mf1->len, mf2->buf, mf2->len);
 
