@@ -24,10 +24,29 @@ int modified_filter(const struct dirent *dir) {
     return 0;
 }
 
+int print_chunk(void *baton, dmp_operation_t op, const void *data, uint32_t len) {
+    switch (op) {
+        case DMP_DIFF_DELETE:
+            log_debug("delete");
+        break;
+
+        case DMP_DIFF_EQUAL:
+            log_debug("equal");
+        break;
+
+        case DMP_DIFF_INSERT:
+            log_debug("insert");
+        break;
+
+        default:
+            log_err("WTF?!?!");
+    }
+    log_debug("len: %u", len);
+
+    return 0;
+}
+
 void push_changes(const char *path) {
-    char orig_base[] = "/tmp/fuck_yo_couch";
-    char *orig_path;
-    int orig_path_len;
     struct dirent **dir_list = NULL;
     struct dirent *dir = NULL;
     int results;
@@ -40,6 +59,9 @@ void push_changes(const char *path) {
         log_debug("No results found in directory %s", path);
     }
 
+    char orig_base[] = "/tmp/fuck_yo_couch";
+    char *orig_path;
+    int orig_path_len;
     char *file_path;
     int file_path_len;
     for (i = 0; i < results; i++) {
@@ -59,8 +81,13 @@ void push_changes(const char *path) {
 
         diff = diff_files(orig_path, file_path);
         log_debug("diff: ");
+        void *baton = NULL;
         if (diff) {
+            dmp_diff_foreach(diff, print_chunk, baton);
             dmp_diff_free(diff);
+        }
+        else {
+            log_err("damn. diff is null");
         }
         free(orig_path);
         free(file_path);

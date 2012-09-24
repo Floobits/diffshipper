@@ -24,7 +24,7 @@ void event_cb(ConstFSEventStreamRef streamRef, void *cb_data, size_t count, void
     }
 
     if (count > 0) {
-        exit(1);
+/*        exit(1);*/
     }
 }
 
