@@ -12,7 +12,7 @@
 #include "file.h"
 #include "log.h"
 
-struct timespec now;
+struct timeval now;
 
 int modified_filter(const struct dirent *dir) {
     struct stat dir_info;
@@ -35,27 +35,36 @@ void push_changes(const char *path) {
     dmp_diff *diff;
     gettimeofday(&now, NULL);
 
-    orig_path_len = strlen(orig_base) + strlen(path) + 1;
-    orig_path = malloc(orig_path_len);
-    strlcpy(orig_path, orig_base, orig_path_len);
-    strlcat(orig_path, path, orig_path_len);
-
     results = scandir(path, &dir_list, &modified_filter, &alphasort);
-    if (results == 0)
-    {
+    if (results == 0) {
         log_debug("No results found in directory %s", path);
     }
 
+    char *file_path;
+    int file_path_len;
     for (i = 0; i < results; i++) {
-        log_debug("Getting changes for %s", path);
-        diff = diff_files(orig_path, path);
+        dir = dir_list[i];
+        orig_path_len = strlen(orig_base) + strlen(path) + strlen(dir->d_name) + 1;
+        orig_path = malloc(orig_path_len);
+        strlcpy(orig_path, orig_base, orig_path_len);
+        strlcat(orig_path, path, orig_path_len);
+        strlcat(orig_path, dir->d_name, orig_path_len);
+
+        file_path_len = strlen(path) + strlen(dir->d_name) + 1;
+        file_path = malloc(file_path_len);
+        strlcat(file_path, path, file_path_len);
+        strlcat(file_path, dir->d_name, file_path_len);
+
+        log_debug("Diffing. original %s, new %s", orig_path, file_path);
+
+        diff = diff_files(orig_path, file_path);
         log_debug("diff: ");
         if (diff) {
             dmp_diff_free(diff);
         }
+        free(orig_path);
+        free(file_path);
     }
-
-    free(orig_path);
 }
 
 
