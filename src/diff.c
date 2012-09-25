@@ -109,7 +109,7 @@ void push_changes(const char *path) {
         }
 
         dmp_diff_print_raw(stderr, ftc_diff.diff);
-        memcpy(ftc_diff.mf1, ftc_diff.mf2, ftc_diff.mf2->len);
+        memcpy(ftc_diff.mf1->buf, ftc_diff.mf2->buf, ftc_diff.mf2->len);
         rv = msync_file(ftc_diff.mf1, ftc_diff.mf2->len);
         log_debug("rv %i wrote %i bytes to %s", rv, ftc_diff.mf2->len, ftc_diff.f1);
 
