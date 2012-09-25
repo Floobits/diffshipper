@@ -11,7 +11,7 @@
 #include "log.h"
 
 
-mmapped_file_t *mmap_file(const char *path) {
+mmapped_file_t *mmap_file(const char *path, off_t size, int prot, int flags) {
     int fd = -1;
     off_t f_len = 0;
     char *buf = NULL;
@@ -19,7 +19,7 @@ mmapped_file_t *mmap_file(const char *path) {
     int rv = 0;
     mmapped_file_t *mf;
 
-    fd = open(path, O_RDONLY);
+    fd = open(path, O_RDWR);
     if (fd < 0) {
         log_err("Error opening file %s: %s Skipping...", path, strerror(errno));
         goto cleanup;
@@ -39,8 +39,10 @@ mmapped_file_t *mmap_file(const char *path) {
         goto cleanup;
     }
 
-    f_len = statbuf.st_size;
-    buf = mmap(0, f_len, PROT_READ, MAP_SHARED, fd, 0);
+    f_len = size > statbuf.st_size ? size : statbuf.st_size;
+    prot = prot ? prot : PROT_READ;
+    flags = flags ? flags : MAP_SHARED;
+    buf = mmap(0, f_len, prot, flags, fd, 0);
     if (buf == MAP_FAILED) {
         log_err("File %s failed to load: %s.", path, strerror(errno));
         goto cleanup;
@@ -48,7 +50,7 @@ mmapped_file_t *mmap_file(const char *path) {
 
     mf = malloc(sizeof(mmapped_file_t));
     mf->buf = buf;
-    mf->len = f_len;
+    mf->len = statbuf.st_size; /* yeah I know this is confusing */
     mf->fd = fd;
     return mf;
 
@@ -63,4 +65,20 @@ mmapped_file_t *mmap_file(const char *path) {
 void munmap_file(mmapped_file_t *mf) {
     munmap(mf->buf, mf->len);
     close(mf->fd);
+}
+
+int msync_file(mmapped_file_t *mf, off_t len) {
+    int rv;
+    if (len > mf->len) {
+        if (lseek(mf->fd, len, SEEK_SET) == -1) {
+            log_err("lseek failed");
+            exit(1);
+        }
+        if (write(mf->fd, "", 1) != 1) {
+            log_err("write failed");
+            exit(1);
+        }
+        mf->len = len;
+    }
+    return msync(mf->buf, len, MS_SYNC);
 }

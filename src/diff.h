@@ -8,10 +8,10 @@
 typedef struct {
     const char *f1;
     const char *f2;
-    mmapped_file_t *mf1;
-    mmapped_file_t *mf2;
     dmp_diff *diff;
     dmp_options opts;
+    mmapped_file_t *mf1;
+    mmapped_file_t *mf2;
 } ftc_diff_t;
 
 void push_changes(const char *path);

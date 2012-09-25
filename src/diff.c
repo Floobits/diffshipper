@@ -2,6 +2,7 @@
 #include <sys/stat.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/mman.h>
 #include <sys/time.h>
 #include <sys/types.h>
 #include <time.h>
@@ -54,6 +55,7 @@ void push_changes(const char *path) {
     struct dirent *dir = NULL;
     int results;
     int i;
+    int rv;
     ftc_diff_t ftc_diff;
     gettimeofday(&now, NULL);
 
@@ -101,14 +103,17 @@ void push_changes(const char *path) {
         log_debug("Diffing. original %s, new %s", orig_path, file_path);
 
         diff_files(&ftc_diff, orig_path, file_path);
-        if (ftc_diff.diff) {
-            dmp_diff_print_raw(stderr, ftc_diff.diff);
-/*            dmp_diff_foreach(diff, print_chunk, NULL);*/
-        }
-        else {
+        if (!ftc_diff.diff) {
             log_err("damn. diff is null");
+            goto cleanup;
         }
-        ftc_diff_cleanup(&ftc_diff);
+
+        dmp_diff_print_raw(stderr, ftc_diff.diff);
+        memcpy(ftc_diff.mf1, ftc_diff.mf2, ftc_diff.mf2->len);
+        rv = msync_file(ftc_diff.mf1, ftc_diff.mf2->len);
+        log_debug("rv %i wrote %i bytes to %s", rv, ftc_diff.mf2->len, ftc_diff.f1);
+
+        cleanup:;
         free(orig_path);
         free(file_path);
     }
@@ -118,20 +123,15 @@ void push_changes(const char *path) {
 void diff_files(ftc_diff_t *f, const char *f1, const char *f2) {
     f->f1 = f1; /* not sure if this is a good idea*/
     f->f2 = f2;
-    f->mf1 = mmap_file(f1);
-    f->mf2 = mmap_file(f2);
-
-    if (f->mf1 == NULL || f->mf2 == NULL) {
-        log_err("SHIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIT! AVENGE ME!");
-        exit(1);
-    }
+    f->mf2 = mmap_file(f2, 10000, 0, 0);
+    f->mf1 = mmap_file(f1, 10000, PROT_WRITE | PROT_READ, 0);
 
     dmp_diff_new(&(f->diff), NULL, f->mf1->buf, f->mf1->len, f->mf2->buf, f->mf2->len);
 }
 
 
 void ftc_diff_cleanup(ftc_diff_t *f) {
-    dmp_diff_free(f->diff);
+/*    dmp_diff_free(f->diff);*/
     munmap_file(f->mf1);
     munmap_file(f->mf2);
     free(f->mf1);
