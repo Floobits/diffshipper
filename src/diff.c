@@ -122,19 +122,12 @@ void push_changes(const char *path) {
         else {
             log_err("damn. diff is null");
         }
+        ftc_diff_cleanup(&ftc_diff);
         free(orig_path);
         free(file_path);
     }
 }
 
-
-void free_ftc_diff(ftc_diff_t *f) {
-    dmp_diff_free(f->diff);
-    munmap_file(f->mf1);
-    munmap_file(f->mf2);
-    free(f->mf1);
-    free(f->mf2);
-}
 
 void diff_files(ftc_diff_t *f, const char *f1, const char *f2) {
     f->f1 = f1; /* not sure if this is a good idea*/
@@ -150,3 +143,11 @@ void diff_files(ftc_diff_t *f, const char *f1, const char *f2) {
     dmp_diff_new(&(f->diff), NULL, f->mf1->buf, f->mf1->len, f->mf2->buf, f->mf2->len);
 }
 
+
+void ftc_diff_cleanup(ftc_diff_t *f) {
+    dmp_diff_free(f->diff);
+    munmap_file(f->mf1);
+    munmap_file(f->mf2);
+    free(f->mf1);
+    free(f->mf2);
+}
