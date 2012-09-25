@@ -24,13 +24,7 @@ int modified_filter(const struct dirent *dir) {
 }
 
 int print_chunk(void *baton, dmp_operation_t op, const void *data, uint32_t len) {
-    if (baton == NULL) {
-        log_err("baton is null");
-    }
-    else {
-/*        log_err("baton is %s", (char*)baton);*/
-    }
-/*    switch (op) {
+    switch (op) {
         case DMP_DIFF_EQUAL:
             log_debug("equal");
         break;
@@ -46,15 +40,10 @@ int print_chunk(void *baton, dmp_operation_t op, const void *data, uint32_t len)
         default:
             log_err("WTF?!?!");
             exit(1);
-        break;
-    }*/
+    }
     log_debug("len: %u", (size_t)len);
-    log_err("omg baton is %s", (char*)baton);
     if (op != DMP_DIFF_EQUAL) {
-        char *temp = malloc(len+1);
-        memcpy(temp, data, len);
-        log_err(temp);
-/*        fwrite(data, (size_t)len, 1, stdout);*/
+        fwrite(data, (size_t)len, 1, stdout);
     }
 
     return 0;
@@ -112,12 +101,9 @@ void push_changes(const char *path) {
         log_debug("Diffing. original %s, new %s", orig_path, file_path);
 
         diff_files(&ftc_diff, orig_path, file_path);
-        char *baton = calloc(100, 1);
-        strlcpy(baton, "baton baton baton baton baton baton baton", 100);
         if (ftc_diff.diff) {
-            log_debug("diff: ");
             dmp_diff_print_raw(stderr, ftc_diff.diff);
-/*            dmp_diff_foreach(diff, print_chunk, baton);*/
+/*            dmp_diff_foreach(diff, print_chunk, NULL);*/
         }
         else {
             log_err("damn. diff is null");
