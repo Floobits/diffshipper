@@ -100,8 +100,6 @@ void push_changes(const char *path) {
         strlcat(file_path, path, file_path_len);
         strlcat(file_path, dir->d_name, file_path_len);
 
-        log_debug("Diffing. original %s, new %s", orig_path, file_path);
-
         diff_files(&ftc_diff, orig_path, file_path);
         if (!ftc_diff.diff) {
             log_err("damn. diff is null");
@@ -109,10 +107,26 @@ void push_changes(const char *path) {
         }
 
         dmp_diff_print_raw(stderr, ftc_diff.diff);
-        memcpy(ftc_diff.mf1->buf, ftc_diff.mf2->buf, ftc_diff.mf2->len);
-        rv = msync_file(ftc_diff.mf1, ftc_diff.mf2->len);
+
+        mmapped_file_t *mf1 = ftc_diff.mf1;
+        mmapped_file_t *mf2 = ftc_diff.mf2;
+        if (mf1->len != mf2->len) {
+            if (ftruncate(mf1->fd, mf2->len) != 0) {
+                log_err("resizing file failed");
+                exit(1);
+            }
+            log_debug("resized to %u bytes", mf2->len);
+        }
+
+        munmap(mf1->buf, mf1->len);
+        mf1->buf = mmap(0, mf2->len, PROT_WRITE | PROT_READ, MAP_SHARED, mf1->fd, 0);
+        mf1->len = mf2->len;
+        memcpy(mf1->buf, mf2->buf, mf2->len);
+        msync(mf1->buf, mf1->len, MS_SYNC);
+
         log_debug("rv %i wrote %i bytes to %s", rv, ftc_diff.mf2->len, ftc_diff.f1);
 
+        ftc_diff_cleanup(&ftc_diff);
         cleanup:;
         free(orig_path);
         free(file_path);
@@ -121,10 +135,28 @@ void push_changes(const char *path) {
 
 
 void diff_files(ftc_diff_t *f, const char *f1, const char *f2) {
+    struct stat file_stats;
+    int rv;
+    off_t f1_size;
+    off_t f2_size;
+
     f->f1 = f1; /* not sure if this is a good idea*/
     f->f2 = f2;
-    f->mf2 = mmap_file(f2, 10000, 0, 0);
-    f->mf1 = mmap_file(f1, 10000, PROT_WRITE | PROT_READ, 0);
+
+    rv = lstat(f1, &file_stats);
+    if (rv != 0) {
+        log_err("Error lstat()ing file %s. Skipping...", f1);
+    }
+    f1_size = file_stats.st_size;
+    rv = lstat(f2, &file_stats);
+    if (rv != 0) {
+        log_err("Error lstat()ing file %s. Skipping...", f2);
+    }
+    f2_size = file_stats.st_size;
+    f1_size = f2_size > f1_size ? f2_size : f1_size;
+
+    f->mf2 = mmap_file(f2, f2_size, 0, 0);
+    f->mf1 = mmap_file(f1, f1_size, PROT_WRITE | PROT_READ, 0);
 
     dmp_diff_new(&(f->diff), NULL, f->mf1->buf, f->mf1->len, f->mf2->buf, f->mf2->len);
 }
