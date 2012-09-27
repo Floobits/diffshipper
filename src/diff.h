@@ -5,6 +5,8 @@
 
 #include "file.h"
 
+#define TMP_BASE "/tmp/fuck_yo_couch"
+
 typedef struct {
     const char *f1;
     const char *f2;

@@ -15,7 +15,6 @@
 
 struct timeval now;
 
-
 int modified_filter(const struct dirent *dir) {
     struct stat dir_info;
     lstat(dir->d_name, &dir_info);
@@ -65,7 +64,6 @@ void push_changes(const char *path) {
         log_debug("No results found in directory %s", path);
     }
 
-    char orig_base[] = "/tmp/fuck_yo_couch";
     char *orig_path;
     int orig_path_len;
     char *file_path;
@@ -90,9 +88,9 @@ void push_changes(const char *path) {
             continue;
         }
 
-        orig_path_len = strlen(orig_base) + strlen(path) + strlen(dir->d_name) + 1;
+        orig_path_len = strlen(TMP_BASE) + strlen(path) + strlen(dir->d_name) + 1;
         orig_path = malloc(orig_path_len);
-        strlcpy(orig_path, orig_base, orig_path_len);
+        strlcpy(orig_path, TMP_BASE, orig_path_len);
         strlcat(orig_path, path, orig_path_len);
         strlcat(orig_path, dir->d_name, orig_path_len);
 
