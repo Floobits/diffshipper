@@ -1,5 +1,6 @@
 #include <stdarg.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <sys/time.h>
 #include <unistd.h>
@@ -36,18 +37,20 @@ int main(int argc, char **argv) {
 
     if (argc < 2)
         die("No path to watch specified");
-    path = argv[1];
+    path = realpath(argv[1], NULL);
 
-    rv = run_cmd("mkdir -p %s", TMP_BASE);
+    rv = run_cmd("mkdir -p %s%s", TMP_BASE, path);
     if (rv != 0)
         die("error creating temp directior %s", TMP_BASE);
 
-    rv = run_cmd("cp -r %s %s", path, TMP_BASE);
+    rv = run_cmd("cp -fr %s/ %s%s", path, TMP_BASE, path);
     if (rv != 0)
         die("error creating copying files to tmp dir %s", TMP_BASE);
 
     log_msg("Watching %s", path);
-    CFStringRef cfs_path = CFStringCreateWithCString(NULL, path, kCFStringEncodingUTF8); /* pretty sure I'm leaking this */
+    free(path);
+
+    CFStringRef cfs_path = CFStringCreateWithCString(NULL, argv[1], kCFStringEncodingUTF8); /* pretty sure I'm leaking this */
     CFArrayRef paths = CFArrayCreate(NULL, (const void **)&cfs_path, 1, NULL); /* ditto */
     void *cb_data = NULL;
     FSEventStreamRef stream;

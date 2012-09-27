@@ -65,13 +65,11 @@ void push_changes(const char *path) {
     }
 
     char *orig_path;
-    int orig_path_len;
     char *file_path;
-    int file_path_len;
     struct stat dir_info;
     for (i = 0; i < results; i++) {
         dir = dir_list[i];
-        asprintf(&file_path, "%s/%s", path, dir->d_name);
+        asprintf(&file_path, "%s%s", path, dir->d_name);
 
         /* If a link points to a directory then we need to treat it as a directory. */
         if (dir->d_type == DT_LNK) {
@@ -83,22 +81,12 @@ void push_changes(const char *path) {
                 dir->d_type = DT_DIR;
             }
         }
-
         if (dir->d_type == DT_DIR) {
             /* todo: figure out if we need to recurse */
             continue;
         }
 
-        orig_path_len = strlen(TMP_BASE) + strlen(path) + strlen(dir->d_name) + 1;
-        orig_path = malloc(orig_path_len);
-        strlcpy(orig_path, TMP_BASE, orig_path_len);
-        strlcat(orig_path, path, orig_path_len);
-        strlcat(orig_path, dir->d_name, orig_path_len);
-
-        file_path_len = strlen(path) + strlen(dir->d_name) + 1;
-        file_path = malloc(file_path_len);
-        strlcat(file_path, path, file_path_len);
-        strlcat(file_path, dir->d_name, file_path_len);
+        asprintf(&orig_path, "%s%s", TMP_BASE, file_path);
 
         diff_files(&ftc_diff, orig_path, file_path);
         if (!ftc_diff.diff) {
