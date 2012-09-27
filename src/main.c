@@ -32,8 +32,7 @@ int main(int argc, char **argv) {
     set_log_level(LOG_LEVEL_DEBUG);
 
     if (argc < 2) {
-        log_err("No path to watch specified");
-        exit(1);
+        die("No path to watch specified");
     }
 
     CFStringRef cfs_path = CFStringCreateWithCString(NULL, argv[1], kCFStringEncodingUTF8); /* pretty sure I'm leaking this */

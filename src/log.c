@@ -1,5 +1,6 @@
-#include <stdio.h>
 #include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "log.h"
 
@@ -70,4 +71,12 @@ void plog(const unsigned int level, const char *fmt, ...) {
     va_start(args, fmt);
     vplog(level, fmt, args);
     va_end(args);
+}
+
+void die(const char *fmt, ...) {
+    va_list args;
+    va_start(args, fmt);
+    vplog(LOG_LEVEL_WARN, fmt, args);
+    va_end(args);
+    exit(1);
 }

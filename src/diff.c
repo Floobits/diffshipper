@@ -41,8 +41,7 @@ int print_chunk(void *baton, dmp_operation_t op, const void *data, uint32_t len)
         break;
 
         default:
-            log_err("WTF?!?!");
-            exit(1);
+            die("WTF?!?!");
     }
     log_debug("len: %u", (size_t)len);
     if (op != DMP_DIFF_EQUAL) {
@@ -114,8 +113,7 @@ void push_changes(const char *path) {
         mmapped_file_t *mf2 = ftc_diff.mf2;
         if (mf1->len != mf2->len) {
             if (ftruncate(mf1->fd, mf2->len) != 0) {
-                log_err("resizing file failed");
-                exit(1);
+                die("resizing file failed");
             }
             log_debug("resized to %u bytes", mf2->len);
         }
@@ -147,12 +145,12 @@ void diff_files(ftc_diff_t *f, const char *f1, const char *f2) {
 
     rv = lstat(f1, &file_stats);
     if (rv != 0) {
-        log_err("Error lstat()ing file %s. Skipping...", f1);
+        die("Error lstat()ing file %s.", f1);
     }
     f1_size = file_stats.st_size;
     rv = lstat(f2, &file_stats);
     if (rv != 0) {
-        log_err("Error lstat()ing file %s. Skipping...", f2);
+        die("Error lstat()ing file %s.", f2);
     }
     f2_size = file_stats.st_size;
     f1_size = f2_size > f1_size ? f2_size : f1_size;
