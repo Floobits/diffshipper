@@ -5,6 +5,7 @@
 
 #include "diff.h"
 #include "log.h"
+#include "net.h"
 #include "util.h"
 
 void event_cb(ConstFSEventStreamRef streamRef, void *cb_data, size_t count, void *paths,
@@ -53,6 +54,10 @@ int main(int argc, char **argv) {
     stream = FSEventStreamCreate(NULL, &event_cb, cb_data, paths, kFSEventStreamEventIdSinceNow, 0, kFSEventStreamCreateFlagNone);
     FSEventStreamScheduleWithRunLoop(stream, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
     FSEventStreamStart(stream);
+
+    rv = server_connect("fixtheco.de", "4001");
+    if (rv != 0)
+        die("Couldn't connect to server");
 
     CFRunLoopRun();
     /* We never get here */
