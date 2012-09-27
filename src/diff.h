@@ -5,7 +5,7 @@
 
 #include "file.h"
 
-#define TMP_BASE "/tmp/fuck_yo_couch"
+#define TMP_BASE "/tmp/diff-patch-cloud"
 
 typedef struct {
     const char *f1;
