@@ -71,6 +71,7 @@ void push_changes(const char *path) {
     struct stat dir_info;
     for (i = 0; i < results; i++) {
         dir = dir_list[i];
+        asprintf(&file_path, "%s/%s", path, dir->d_name);
 
         /* If a link points to a directory then we need to treat it as a directory. */
         if (dir->d_type == DT_LNK) {
@@ -101,7 +102,7 @@ void push_changes(const char *path) {
 
         diff_files(&ftc_diff, orig_path, file_path);
         if (!ftc_diff.diff) {
-            log_err("damn. diff is null");
+            log_err("diff is null. I guess someone wrote the exact same bytes to this file?");
             goto cleanup;
         }
 
@@ -111,16 +112,16 @@ void push_changes(const char *path) {
         mmapped_file_t *mf2 = ftc_diff.mf2;
         if (mf1->len != mf2->len) {
             if (ftruncate(mf1->fd, mf2->len) != 0) {
-                die("resizing file failed");
+                die("resizing %s failed", ftc_diff.f1);
             }
-            log_debug("resized to %u bytes", mf2->len);
+            log_debug("resized %s to %u bytes", ftc_diff.f1, mf2->len);
         }
 
         munmap(mf1->buf, mf1->len);
         mf1->buf = mmap(0, mf2->len, PROT_WRITE | PROT_READ, MAP_SHARED, mf1->fd, 0);
         mf1->len = mf2->len;
         memcpy(mf1->buf, mf2->buf, mf1->len);
-        msync(mf1->buf, mf1->len, MS_SYNC);
+        rv = msync(mf1->buf, mf1->len, MS_SYNC);
 
         log_debug("rv %i wrote %i bytes to %s", rv, mf1->len, ftc_diff.f1);
 
