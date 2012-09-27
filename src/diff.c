@@ -165,7 +165,7 @@ void diff_files(ftc_diff_t *f, const char *f1, const char *f2) {
 
 
 void ftc_diff_cleanup(ftc_diff_t *f) {
-/*    dmp_diff_free(f->diff);*/
+    dmp_diff_free(f->diff);
     munmap_file(f->mf1);
     munmap_file(f->mf2);
     free(f->mf1);
