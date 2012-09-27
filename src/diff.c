@@ -1,11 +1,13 @@
 #include <dirent.h>
-#include <sys/stat.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/mman.h>
+#include <sys/stat.h>
 #include <sys/time.h>
 #include <sys/types.h>
 #include <time.h>
+#include <unistd.h>
 
 #include "diff.h"
 #include "file.h"
@@ -121,10 +123,10 @@ void push_changes(const char *path) {
         munmap(mf1->buf, mf1->len);
         mf1->buf = mmap(0, mf2->len, PROT_WRITE | PROT_READ, MAP_SHARED, mf1->fd, 0);
         mf1->len = mf2->len;
-        memcpy(mf1->buf, mf2->buf, mf2->len);
+        memcpy(mf1->buf, mf2->buf, mf1->len);
         msync(mf1->buf, mf1->len, MS_SYNC);
 
-        log_debug("rv %i wrote %i bytes to %s", rv, ftc_diff.mf2->len, ftc_diff.f1);
+        log_debug("rv %i wrote %i bytes to %s", rv, mf1->len, ftc_diff.f1);
 
         ftc_diff_cleanup(&ftc_diff);
         cleanup:;
