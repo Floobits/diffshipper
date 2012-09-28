@@ -1,8 +1,11 @@
 #include <dirent.h>
+#include <errno.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/mman.h>
+#include <sys/socket.h>
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <sys/types.h>
@@ -12,6 +15,7 @@
 #include "diff.h"
 #include "file.h"
 #include "log.h"
+#include "net.h"
 
 
 struct timeval now;
@@ -27,27 +31,41 @@ int modified_filter(const struct dirent *dir) {
 }
 
 
-int print_chunk(void *baton, dmp_operation_t op, const void *data, uint32_t len) {
+int send_diff_chunk(void *baton, dmp_operation_t op, const void *data, uint32_t len) {
+    diff_info_t *di = (diff_info_t*)baton;
+    ssize_t bytes_sent;
+    off_t offset;
+    char *msg;
+    int msg_len;
+
+    /* Just so you know, I know this is bad. */
     switch (op) {
         case DMP_DIFF_EQUAL:
+            /* Don't care */
             log_debug("equal");
+            return 0;
         break;
 
         case DMP_DIFF_DELETE:
-            log_debug("delete");
+            offset = data - di->mf1->buf;
+            log_debug("delete. offset: %i bytes", offset);
+            msg_len = asprintf(&msg, "path %s delete offset %lld data_len %u\n", di->path, offset, len);
         break;
 
         case DMP_DIFF_INSERT:
-            log_debug("insert");
+            offset = data - di->mf2->buf;
+            log_debug("delete. offset: %i bytes", offset);
+            msg_len = asprintf(&msg, "path %s insert offset %lld data_len %u\n", di->path, offset, len);
         break;
 
         default:
             die("WTF?!?!");
     }
-    log_debug("len: %u", (size_t)len);
-    if (op != DMP_DIFF_EQUAL) {
-        fwrite(data, (size_t)len, 1, stdout);
-    }
+    bytes_sent = send_bytes(msg, msg_len);
+    fwrite(data, (size_t)len, 1, stdout);
+    bytes_sent = send(server_sock, data, len, 0);
+    if (bytes_sent == -1)
+        die("send() error: %s", strerror(errno));
 
     return 0;
 }
@@ -59,6 +77,7 @@ void push_changes(const char *path) {
     int results;
     int i;
     int rv;
+    diff_info_t di;
     ftc_diff_t ftc_diff;
     gettimeofday(&now, NULL);
 
@@ -84,7 +103,7 @@ void push_changes(const char *path) {
             }
         }
         if (dir->d_type == DT_DIR) {
-            /* todo: figure out if we need to recurse */
+            /* TODO: figure out if we need to recurse */
             continue;
         }
 
@@ -96,10 +115,14 @@ void push_changes(const char *path) {
             goto cleanup;
         }
 
-        dmp_diff_print_raw(stderr, ftc_diff.diff);
-
         mmapped_file_t *mf1 = ftc_diff.mf1;
         mmapped_file_t *mf2 = ftc_diff.mf2;
+        di.path = file_path;
+        di.mf1 = mf1;
+        di.mf2 = mf2;
+        dmp_diff_print_raw(stderr, ftc_diff.diff);
+        dmp_diff_foreach(ftc_diff.diff, send_diff_chunk, &di);
+
         if (mf1->len != mf2->len) {
             if (ftruncate(mf1->fd, mf2->len) != 0) {
                 die("resizing %s failed", ftc_diff.f1);

@@ -1,6 +1,8 @@
 #ifndef DIFF_H
 #define DIFF_H
 
+#include <dirent.h>
+
 #include "dmp.h"
 
 #include "file.h"
@@ -15,6 +17,15 @@ typedef struct {
     mmapped_file_t *mf1;
     mmapped_file_t *mf2;
 } ftc_diff_t;
+
+typedef struct {
+  char *path;
+  mmapped_file_t *mf1;
+  mmapped_file_t *mf2;
+} diff_info_t;
+
+int modified_filter(const struct dirent *dir);
+int send_diff_chunk(void *baton, dmp_operation_t op, const void *data, uint32_t len);
 
 void push_changes(const char *path);
 

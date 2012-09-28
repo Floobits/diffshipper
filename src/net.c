@@ -46,6 +46,14 @@ int server_connect(const char *host, const char *port) {
 }
 
 
+int send_bytes(const void *buf, const size_t len) {
+    int bytes_sent = send(server_sock, buf, len, 0);
+    if (bytes_sent == -1)
+        die("send() error: %s", strerror(errno));
+    return bytes_sent;
+}
+
+
 void net_cleanup() {
     close(server_sock);
     freeaddrinfo(server_info);
