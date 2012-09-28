@@ -8,6 +8,7 @@
 #include "net.h"
 #include "util.h"
 
+
 void event_cb(ConstFSEventStreamRef streamRef, void *cb_data, size_t count, void *paths,
               const FSEventStreamEventFlags flags[], const FSEventStreamEventId ids[]) {
     size_t i;
@@ -24,6 +25,7 @@ void event_cb(ConstFSEventStreamRef streamRef, void *cb_data, size_t count, void
 /*        exit(1);*/
     }
 }
+
 
 int main(int argc, char **argv) {
     int rv;

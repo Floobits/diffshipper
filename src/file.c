@@ -62,10 +62,12 @@ mmapped_file_t *mmap_file(const char *path, off_t size, int prot, int flags) {
     return NULL;
 }
 
+
 void munmap_file(mmapped_file_t *mf) {
     munmap(mf->buf, mf->len);
     close(mf->fd);
 }
+
 
 int msync_file(mmapped_file_t *mf, off_t len) {
     if (len != mf->len) {

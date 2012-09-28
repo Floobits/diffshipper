@@ -13,6 +13,7 @@
 #include "file.h"
 #include "log.h"
 
+
 struct timeval now;
 
 int modified_filter(const struct dirent *dir) {
@@ -24,6 +25,7 @@ int modified_filter(const struct dirent *dir) {
     }
     return 0;
 }
+
 
 int print_chunk(void *baton, dmp_operation_t op, const void *data, uint32_t len) {
     switch (op) {
@@ -49,6 +51,7 @@ int print_chunk(void *baton, dmp_operation_t op, const void *data, uint32_t len)
 
     return 0;
 }
+
 
 void push_changes(const char *path) {
     struct dirent **dir_list = NULL;
