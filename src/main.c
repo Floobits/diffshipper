@@ -55,7 +55,7 @@ int main(int argc, char **argv) {
     FSEventStreamScheduleWithRunLoop(stream, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
     FSEventStreamStart(stream);
 
-    rv = server_connect("fixtheco.de", "4001");
+    rv = server_connect("localhost", "4001");
     if (rv != 0)
         die("Couldn't connect to server");
 
