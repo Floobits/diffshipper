@@ -18,6 +18,8 @@ int server_connect(const char *host, const char *port) {
     int flags;
     int rv;
     struct addrinfo hints;
+    fd_set read_fds;
+    struct timeval tv;
 
     memset(&hints, 0, sizeof(hints));
     hints.ai_family = AF_UNSPEC;
@@ -30,6 +32,7 @@ int server_connect(const char *host, const char *port) {
     server_sock = socket(server_info->ai_family, server_info->ai_socktype, server_info->ai_protocol);
     if (server_sock == -1)
         die("socket() error: %s", strerror(errno));
+
     flags = fcntl(server_sock, F_GETFL, 0);
     rv = fcntl(server_sock, F_SETFL, flags | O_NONBLOCK);
     if (rv == -1)
@@ -40,11 +43,19 @@ int server_connect(const char *host, const char *port) {
     if (rv != -1 || errno != EINPROGRESS)
         die("connect() error: %s", strerror(errno));
 
-    rv = select(1, NULL, , NULL, NULL);
-    if (rv != 1)
+    FD_ZERO(&read_fds);
+    FD_SET(server_sock, &read_fds);
+    tv.tv_sec = 10;
+    tv.tv_usec = 0;
+    rv = select(1, &read_fds, NULL, NULL, &tv);
+    if (rv == -1) {
         die("select() error:", strerror(errno));
+    } else if (rv == 0) {
+        /* timeout */
+        die("Timed out connecting to %s:%s.", host, port);
+    }
 
-    log_debug("Connected!");
+    log_debug("Connected to %s:%s", host, port);
 
     char msg[] = "hello!";
     ssize_t bytes_sent = send(server_sock, &msg, strlen(msg), 0);
