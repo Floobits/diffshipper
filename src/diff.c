@@ -151,6 +151,10 @@ void diff_files(ftc_diff_t *f, const char *f1, const char *f2) {
     int rv;
     off_t f1_size;
     off_t f2_size;
+    dmp_options opts;
+
+    memset(&opts, 0, sizeof(opts));
+    opts.timeout = 1.0; /* give up diffing after one second of processing */
 
     f->f1 = f1; /* not sure if this is a good idea*/
     f->f2 = f2;
@@ -170,7 +174,7 @@ void diff_files(ftc_diff_t *f, const char *f1, const char *f2) {
     f->mf2 = mmap_file(f2, f2_size, 0, 0);
     f->mf1 = mmap_file(f1, f1_size, PROT_WRITE | PROT_READ, 0);
 
-    dmp_diff_new(&(f->diff), NULL, f->mf1->buf, f->mf1->len, f->mf2->buf, f->mf2->len);
+    dmp_diff_new(&(f->diff), &opts, f->mf1->buf, f->mf1->len, f->mf2->buf, f->mf2->len);
 }
 
 
