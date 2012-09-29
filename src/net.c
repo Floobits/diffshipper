@@ -53,6 +53,14 @@ int send_bytes(const void *buf, const size_t len) {
     return bytes_sent;
 }
 
+ssize_t recv_bytes(void *buf, size_t len) {
+    ssize_t bytes_received;
+    /* TODO: check if bytes received is 0 and reconnect */
+    bytes_received = recv(server_sock, buf, len, 0);
+    log_debug("received %u bytes", len);
+    fwrite(buf, (size_t)len, 1, stdout);
+    return bytes_received;
+}
 
 void net_cleanup() {
     close(server_sock);

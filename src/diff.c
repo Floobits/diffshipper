@@ -185,3 +185,14 @@ void ftc_diff_cleanup(ftc_diff_t *f) {
     free(f->mf1);
     free(f->mf2);
 }
+
+
+/*
+int apply_diff_chunk(void *baton, dmp_operation_t op, const void *data, uint32_t len) {
+    
+}
+*/
+/*void apply_diff(dmp_diff *diff, void *buf, size_t len) {*/
+void apply_diff(void *buf, size_t len) {
+    
+}
