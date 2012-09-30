@@ -18,7 +18,12 @@ void event_cb(ConstFSEventStreamRef streamRef, void *cb_data, size_t count, void
         path = ((char**)paths)[i];
         /* flags are unsigned long, IDs are uint64_t */
         log_debug("Change %llu in %s, flags %lu", ids[i], path, (long)flags[i]);
-        push_changes(path);
+        if (ignored(path)) {
+            /* we triggered this event */
+            unignore_path(path);
+        } else {
+            push_changes(path);
+        }
     }
 
     /* TODO: EXTREMELY BAD CODE FOLLOWS */
@@ -47,11 +52,18 @@ void event_cb(ConstFSEventStreamRef streamRef, void *cb_data, size_t count, void
 }
 
 
+void init() {
+    ignored_paths = NULL;
+    ignored_paths_len = 0;
+    set_log_level(LOG_LEVEL_DEBUG);
+}
+
+
 int main(int argc, char **argv) {
     int rv;
     char *path;
 
-    set_log_level(LOG_LEVEL_DEBUG);
+    init();
 
     if (argc < 2)
         die("No path to watch specified");
@@ -72,8 +84,9 @@ int main(int argc, char **argv) {
     CFArrayRef paths = CFArrayCreate(NULL, (const void **)&cfs_path, 1, NULL); /* ditto */
     void *cb_data = NULL;
     FSEventStreamRef stream;
+    CFAbsoluteTime latency = 0.25;
 
-    stream = FSEventStreamCreate(NULL, &event_cb, cb_data, paths, kFSEventStreamEventIdSinceNow, 0, kFSEventStreamCreateFlagNone);
+    stream = FSEventStreamCreate(NULL, &event_cb, cb_data, paths, kFSEventStreamEventIdSinceNow, latency, kFSEventStreamCreateFlagNone);
     FSEventStreamScheduleWithRunLoop(stream, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
     FSEventStreamStart(stream);
 

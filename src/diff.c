@@ -154,7 +154,7 @@ void diff_files(ftc_diff_t *f, const char *f1, const char *f2) {
     dmp_options opts;
 
     memset(&opts, 0, sizeof(opts));
-    opts.timeout = 1.0; /* give up diffing after one second of processing */
+    opts.timeout = 0.5; /* give up diffing after 0.5 seconds of processing */
 
     f->f1 = f1; /* not sure if this is a good idea*/
     f->f2 = f2;
@@ -194,5 +194,7 @@ int apply_diff_chunk(void *baton, dmp_operation_t op, const void *data, uint32_t
 */
 /*void apply_diff(dmp_diff *diff, void *buf, size_t len) {*/
 void apply_diff(void *buf, size_t len) {
-    
+    char *path;
+    /* parse path & diff from buf */
+    ignore_path(path);
 }
