@@ -1,5 +1,6 @@
 *.dSYM
 *.o
+*.plist/
 .deps
 .dirstamp
 .DS_Store
@@ -8,15 +9,15 @@ autom4te.cache
 cachegrind.out.*
 callgrind.out.*
 clang_output_*
+config.h*
 config.log
 config.status
 configure
 depcomp
+diffmon
 gmon.out
 install-sh
 Makefile
 Makefile.in
 missing
-diffmon
-config.h*
 stamp-h1
