@@ -35,9 +35,10 @@ void event_cb(ConstFSEventStreamRef streamRef, void *cb_data, size_t count, void
     ssize_t rv;
     strcpy(buf, "updates?");
     msg_len = strlen(buf);
-    rv = send_bytes(buf, msg_len);
+/*    rv = send_bytes(buf, msg_len);
     if (rv != msg_len)
         die("not all of message sent");
+        */
     rv = recv_bytes(buf, max_len);
     if (strncmp(buf, "no", 2) == 0) {
         log_debug("no updates");
@@ -92,7 +93,7 @@ int main(int argc, char **argv) {
     FSEventStreamScheduleWithRunLoop(stream, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
     FSEventStreamStart(stream);
 
-    rv = server_connect("127.0.0.1", "4001");
+    rv = server_connect("127.0.0.1", "3148");
     if (rv != 0)
         die("Couldn't connect to server");
 

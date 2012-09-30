@@ -37,9 +37,9 @@ int server_connect(const char *host, const char *port) {
     log_debug("Connected to %s:%s", host, port);
 
     char msg[] = "hello!";
-    ssize_t bytes_sent = send(server_sock, &msg, strlen(msg), 0);
+    ssize_t bytes_sent = send_bytes(&msg, strlen(msg));
     if (bytes_sent == -1)
-        die("send() error: %s", strerror(errno));
+        die("send_bytes() error: %s", strerror(errno));
     /* TODO: check # of bytes sent was correct */
 
     return rv;
@@ -47,13 +47,26 @@ int server_connect(const char *host, const char *port) {
 
 
 ssize_t send_bytes(const void *buf, const size_t len) {
-    ssize_t bytes_sent = send(server_sock, buf, len, 0);
+    if (len == 0) {
+        return 0;
+    }
+    size_t head_len = 20;
+    char *net_buf = malloc((len + head_len) * sizeof(char));
+    snprintf(net_buf, head_len + 1, "%020lu", len);
+    log_debug("%020lu bytes %s", len, net_buf);
+    memcpy(net_buf + head_len + 1, buf, len);
+    ssize_t bytes_sent = send(server_sock, net_buf, len + head_len, 0);
+    free(net_buf);
     if (bytes_sent == -1)
         die("send() error: %s", strerror(errno));
     return bytes_sent;
 }
 
+
 ssize_t recv_bytes(void *buf, size_t len) {
+    if (len == 0) {
+        return 0;
+    }
     ssize_t bytes_received;
     /* TODO: check if bytes received is 0 and reconnect */
     bytes_received = recv(server_sock, buf, len, 0);
@@ -61,6 +74,7 @@ ssize_t recv_bytes(void *buf, size_t len) {
     fwrite(buf, (size_t)len, 1, stdout);
     return bytes_received;
 }
+
 
 void net_cleanup() {
     close(server_sock);
