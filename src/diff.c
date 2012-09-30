@@ -16,6 +16,7 @@
 #include "file.h"
 #include "log.h"
 #include "net.h"
+#include "util.h"
 
 
 struct timeval now;
