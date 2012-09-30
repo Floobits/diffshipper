@@ -48,14 +48,14 @@ int server_connect(const char *host, const char *port) {
 
 ssize_t send_bytes(const void *buf, const size_t len) {
     if (len == 0) {
+        log_err("nothing to send. wtf?");
         return 0;
     }
-    size_t head_len = 20;
-    char *net_buf = malloc((len + head_len) * sizeof(char));
-    snprintf(net_buf, head_len + 1, "%020lu", len);
-    log_debug("%020lu bytes %s", len, net_buf);
-    memcpy(net_buf + head_len + 1, buf, len);
-    ssize_t bytes_sent = send(server_sock, net_buf, len + head_len, 0);
+    int total_len = NET_HEADER_LEN + len;
+    char *net_buf = malloc((total_len) * sizeof(char));
+    snprintf(net_buf, NET_HEADER_LEN + 1, "%020lu", len);
+    memcpy(net_buf + NET_HEADER_LEN + 1, buf, len);
+    ssize_t bytes_sent = send(server_sock, net_buf, total_len, 0);
     free(net_buf);
     if (bytes_sent == -1)
         die("send() error: %s", strerror(errno));
@@ -63,15 +63,28 @@ ssize_t send_bytes(const void *buf, const size_t len) {
 }
 
 
-ssize_t recv_bytes(void *buf, size_t len) {
+ssize_t recv_bytes(void **buf, size_t len) {
     if (len == 0) {
+        log_err("nothing to receive. wtf?");
         return 0;
     }
+    *buf = realloc(*buf, NET_HEADER_LEN);
     ssize_t bytes_received;
     /* TODO: check if bytes received is 0 and reconnect */
-    bytes_received = recv(server_sock, buf, len, 0);
-    log_debug("received %u bytes", len);
-    fwrite(buf, (size_t)len, 1, stdout);
+    bytes_received = recv(server_sock, *buf, NET_HEADER_LEN, 0);
+    log_debug("received %u bytes", bytes_received);
+    fwrite(*buf, (size_t)bytes_received, 1, stdout);
+    if (bytes_received != NET_HEADER_LEN) {
+        die("fix this code so it retries or something");
+    }
+    char header[NET_HEADER_LEN + 1];
+    memcpy(header, *buf, NET_HEADER_LEN);
+    header[NET_HEADER_LEN] = '\0';
+    int msg_len = atoi(header);
+    log_debug("msg is %i bytes", msg_len);
+    /* TODO: check to make sure we got the whole message*/
+    *buf = realloc(*buf, msg_len);
+    bytes_received = recv(server_sock, *buf, msg_len, 0);
     return bytes_received;
 }
 

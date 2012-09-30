@@ -62,11 +62,9 @@ int send_diff_chunk(void *baton, dmp_operation_t op, const void *data, uint32_t 
         default:
             die("WTF?!?!");
     }
+    log_debug("msg: %s", msg);
     bytes_sent = send_bytes(msg, msg_len);
     fwrite(data, (size_t)len, 1, stdout);
-    bytes_sent = send(server_sock, data, len, 0);
-    if (bytes_sent == -1)
-        die("send() error: %s", strerror(errno));
 
     return 0;
 }

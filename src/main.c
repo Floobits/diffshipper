@@ -29,24 +29,11 @@ void event_cb(ConstFSEventStreamRef streamRef, void *cb_data, size_t count, void
     /* TODO: EXTREMELY BAD CODE FOLLOWS */
     /* seriously. I winced as I wrote this */
     /* this should be in its own thread. we shouldn't have to wait for local changes before checking for remote changes */
-    ssize_t max_len = 8192;
-    ssize_t msg_len;
-    char *buf = malloc(max_len);
+    void *buf = NULL;
     ssize_t rv;
-    strcpy(buf, "updates?");
-    msg_len = strlen(buf);
-/*    rv = send_bytes(buf, msg_len);
-    if (rv != msg_len)
-        die("not all of message sent");
-        */
-    rv = recv_bytes(buf, max_len);
-    if (strncmp(buf, "no", 2) == 0) {
-        log_debug("no updates");
-    }
-    else {
-        log_debug("updates");
+    rv = recv_bytes(&buf, 1000);
+    if (rv)
         apply_diff(buf, rv);
-    }
     free(buf);
 
     if (count > 0) {
