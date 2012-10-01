@@ -115,6 +115,7 @@ void push_changes(const char *path) {
 
         asprintf(&orig_path, "%s%s", TMP_BASE, file_path);
 
+        ftc_diff.diff = NULL;
         diff_files(&ftc_diff, orig_path, file_path);
         if (!ftc_diff.diff) {
             log_err("diff is null. I guess someone wrote the exact same bytes to this file?");
@@ -180,7 +181,8 @@ void diff_files(ftc_diff_t *f, const char *f1, const char *f2) {
     f->mf2 = mmap_file(f2, f2_size, 0, 0);
     f->mf1 = mmap_file(f1, f1_size, PROT_WRITE | PROT_READ, 0);
 
-    dmp_diff_new(&(f->diff), &opts, f->mf1->buf, f->mf1->len, f->mf2->buf, f->mf2->len);
+    if (f->mf1 && f->mf2)
+        dmp_diff_new(&(f->diff), &opts, f->mf1->buf, f->mf1->len, f->mf2->buf, f->mf2->len);
 }
 
 
