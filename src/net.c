@@ -8,6 +8,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include "diff.h"
 #include "log.h"
 #include "net.h"
 #include "util.h"
@@ -81,7 +82,17 @@ ssize_t recv_bytes(void **buf) {
 }
 
 
-void *remote_change_watcher() {
+void *remote_change_worker() {
+    void *buf = NULL;
+    ssize_t rv;
+
+    while (TRUE) {
+        rv = recv_bytes(&buf);
+        if (rv)
+            apply_diff(buf, rv);
+    }
+
+    free(buf);
     pthread_exit(NULL);
     return NULL;
 }

@@ -3,6 +3,14 @@
 
 #include <pthread.h>
 
+#ifndef TRUE
+#define TRUE 1
+#endif
+
+#ifndef FALSE
+#define FALSE 0
+#endif
+
 char **ignored_paths;
 int ignored_paths_len;
 pthread_mutex_t ignore_mtx;

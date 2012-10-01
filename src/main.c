@@ -26,10 +26,6 @@ void event_cb(ConstFSEventStreamRef streamRef, void *cb_data, size_t count, void
             push_changes(path);
         }
     }
-
-    if (count > 0) {
-/*        exit(1);*/
-    }
 }
 
 
@@ -45,7 +41,7 @@ void init() {
     if (pthread_mutex_init(&ignore_mtx, NULL)) {
         die("pthread_mutex_init failed!");
     }
-    pthread_create(&remote_changes, NULL, &remote_change_watcher, NULL);
+    pthread_create(&remote_changes, NULL, &remote_change_worker, NULL);
 }
 
 
