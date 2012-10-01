@@ -38,6 +38,7 @@ int send_diff_chunk(void *baton, dmp_operation_t op, const void *data, uint32_t 
     off_t offset;
     char *msg;
     int msg_len;
+    char *data_str;
 
     /* Just so you know, I know this is bad. */
     switch (op) {
@@ -47,16 +48,21 @@ int send_diff_chunk(void *baton, dmp_operation_t op, const void *data, uint32_t 
             return 0;
         break;
 
+        /* TODO: escape stuff */
         case DMP_DIFF_DELETE:
             offset = data - di->mf1->buf;
             log_debug("delete. offset: %i bytes", offset);
-            msg_len = asprintf(&msg, "path %s delete offset %lld data_len %u\n", di->path, offset, len);
+            data_str = malloc(len + 1);
+            strncpy(data_str, data, len + 1);
+            msg_len = asprintf(&msg, "{ \"path\": \"%s\", \"action\": \"-%u@%lld\", \"data\": \"%s\" }\n", di->path, len, offset, data_str);
         break;
 
         case DMP_DIFF_INSERT:
             offset = data - di->mf2->buf;
-            log_debug("delete. offset: %i bytes", offset);
-            msg_len = asprintf(&msg, "path %s insert offset %lld data_len %u\n", di->path, offset, len);
+            log_debug("insert. offset: %i bytes", offset);
+            data_str = malloc(len + 1);
+            strncpy(data_str, data, len + 1);
+            msg_len = asprintf(&msg, "{ \"path\": \"%s\", \"action\": \"+%u@%lld\", \"data\": \"%s\" }\n", di->path, len, offset, data_str);
         break;
 
         default:
@@ -65,6 +71,7 @@ int send_diff_chunk(void *baton, dmp_operation_t op, const void *data, uint32_t 
     log_debug("msg: %s", msg);
     bytes_sent = send_bytes(msg, msg_len);
     fwrite(data, (size_t)len, 1, stdout);
+    free(data_str);
 
     return 0;
 }
@@ -186,12 +193,11 @@ void ftc_diff_cleanup(ftc_diff_t *f) {
 }
 
 
-/*
 int apply_diff_chunk(void *baton, dmp_operation_t op, const void *data, uint32_t len) {
-    
+    return 0;
 }
-*/
-/*void apply_diff(dmp_diff *diff, void *buf, size_t len) {*/
+
+
 void apply_diff(void *buf, size_t len) {
     char *path;
     /* parse path & diff from buf */
