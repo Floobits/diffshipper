@@ -9,7 +9,7 @@ int server_sock;
 int server_connect(const char *host, const char *port);
 
 ssize_t send_bytes(const void *buf, const size_t len);
-ssize_t recv_bytes(void **buf, size_t len);
+ssize_t recv_bytes(void **buf);
 
 void net_cleanup();
 

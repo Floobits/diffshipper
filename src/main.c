@@ -31,7 +31,7 @@ void event_cb(ConstFSEventStreamRef streamRef, void *cb_data, size_t count, void
     /* this should be in its own thread. we shouldn't have to wait for local changes before checking for remote changes */
     void *buf = NULL;
     ssize_t rv;
-    rv = recv_bytes(&buf, 1000);
+    rv = recv_bytes(&buf);
     if (rv)
         apply_diff(buf, rv);
     free(buf);

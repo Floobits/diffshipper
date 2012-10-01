@@ -63,13 +63,9 @@ ssize_t send_bytes(const void *buf, const size_t len) {
 }
 
 
-ssize_t recv_bytes(void **buf, size_t len) {
-    if (len == 0) {
-        log_err("nothing to receive. wtf?");
-        return 0;
-    }
-    *buf = realloc(*buf, NET_HEADER_LEN);
+ssize_t recv_bytes(void **buf) {
     ssize_t bytes_received;
+    *buf = realloc(*buf, NET_HEADER_LEN);
     /* TODO: check if bytes received is 0 and reconnect */
     bytes_received = recv(server_sock, *buf, NET_HEADER_LEN, 0);
     log_debug("received %u bytes", bytes_received);
@@ -82,7 +78,7 @@ ssize_t recv_bytes(void **buf, size_t len) {
     header[NET_HEADER_LEN] = '\0';
     int msg_len = atoi(header);
     log_debug("msg is %i bytes", msg_len);
-    /* TODO: check to make sure we got the whole message*/
+    /* TODO: check to make sure we got the whole message */
     *buf = realloc(*buf, msg_len);
     bytes_received = recv(server_sock, *buf, msg_len, 0);
     return bytes_received;
