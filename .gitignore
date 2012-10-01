@@ -9,7 +9,6 @@ autom4te.cache
 cachegrind.out.*
 callgrind.out.*
 clang_output_*
-config.h*
 config.log
 config.status
 configure
@@ -20,4 +19,5 @@ install-sh
 Makefile
 Makefile.in
 missing
+src/config.h*
 stamp-h1

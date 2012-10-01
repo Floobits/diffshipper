@@ -1,4 +1,4 @@
-AC_INIT([diffmon], [0.1])
+AC_INIT([diffmon], [0.1], [https://github.com/ggreer/diff-patch-cloud/issues], [diffmon], [https://github.com/ggreer/diff-patch-cloud])
 AC_PROG_CC
 AC_PREREQ([2.59])
 
@@ -12,7 +12,9 @@ m4_ifdef(
 CFLAGS="$CFLAGS -Iextern/diff-match-patch-c/src/ -Wall -Wextra -std=c89 -D_GNU_SOURCE -g"
 LDFLAGS="$LDFLAGS -Lextern/diff-match-patch-c/ -framework CoreFoundation -framework CoreServices"
 
+AC_CHECK_HEADERS([pthread.h])
+
 AC_CONFIG_FILES([Makefile])
-AC_CONFIG_HEADERS([config.h])
+AC_CONFIG_HEADERS([src/config.h])
 
 AC_OUTPUT

@@ -1,8 +1,11 @@
 #ifndef UTIL_H
 #define UTIL_H
 
+#include <pthread.h>
+
 char **ignored_paths;
 int ignored_paths_len;
+pthread_mutex_t ignore_mtx;
 
 int run_cmd(const char *fmt, ...);
 

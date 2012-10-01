@@ -36,7 +36,9 @@ int server_connect(const char *host, const char *port) {
 
     log_debug("Connected to %s:%s", host, port);
 
-    char msg[] = "hello!";
+    net_buf = NULL;
+    net_buf_len = 0;
+    char msg[] = "hello!\n";
     ssize_t bytes_sent = send_bytes(&msg, strlen(msg));
     if (bytes_sent == -1)
         die("send_bytes() error: %s", strerror(errno));
@@ -51,12 +53,7 @@ ssize_t send_bytes(const void *buf, const size_t len) {
         log_err("nothing to send. wtf?");
         return 0;
     }
-    int total_len = NET_HEADER_LEN + len;
-    char *net_buf = malloc((total_len) * sizeof(char));
-    snprintf(net_buf, NET_HEADER_LEN + 1, "%020lu", len);
-    memcpy(net_buf + NET_HEADER_LEN + 1, buf, len);
-    ssize_t bytes_sent = send(server_sock, net_buf, total_len, 0);
-    free(net_buf);
+    ssize_t bytes_sent = send(server_sock, buf, len, 0);
     if (bytes_sent == -1)
         die("send() error: %s", strerror(errno));
     return bytes_sent;
@@ -65,23 +62,28 @@ ssize_t send_bytes(const void *buf, const size_t len) {
 
 ssize_t recv_bytes(void **buf) {
     ssize_t bytes_received;
-    *buf = realloc(*buf, NET_HEADER_LEN);
-    /* TODO: check if bytes received is 0 and reconnect */
-    bytes_received = recv(server_sock, *buf, NET_HEADER_LEN, 0);
-    log_debug("received %u bytes", bytes_received);
-    fwrite(*buf, (size_t)bytes_received, 1, stdout);
-    if (bytes_received != NET_HEADER_LEN) {
-        die("fix this code so it retries or something");
-    }
-    char header[NET_HEADER_LEN + 1];
-    memcpy(header, *buf, NET_HEADER_LEN);
-    header[NET_HEADER_LEN] = '\0';
-    int msg_len = atoi(header);
-    log_debug("msg is %i bytes", msg_len);
-    /* TODO: check to make sure we got the whole message */
-    *buf = realloc(*buf, msg_len);
-    bytes_received = recv(server_sock, *buf, msg_len, 0);
-    return bytes_received;
+    ssize_t buf_len = 100;
+
+    *buf = realloc(*buf, buf_len);
+
+    do {
+        /* TODO: check if bytes received is 0 and reconnect */
+        bytes_received = recv(server_sock, *buf, buf_len, 0);
+        log_debug("received %u bytes", bytes_received);
+        if (bytes_received == buf_len) {
+            buf_len = buf_len * 1.5;
+            *buf = realloc(*buf, buf_len);
+        }
+    } while (1);
+
+    fwrite(*buf, (size_t)buf_len, 1, stdout);
+    return buf_len;
+}
+
+
+void *remote_change_watcher() {
+    pthread_exit(NULL);
+    return NULL;
 }
 
 

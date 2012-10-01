@@ -1,3 +1,4 @@
+#include <pthread.h>
 #include <stdlib.h>
 
 #include <CoreFoundation/CoreFoundation.h>
@@ -26,16 +27,6 @@ void event_cb(ConstFSEventStreamRef streamRef, void *cb_data, size_t count, void
         }
     }
 
-    /* TODO: EXTREMELY BAD CODE FOLLOWS */
-    /* seriously. I winced as I wrote this */
-    /* this should be in its own thread. we shouldn't have to wait for local changes before checking for remote changes */
-    void *buf = NULL;
-    ssize_t rv;
-    rv = recv_bytes(&buf);
-    if (rv)
-        apply_diff(buf, rv);
-    free(buf);
-
     if (count > 0) {
 /*        exit(1);*/
     }
@@ -43,9 +34,18 @@ void event_cb(ConstFSEventStreamRef streamRef, void *cb_data, size_t count, void
 
 
 void init() {
+    pthread_t remote_changes;
+
     ignored_paths = NULL;
     ignored_paths_len = 0;
     set_log_level(LOG_LEVEL_DEBUG);
+    if (pthread_cond_init(&server_conn_ready, NULL)) {
+        die("pthread_cond_init failed!");
+    }
+    if (pthread_mutex_init(&ignore_mtx, NULL)) {
+        die("pthread_mutex_init failed!");
+    }
+    pthread_create(&remote_changes, NULL, &remote_change_watcher, NULL);
 }
 
 
