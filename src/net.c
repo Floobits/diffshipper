@@ -116,7 +116,7 @@ void *remote_change_worker() {
         }
         /* yeah this is retarded */
         path = malloc(1000);
-        diff_data = malloc(1000);
+        diff_data = malloc(100000);
         rv = sscanf(buf, "{ \"path\": \"%[^\"]\", \"action\": \"%c%u@%u\", \"data\": \"%[^\"] }\n", path, &action, &diff_size, &diff_pos, diff_data);
         if (rv != 5) {
             log_warn("rv %i. unable to parse message: %s", rv, buf);
