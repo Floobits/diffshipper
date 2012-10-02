@@ -98,6 +98,11 @@ void push_changes(const char *path) {
     for (i = 0; i < results; i++) {
         dir = dir_list[i];
         asprintf(&file_path, "%s%s", path, dir->d_name);
+        if (ignored(file_path)) {
+            /* we triggered this event */
+            unignore_path(file_path);
+            continue;
+        }
 
         /* If a link points to a directory then we need to treat it as a directory. */
         if (dir->d_type == DT_LNK) {

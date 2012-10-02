@@ -19,12 +19,7 @@ void event_cb(ConstFSEventStreamRef streamRef, void *cb_data, size_t count, void
         path = ((char**)paths)[i];
         /* flags are unsigned long, IDs are uint64_t */
         log_debug("Change %llu in %s, flags %lu", ids[i], path, (long)flags[i]);
-        if (ignored(path)) {
-            /* we triggered this event */
-            unignore_path(path);
-        } else {
-            push_changes(path);
-        }
+        push_changes(path);
     }
 }
 
