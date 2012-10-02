@@ -37,13 +37,16 @@ int server_connect(const char *host, const char *port) {
 
     log_debug("Connected to %s:%s", host, port);
 
-    net_buf = NULL;
-    net_buf_len = 0;
     char msg[] = "hello!\n";
     ssize_t bytes_sent = send_bytes(&msg, strlen(msg));
     if (bytes_sent == -1)
         die("send_bytes() error: %s", strerror(errno));
     /* TODO: check # of bytes sent was correct */
+
+    net_buf = malloc(100);
+    net_buf_len = 0;
+    net_buf_size = 100;
+    pthread_cond_broadcast(&server_conn_ready);
 
     return rv;
 }
@@ -61,35 +64,72 @@ ssize_t send_bytes(const void *buf, const size_t len) {
 }
 
 
-ssize_t recv_bytes(void **buf) {
+ssize_t recv_bytes(char **buf) {
     ssize_t bytes_received;
-    ssize_t buf_len = 100;
+    ssize_t buf_len;
+    void *net_buf_end;
+    ssize_t net_buf_left;
+    void *line_end;
 
-    *buf = realloc(*buf, buf_len);
-
+    /* TODO: check if bytes received is 0 and reconnect */
     do {
-        /* TODO: check if bytes received is 0 and reconnect */
-        bytes_received = recv(server_sock, *buf, buf_len, 0);
+        net_buf_end = net_buf + net_buf_len;
+        net_buf_left = net_buf_size - net_buf_len;
+        bytes_received = recv(server_sock, net_buf_end, net_buf_left, 0);
+        net_buf_len += bytes_received;
         log_debug("received %u bytes", bytes_received);
-        if (bytes_received == buf_len) {
-            buf_len = buf_len * 1.5;
-            *buf = realloc(*buf, buf_len);
+        if (bytes_received == net_buf_left) {
+            net_buf_size *= 1.5;
+            net_buf = realloc(net_buf, net_buf_size);
         }
-    } while (1);
+        line_end = memchr(net_buf, '\n', net_buf_len);
+    } while(line_end == NULL);
 
+    buf_len = line_end - net_buf;
+    *buf = realloc(*buf, buf_len + 1);
+    memcpy(*buf, net_buf, buf_len);
+    buf[buf_len] = '\0';
+    memmove(net_buf, line_end + 1, buf_len - 1);
+    net_buf_len -= buf_len + 1;
     fwrite(*buf, (size_t)buf_len, 1, stdout);
     return buf_len;
 }
 
 
 void *remote_change_worker() {
-    void *buf = NULL;
+    char *buf = NULL;
     ssize_t rv;
+    char *path;
+    char action;
+    char *diff_data;
+    unsigned int diff_pos;
+    unsigned int diff_size;
+
+    pthread_cond_wait(&server_conn_ready, &server_conn_mtx);
+    pthread_mutex_unlock(&server_conn_mtx);
 
     while (TRUE) {
         rv = recv_bytes(&buf);
-        if (rv)
-            apply_diff(buf, rv);
+        if (!rv) {
+            /* TODO: reconnect or error out or something*/
+            log_err("no bytes!");
+            continue;
+        }
+        /* yeah this is retarded */
+        path = malloc(1000);
+        diff_data = malloc(1000);
+        rv = sscanf(buf, "{ \"path\": \"%s\", \"action\": \"%c%u@%u\", \"data\": \"%s\" }\n", path, &action, &diff_size, &diff_pos, diff_data);
+        if (rv != 5) {
+            log_err("unable to parse message: %s", buf);
+            goto cleanup;
+        }
+        log_debug("{ \"path\": \"%s\", \"action\": \"%c%u@%u\", \"data\": \"%s\" }\n", path, action, diff_size, diff_pos, diff_data);
+        ignore_path(path);
+        apply_diff(path, buf, rv);
+
+        cleanup:;
+        free(path);
+        free(diff_data);
     }
 
     free(buf);

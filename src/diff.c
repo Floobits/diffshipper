@@ -200,8 +200,6 @@ int apply_diff_chunk(void *baton, dmp_operation_t op, const void *data, uint32_t
 }
 
 
-void apply_diff(void *buf, size_t len) {
-    char *path;
-    /* parse path & diff from buf */
-    ignore_path(path);
+void apply_diff(char *path, void *buf, size_t len) {
+    /* parse diff from buf */
 }

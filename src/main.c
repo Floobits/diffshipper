@@ -38,10 +38,21 @@ void init() {
     if (pthread_cond_init(&server_conn_ready, NULL)) {
         die("pthread_cond_init failed!");
     }
+    if (pthread_mutex_init(&server_conn_mtx, NULL)) {
+        die("pthread_mutex_init failed!");
+    }
     if (pthread_mutex_init(&ignore_mtx, NULL)) {
         die("pthread_mutex_init failed!");
     }
     pthread_create(&remote_changes, NULL, &remote_change_worker, NULL);
+}
+
+
+void cleanup() {
+    pthread_cond_destroy(&server_conn_ready);
+    pthread_mutex_destroy(&server_conn_mtx);
+    pthread_mutex_destroy(&ignore_mtx);
+    net_cleanup();
 }
 
 
@@ -82,6 +93,7 @@ int main(int argc, char **argv) {
 
     CFRunLoopRun();
     /* We never get here */
+    cleanup();
 
     return(0);
 }
