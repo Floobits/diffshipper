@@ -91,7 +91,6 @@ ssize_t recv_bytes(char **buf) {
     buf[buf_len] = '\0';
     memmove(net_buf, line_end + 1, buf_len - 1);
     net_buf_len -= buf_len + 1;
-    fwrite(*buf, (size_t)buf_len, 1, stdout);
     return buf_len;
 }
 
@@ -118,12 +117,13 @@ void *remote_change_worker() {
         /* yeah this is retarded */
         path = malloc(1000);
         diff_data = malloc(1000);
-        rv = sscanf(buf, "{ \"path\": \"%s\", \"action\": \"%c%u@%u\", \"data\": \"%s\" }\n", path, &action, &diff_size, &diff_pos, diff_data);
+        rv = sscanf(buf, "{ \"path\": \"%[^\"]\", \"action\": \"%c%u@%u\", \"data\": \"%[^\"] }\n", path, &action, &diff_size, &diff_pos, diff_data);
         if (rv != 5) {
-            log_err("unable to parse message: %s", buf);
+            log_warn("rv %i. unable to parse message: %s", rv, buf);
+            log_debug("path %s action %c diff_size %u diff_pos %u data %s", path, action, diff_size, diff_pos, diff_data);
             goto cleanup;
         }
-        log_debug("{ \"path\": \"%s\", \"action\": \"%c%u@%u\", \"data\": \"%s\" }\n", path, action, diff_size, diff_pos, diff_data);
+        log_debug("parsed { \"path\": \"%s\", \"action\": \"%c%u@%u\", \"data\": \"%s\" }\n", path, action, diff_size, diff_pos, diff_data);
         ignore_path(path);
         apply_diff(path, buf, rv);
 
