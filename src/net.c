@@ -37,7 +37,7 @@ int server_connect(const char *host, const char *port) {
 
     log_debug("Connected to %s:%s", host, port);
 
-    char msg[] = "hello!\n";
+    char msg[] = "{\"v\": \"0.01\"}\n";
     ssize_t bytes_sent = send_bytes(&msg, strlen(msg));
     if (bytes_sent == -1)
         die("send_bytes() error: %s", strerror(errno));
@@ -78,7 +78,9 @@ ssize_t recv_bytes(char **buf) {
         bytes_received = recv(server_sock, net_buf_end, net_buf_left, 0);
         net_buf_len += bytes_received;
         log_debug("received %u bytes", bytes_received);
-        if (bytes_received == net_buf_left) {
+        if (bytes_received == 0) {
+            die("disconnected from server");
+        } else if (bytes_received == net_buf_left) {
             net_buf_size *= 1.5;
             net_buf = realloc(net_buf, net_buf_size);
         }

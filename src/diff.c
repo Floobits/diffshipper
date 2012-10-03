@@ -235,7 +235,7 @@ void apply_diff(char *path, dmp_operation_t op, char *buf, size_t len, off_t off
         log_debug("resized %s to %u bytes", path, file_size);
     }
     rv = msync(mf->buf, file_size, MS_SYNC);
-
+    log_debug("rv %i wrote %i bytes to %s", rv, mf->len, path);
     munmap_file(mf);
     free(mf);
 }
