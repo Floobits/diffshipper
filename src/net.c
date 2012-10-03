@@ -71,7 +71,6 @@ ssize_t recv_bytes(char **buf) {
     ssize_t net_buf_left;
     void *line_end;
 
-    /* TODO: check if bytes received is 0 and reconnect */
     do {
         net_buf_end = net_buf + net_buf_len;
         net_buf_left = net_buf_size - net_buf_len;
@@ -79,7 +78,7 @@ ssize_t recv_bytes(char **buf) {
         net_buf_len += bytes_received;
         log_debug("received %u bytes", bytes_received);
         if (bytes_received == 0) {
-            die("disconnected from server");
+            return 0;
         } else if (bytes_received == net_buf_left) {
             net_buf_size *= 1.5;
             net_buf = realloc(net_buf, net_buf_size);
@@ -114,8 +113,7 @@ void *remote_change_worker() {
         rv = recv_bytes(&buf);
         if (!rv) {
             /* TODO: reconnect or error out or something*/
-            log_err("no bytes!");
-            continue;
+            die("no bytes!");
         }
         /* yeah this is retarded */
         path = malloc(1000);
