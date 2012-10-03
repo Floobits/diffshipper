@@ -21,4 +21,7 @@ void ignore_path(const char *path);
 void unignore_path(const char *path);
 int ignored(const char *path);
 
+char *escape_data(char *data);
+char *unescape_data(char *data);
+
 #endif

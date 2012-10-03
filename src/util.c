@@ -73,3 +73,28 @@ int ignored(const char *path) {
     pthread_mutex_unlock(&ignore_mtx);
     return rv;
 }
+
+
+char *escape_data(char *data) {
+    char *escaped;
+    int data_len = strlen(data);
+    int i;
+    int offset = 0;
+
+    escaped = malloc(data_len);
+
+    for (i = 0; data[i] != '\0'; i++) {
+        escaped[i + offset] = data[i];
+        if (data[i] == '\n') {
+            offset++;
+            realloc(escaped, data_len + offset);
+            strcpy(escaped[i + offset - 1], "\\n");
+        }
+    }
+    return escaped;
+}
+
+
+char *unescape_data(char *data) {
+    return data;
+}

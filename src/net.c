@@ -103,6 +103,7 @@ void *remote_change_worker() {
     char *diff_data;
     unsigned int diff_pos;
     unsigned int diff_size;
+    dmp_operation_t op;
 
     pthread_cond_wait(&server_conn_ready, &server_conn_mtx);
     pthread_mutex_unlock(&server_conn_mtx);
@@ -125,7 +126,14 @@ void *remote_change_worker() {
         }
         log_debug("parsed { \"path\": \"%s\", \"action\": \"%c%u@%u\", \"data\": \"%s\" }\n", path, action, diff_size, diff_pos, diff_data);
         ignore_path(path);
-        apply_diff(path, buf, rv);
+        if (action == '+') {
+            op = DMP_DIFF_INSERT;
+        } else if (action == '-') {
+            op = DMP_DIFF_DELETE;
+        } else {
+            die("unknown action: %c", action);
+        }
+        apply_diff(path, op, diff_data, diff_size, diff_pos);
 
         cleanup:;
         free(path);

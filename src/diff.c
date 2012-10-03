@@ -39,6 +39,7 @@ int send_diff_chunk(void *baton, dmp_operation_t op, const void *data, uint32_t 
     char *msg;
     int msg_len;
     char *data_str;
+    char *data_safe;
 
     /* Just so you know, I know this is bad. */
     switch (op) {
@@ -48,13 +49,14 @@ int send_diff_chunk(void *baton, dmp_operation_t op, const void *data, uint32_t 
             return 0;
         break;
 
-        /* TODO: escape stuff */
+        /* TODO: escape stuff. especially newlines and double-quotes */
         case DMP_DIFF_DELETE:
             offset = data - di->mf1->buf;
             log_debug("delete. offset: %i bytes", offset);
             data_str = malloc(len + 1);
             strncpy(data_str, data, len + 1);
-            msg_len = asprintf(&msg, "{ \"path\": \"%s\", \"action\": \"-%u@%lld\", \"data\": \"%s\" }\n", di->path, len, offset, data_str);
+            data_safe = escape_data(data_str);
+            msg_len = asprintf(&msg, "{ \"path\": \"%s\", \"action\": \"-%u@%lld\", \"data\": \"%s\" }\n", di->path, len, offset, data_safe);
         break;
 
         case DMP_DIFF_INSERT:
@@ -62,7 +64,8 @@ int send_diff_chunk(void *baton, dmp_operation_t op, const void *data, uint32_t 
             log_debug("insert. offset: %i bytes", offset);
             data_str = malloc(len + 1);
             strncpy(data_str, data, len + 1);
-            msg_len = asprintf(&msg, "{ \"path\": \"%s\", \"action\": \"+%u@%lld\", \"data\": \"%s\" }\n", di->path, len, offset, data_str);
+            data_safe = escape_data(data_str);
+            msg_len = asprintf(&msg, "{ \"path\": \"%s\", \"action\": \"+%u@%lld\", \"data\": \"%s\" }\n", di->path, len, offset, data_safe);
         break;
 
         default:
@@ -72,6 +75,7 @@ int send_diff_chunk(void *baton, dmp_operation_t op, const void *data, uint32_t 
     bytes_sent = send_bytes(msg, msg_len);
     fwrite(data, (size_t)len, 1, stdout);
     free(data_str);
+    free(data_safe);
 
     return 0;
 }
@@ -200,11 +204,38 @@ void ftc_diff_cleanup(ftc_diff_t *f) {
 }
 
 
-int apply_diff_chunk(void *baton, dmp_operation_t op, const void *data, uint32_t len) {
-    return 0;
-}
+void apply_diff(char *path, dmp_operation_t op, char *buf, size_t len, off_t offset) {
+    struct stat file_stats;
+    int rv;
+    mmapped_file_t *mf;
 
+    rv = lstat(path, &file_stats);
+    if (rv != 0) {
+        die("Error lstat()ing file %s.", path);
+    }
 
-void apply_diff(char *path, void *buf, size_t len) {
-    /* parse diff from buf */
+    off_t file_size = file_stats.st_size;
+    if (op == DMP_DIFF_INSERT) {
+        file_size += len;
+    }
+    mf = mmap_file(path, file_size, PROT_WRITE | PROT_READ, 0);
+    if (!mf)
+        die("mmap of %s failed!", path);
+
+    void *op_point = mf->buf + offset;
+    if (op == DMP_DIFF_INSERT) {
+        memmove(op_point + len, op_point, mf->len - offset);
+        memcpy(op_point, buf, len);
+    } else if (op == DMP_DIFF_DELETE) {
+        file_size = mf->len - len;
+        memmove(op_point, op_point + len, file_size - offset);
+        if (ftruncate(mf->fd, file_size) != 0) {
+            die("resizing %s failed", path);
+        }
+        log_debug("resized %s to %u bytes", path, file_size);
+    }
+    rv = msync(mf->buf, file_size, MS_SYNC);
+
+    munmap_file(mf);
+    free(mf);
 }
