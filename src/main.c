@@ -63,7 +63,7 @@ int main(int argc, char **argv) {
 
     rv = run_cmd("mkdir -p %s%s", TMP_BASE, path);
     if (rv != 0)
-        die("error creating temp directior %s", TMP_BASE);
+        die("error creating temp directory %s", TMP_BASE);
 
     rv = run_cmd("cp -fr %s/ %s%s", path, TMP_BASE, path);
     if (rv != 0)
