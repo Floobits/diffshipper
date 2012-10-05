@@ -27,7 +27,7 @@ typedef struct {
 int modified_filter(const struct dirent *dir);
 int send_diff_chunk(void *baton, dmp_operation_t op, const void *data, uint32_t len);
 
-void push_changes(const char *path);
+void push_changes(const char *base_path, const char *full_path);
 
 void diff_files(ftc_diff_t *f, const char *f1, const char *f2);
 void ftc_diff_cleanup(ftc_diff_t *ftc_diff);

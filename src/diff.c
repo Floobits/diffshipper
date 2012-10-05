@@ -81,7 +81,7 @@ int send_diff_chunk(void *baton, dmp_operation_t op, const void *data, uint32_t 
 }
 
 
-void push_changes(const char *path) {
+void push_changes(const char *base_path, const char *full_path) {
     struct dirent **dir_list = NULL;
     struct dirent *dir = NULL;
     int results;
@@ -89,7 +89,15 @@ void push_changes(const char *path) {
     int rv;
     diff_info_t di;
     ftc_diff_t ftc_diff;
+    char *path;
+    const char *path_start;
     gettimeofday(&now, NULL);
+
+    for (i = 0; base_path[i] == full_path[i] && i < (int)strlen(base_path); i++) {
+        path_start = &full_path[i];
+    }
+    path = strdup(path_start);
+    log_debug("path is %s", path);
 
     results = scandir(path, &dir_list, &modified_filter, &alphasort);
     if (results == 0) {
