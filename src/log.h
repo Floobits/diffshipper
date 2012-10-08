@@ -3,6 +3,8 @@
 
 #include <stdarg.h>
 
+#include <jansson.h>
+
 enum log_level {
     LOG_LEVEL_DEBUG = 10,
     LOG_LEVEL_MSG   = 20,
@@ -21,5 +23,7 @@ void vplog(const unsigned int level, const char *fmt, va_list args);
 void plog(const unsigned int level, const char *fmt, ...);
 
 void die(const char *fmt, ...);
+
+void log_json_err(json_error_t *err);
 
 #endif

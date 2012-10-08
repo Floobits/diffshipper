@@ -8,6 +8,8 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include <jansson.h>
+
 #include "diff.h"
 #include "log.h"
 #include "net.h"
@@ -101,6 +103,7 @@ void *remote_change_worker() {
     ssize_t rv;
     char *path;
     char action;
+    char *action_str;
     char *diff_data;
     unsigned int diff_pos;
     unsigned int diff_size;
@@ -109,17 +112,30 @@ void *remote_change_worker() {
     pthread_cond_wait(&server_conn_ready, &server_conn_mtx);
     pthread_mutex_unlock(&server_conn_mtx);
 
+    json_t *json;
+    json_error_t json_err;
+
     while (TRUE) {
         rv = recv_bytes(&buf);
         if (!rv) {
             /* TODO: reconnect or error out or something*/
             die("no bytes!");
         }
+        json = json_loadb(buf, rv, 0, &json_err);
+        if (!json) {
+            log_json_err(&json_err);
+            continue;
+        }
         /* yeah this is retarded */
         path = malloc(1000);
         diff_data = malloc(100000);
-        rv = sscanf(buf, "{ \"path\": \"%[^\"]\", \"action\": \"%c%u@%u\", \"data\": \"%[^\"] }\n", path, &action, &diff_size, &diff_pos, diff_data);
-        if (rv != 5) {
+        action_str = malloc(50);
+        rv = json_unpack(json, "{s:s, s:s, s:s}", "path", &path, "action", &action_str, "data", &diff_data);
+        if (rv != 0) {
+            die("error parsing json");
+        }
+        rv = sscanf(action_str, "%c%u@%u", &action, &diff_size, &diff_pos);
+        if (rv != 3) {
             log_warn("rv %i. unable to parse message: %s", rv, buf);
             log_debug("path %s action %c diff_size %u diff_pos %u data %s", path, action, diff_size, diff_pos, diff_data);
             goto cleanup;
@@ -136,6 +152,7 @@ void *remote_change_worker() {
         apply_diff(path, op, diff_data, diff_size, diff_pos);
 
         cleanup:;
+        json_decref(json);
         free(path);
         free(diff_data);
     }

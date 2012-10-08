@@ -80,3 +80,7 @@ void die(const char *fmt, ...) {
     va_end(args);
     exit(1);
 }
+
+void log_json_err(json_error_t *err) {
+    log_msg("Error parsing JSON in %s, line %i column %i (offset %u): %s", err->source, err->line, err->column, err->position, err->text);
+}
