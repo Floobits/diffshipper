@@ -96,20 +96,26 @@ void push_changes(const char *base_path, const char *full_path) {
     for (i = 0; base_path[i] == full_path[i] && i < (int)strlen(base_path); i++) {
         path_start = &full_path[i];
     }
-    path = strdup(path_start);
+    path = strdup(path_start + 2);
     log_debug("path is %s", path);
 
     results = scandir(path, &dir_list, &modified_filter, &alphasort);
-    if (results == 0) {
+    if (results == -1) {
+        log_debug("Error scanning directory %s", path);
+        return;
+    } else if (results == 0) {
         log_debug("No results found in directory %s", path);
+        return;
     }
 
     char *orig_path;
     char *file_path;
+    char *file_path_rel;
     struct stat dir_info;
     for (i = 0; i < results; i++) {
         dir = dir_list[i];
-        asprintf(&file_path, "%s%s", path, dir->d_name);
+        asprintf(&file_path, "%s%s", full_path, dir->d_name);
+        asprintf(&file_path_rel, "%s%s", path, dir->d_name);
         if (ignored(file_path)) {
             /* we triggered this event */
             unignore_path(file_path);
@@ -141,7 +147,7 @@ void push_changes(const char *base_path, const char *full_path) {
 
         mmapped_file_t *mf1 = ftc_diff.mf1;
         mmapped_file_t *mf2 = ftc_diff.mf2;
-        di.path = file_path;
+        di.path = file_path_rel;
         di.mf1 = mf1;
         di.mf2 = mf2;
         dmp_diff_print_raw(stderr, ftc_diff.diff);
