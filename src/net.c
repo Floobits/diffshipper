@@ -131,9 +131,10 @@ void *remote_change_worker() {
             log_json_err(&json_err);
             continue;
         }
-        rv = json_unpack(json, "{s:s, s:s, s:s}", "path", &path, "action", &action_str, "data", &diff_data);
+        rv = json_unpack_ex(json, &json_err, 0, "{s:s, s:s, s:s}", "path", &path, "action", &action_str, "data", &diff_data);
         if (rv != 0) {
-            die("error parsing json");
+            log_json_err(&json_err);
+            continue;
         }
         rv = sscanf(action_str, "%c%u@%u", &action, &diff_size, &diff_pos);
         if (rv != 3) {
