@@ -115,6 +115,11 @@ void *remote_change_worker() {
     json_t *json;
     json_error_t json_err;
 
+    /* yeah this is retarded */
+    path = malloc(1000);
+    diff_data = malloc(100000);
+    action_str = malloc(50);
+
     while (TRUE) {
         rv = recv_bytes(&buf);
         if (!rv) {
@@ -126,10 +131,6 @@ void *remote_change_worker() {
             log_json_err(&json_err);
             continue;
         }
-        /* yeah this is retarded */
-        path = malloc(1000);
-        diff_data = malloc(100000);
-        action_str = malloc(50);
         rv = json_unpack(json, "{s:s, s:s, s:s}", "path", &path, "action", &action_str, "data", &diff_data);
         if (rv != 0) {
             die("error parsing json");
@@ -157,6 +158,9 @@ void *remote_change_worker() {
         free(diff_data);
     }
 
+    free(path);
+    free(action_str);
+    free(diff_data);
     free(buf);
     pthread_exit(NULL);
     return NULL;
