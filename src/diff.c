@@ -34,7 +34,6 @@ int modified_filter(const struct dirent *dir) {
 
 int send_diff_chunk(void *baton, dmp_operation_t op, const void *data, uint32_t len) {
     diff_info_t *di = (diff_info_t*)baton;
-    ssize_t bytes_sent;
     off_t offset;
     char *msg;
     int msg_len;
@@ -72,7 +71,7 @@ int send_diff_chunk(void *baton, dmp_operation_t op, const void *data, uint32_t 
             die("WTF?!?!");
     }
     log_debug("msg: %s", msg);
-    bytes_sent = send_bytes(msg, msg_len);
+    send_bytes(msg, msg_len);
     fwrite(data, (size_t)len, 1, stdout);
     free(data_str);
     free(data_safe);
@@ -90,7 +89,7 @@ void push_changes(const char *base_path, const char *full_path) {
     diff_info_t di;
     ftc_diff_t ftc_diff;
     char *path;
-    const char *path_start;
+    const char *path_start = full_path;
     gettimeofday(&now, NULL);
 
     for (i = 0; base_path[i] == full_path[i] && i < (int)strlen(base_path); i++) {

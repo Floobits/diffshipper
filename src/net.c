@@ -91,7 +91,7 @@ ssize_t recv_bytes(char **buf) {
     buf_len = line_end - net_buf;
     *buf = realloc(*buf, buf_len + 1);
     memcpy(*buf, net_buf, buf_len);
-    buf[buf_len] = '\0';
+    (*buf)[buf_len] = '\0';
     memmove(net_buf, line_end + 1, buf_len - 1);
     net_buf_len -= buf_len + 1;
     return buf_len;
@@ -107,7 +107,7 @@ void *remote_change_worker() {
     char *diff_data;
     unsigned int diff_pos;
     unsigned int diff_size;
-    dmp_operation_t op;
+    dmp_operation_t op = DMP_DIFF_EQUAL;
 
     pthread_cond_wait(&server_conn_ready, &server_conn_mtx);
     pthread_mutex_unlock(&server_conn_mtx);
