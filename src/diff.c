@@ -237,11 +237,11 @@ void apply_diff(char *path, dmp_operation_t op, char *buf, size_t len, off_t off
         die("mmap of %s failed!", path);
 
     if (mf->len < offset)
-        die("File is too small to apply patch to!");
+        die("%s is too small to apply patch to!", path);
 
     void *op_point = mf->buf + offset;
     if (op == DMP_DIFF_INSERT) {
-        memmove(op_point + len, op_point, mf->len - offset);
+        memmove(op_point + len, op_point, file_size - offset);
         memcpy(op_point, buf, len);
     } else if (op == DMP_DIFF_DELETE) {
         file_size = mf->len - len;
@@ -252,7 +252,7 @@ void apply_diff(char *path, dmp_operation_t op, char *buf, size_t len, off_t off
         log_debug("resized %s to %u bytes", path, file_size);
     }
     rv = msync(mf->buf, file_size, MS_SYNC);
-    log_debug("rv %i wrote %i bytes to %s", rv, mf->len, path);
+    log_debug("rv %i wrote %i bytes to %s", rv, file_size, path);
     munmap_file(mf);
     free(mf);
 }
