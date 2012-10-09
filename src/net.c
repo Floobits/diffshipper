@@ -126,6 +126,7 @@ void *remote_change_worker() {
             /* TODO: reconnect or error out or something*/
             die("no bytes!");
         }
+        log_debug("parsing %s", buf);
         json = json_loadb(buf, rv, 0, &json_err);
         if (!json) {
             log_json_err(&json_err);
@@ -155,8 +156,6 @@ void *remote_change_worker() {
 
         cleanup:;
         json_decref(json);
-        free(path);
-        free(diff_data);
     }
 
     free(path);
