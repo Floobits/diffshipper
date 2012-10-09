@@ -232,8 +232,10 @@ void apply_diff(char *path, dmp_operation_t op, char *buf, size_t len, off_t off
         file_size += len;
     }
     mf = mmap_file(path, file_size, PROT_WRITE | PROT_READ, 0);
-    if (!mf)
+    if (!mf) {
         die("mmap of %s failed!", path);
+        return; /* never get here, but make the static analyzer happy */
+    }
 
     if (mf->len < offset)
         die("%s is too small to apply patch to!", path);
