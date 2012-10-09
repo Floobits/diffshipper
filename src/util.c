@@ -87,8 +87,8 @@ char *escape_data(char *data) {
         escaped[i + offset] = data[i];
         if (data[i] == '\n') {
             offset++;
-            realloc(escaped, data_len + offset);
-            strcpy(escaped[i + offset - 1], "\\n");
+            escaped = realloc(escaped, data_len + offset);
+            strcpy(&escaped[i + offset - 1], "\\n");
         }
     }
     return escaped;
