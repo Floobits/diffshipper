@@ -222,6 +222,8 @@ void apply_diff(char *path, dmp_operation_t op, char *buf, size_t len, off_t off
     int rv;
     mmapped_file_t *mf;
 
+    log_debug("patching %s: %lu bytes at %lu", path, len, offset);
+
     rv = lstat(path, &file_stats);
     if (rv != 0) {
         die("Error lstat()ing file %s.", path);
@@ -242,16 +244,16 @@ void apply_diff(char *path, dmp_operation_t op, char *buf, size_t len, off_t off
 
     void *op_point = mf->buf + offset;
     if (op == DMP_DIFF_INSERT) {
-        memmove(op_point + len, op_point, file_size - offset);
+        memmove(op_point + len, op_point, (file_size - len) - offset);
         memcpy(op_point, buf, len);
     } else if (op == DMP_DIFF_DELETE) {
         file_size = mf->len - len;
         memmove(op_point, op_point + len, file_size - offset);
-        if (ftruncate(mf->fd, file_size) != 0) {
-            die("resizing %s failed", path);
-        }
-        log_debug("resized %s to %u bytes", path, file_size);
     }
+    if (ftruncate(mf->fd, file_size) != 0) {
+        die("resizing %s failed", path);
+    }
+    log_debug("resized %s to %u bytes", path, file_size);
     rv = msync(mf->buf, file_size, MS_SYNC);
     log_debug("rv %i wrote %i bytes to %s", rv, file_size, path);
     munmap_file(mf);
