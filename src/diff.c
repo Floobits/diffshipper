@@ -236,6 +236,9 @@ void apply_diff(char *path, dmp_operation_t op, char *buf, size_t len, off_t off
     if (!mf)
         die("mmap of %s failed!", path);
 
+    if (mf->len < offset)
+        die("File is too small to apply patch to!");
+
     void *op_point = mf->buf + offset;
     if (op == DMP_DIFF_INSERT) {
         memmove(op_point + len, op_point, mf->len - offset);
