@@ -105,8 +105,8 @@ void *remote_change_worker() {
     char action;
     char *action_str;
     char *diff_data;
-    unsigned int diff_pos;
-    unsigned int diff_size;
+    size_t diff_pos;
+    size_t diff_size;
     dmp_operation_t op = DMP_DIFF_EQUAL;
 
     pthread_cond_wait(&server_conn_ready, &server_conn_mtx);
@@ -137,10 +137,10 @@ void *remote_change_worker() {
             log_json_err(&json_err);
             continue;
         }
-        rv = sscanf(action_str, "%c%u@%u", &action, &diff_size, &diff_pos);
+        rv = sscanf(action_str, "%c%zu@%zu", &action, &diff_size, &diff_pos);
         if (rv != 3) {
             log_warn("rv %i. unable to parse message: %s", rv, buf);
-            log_debug("path %s action %c diff_size %u diff_pos %u data %s", path, action, diff_size, diff_pos, diff_data);
+            log_debug("path %s action %c diff_size %ul diff_pos %ul data %s", path, action, diff_size, diff_pos, diff_data);
             goto cleanup;
         }
         log_debug("parsed { \"path\": \"%s\", \"action\": \"%c%u@%u\", \"data\": \"%s\" }\n", path, action, diff_size, diff_pos, diff_data);
