@@ -21,6 +21,7 @@
 
 struct timeval now;
 
+#ifdef FSEVENTS
 int fsevents_filter(const struct dirent *d) {
     if (d->d_name[0] == '.')
         return 0;
@@ -34,7 +35,7 @@ int fsevents_filter(const struct dirent *d) {
 
     return 1;
 }
-
+#endif
 
 int send_diff_chunk(void *baton, dmp_operation_t op, const void *data, uint32_t len) {
     diff_info_t *di = (diff_info_t*)baton;
@@ -93,6 +94,7 @@ void push_changes(const char *base_path, const char *full_path) {
     diff_info_t di;
     char *path;
     const char *path_start = full_path;
+    filter_fp_t filter_fp = NULL;
 
     gettimeofday(&now, NULL);
 
@@ -102,7 +104,14 @@ void push_changes(const char *base_path, const char *full_path) {
     path = strdup(path_start + 2);
     log_debug("path is %s", path);
 
-    results = scandir(path, &dir_list, &fsevents_filter, &alphasort);
+#ifdef FSEVENTS
+    filter_fp = &fsevents_filter;
+#endif
+#ifdef INOTIFY
+    filter_fp = &inotify_filter;
+#endif
+
+    results = scandir(path, &dir_list, filter_fp, &alphasort);
     if (results == -1) {
         log_debug("Error scanning directory %s", path);
         return;

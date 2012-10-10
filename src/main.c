@@ -1,22 +1,20 @@
 #include <pthread.h>
 #include <stdlib.h>
 
-#ifdef FSEVENTS
-#include <CoreFoundation/CoreFoundation.h>
-#include <CoreServices/CoreServices.h>
+#include "config.h"
+#ifndef FS_WATCHER
+#error "Inotify and FSEvents not found. Cannot build!"
 #endif
 
-#ifdef INOTIFY
-#include <sys/inotify.h>
-#endif
 
 #include "diff.h"
 #include "log.h"
 #include "net.h"
 #include "util.h"
 
-
 #ifdef FSEVENTS
+#include <CoreFoundation/CoreFoundation.h>
+#include <CoreServices/CoreServices.h>
 void event_cb(ConstFSEventStreamRef streamRef, void *cb_data, size_t count, void *paths,
               const FSEventStreamEventFlags flags[], const FSEventStreamEventId ids[]) {
     size_t i;
