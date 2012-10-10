@@ -8,9 +8,15 @@ This program monitors a directory for changed files using [FSEvents](http://en.w
 
 Right now it only builds on OS X because of the FSEvents requirement. Sorry Linux users, I'll add inotify soon.
 
-Dependencies: automake
+Dependencies: automake, [Jansson](http://www.digip.org/jansson/)
 
     git clone https://github.com/ggreer/diff-patch-cloud.git
     cd diff-patch-cloud
     git submodule update --init
     ./autogen.sh
+
+## TODO
+
+* Protocol stuff
+* Initial data sync
+* Ignore hidden files
