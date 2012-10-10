@@ -21,9 +21,17 @@
 
 struct timeval now;
 
-int modified_filter(const struct dirent *d) {
+int fsevents_filter(const struct dirent *d) {
     if (d->d_name[0] == '.')
         return 0;
+
+    struct stat dir_info;
+    lstat(d->d_name, &dir_info);
+    /* check it out if it's modified in the last 5 seconds */
+    if (dir_info.st_mtimespec.tv_sec > now.tv_sec - 5) {
+        return 1;
+    }
+
     return 1;
 }
 
@@ -94,7 +102,7 @@ void push_changes(const char *base_path, const char *full_path) {
     path = strdup(path_start + 2);
     log_debug("path is %s", path);
 
-    results = scandir(path, &dir_list, &modified_filter, &alphasort);
+    results = scandir(path, &dir_list, &fsevents_filter, &alphasort);
     if (results == -1) {
         log_debug("Error scanning directory %s", path);
         return;
