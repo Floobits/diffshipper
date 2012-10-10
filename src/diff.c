@@ -87,9 +87,9 @@ void push_changes(const char *base_path, const char *full_path) {
     int i;
     int rv;
     diff_info_t di;
-    ftc_diff_t ftc_diff;
     char *path;
     const char *path_start = full_path;
+
     gettimeofday(&now, NULL);
 
     for (i = 0; base_path[i] == full_path[i] && i < (int)strlen(base_path); i++) {
@@ -118,7 +118,7 @@ void push_changes(const char *base_path, const char *full_path) {
         if (ignored(file_path)) {
             /* we triggered this event */
             unignore_path(file_path);
-            continue;
+            goto cleanup;
         }
 
         /* If a link points to a directory then we need to treat it as a directory. */
@@ -132,31 +132,63 @@ void push_changes(const char *base_path, const char *full_path) {
         }
         if (dir->d_type == DT_DIR) {
             /* TODO: figure out if we need to recurse */
-            continue;
+            goto cleanup;
         }
 
         asprintf(&orig_path, "%s%s", TMP_BASE, file_path);
 
-        ftc_diff.diff = NULL;
-        diff_files(&ftc_diff, orig_path, file_path);
-        if (!ftc_diff.diff) {
-            log_err("diff is null. I guess someone wrote the exact same bytes to this file?");
-            goto cleanup;
+        const char *f1 = orig_path;
+        const char *f2 = file_path;
+        dmp_diff *diff = NULL;
+        dmp_options opts;
+        memset(&opts, 0, sizeof(opts));
+        opts.timeout = 0.5; /* give up diffing after 0.5 seconds of processing */
+
+        mmapped_file_t *mf1;
+        mmapped_file_t *mf2;
+        struct stat file_stats;
+        off_t f1_size;
+        off_t f2_size;
+
+        rv = lstat(f1, &file_stats);
+        if (rv != 0) {
+            die("Error lstat()ing file %s.", f1);
+        }
+        f1_size = file_stats.st_size;
+        rv = lstat(f2, &file_stats);
+        if (rv != 0) {
+            die("Error lstat()ing file %s.", f2);
+        }
+        f2_size = file_stats.st_size;
+        f1_size = f2_size > f1_size ? f2_size : f1_size;
+
+        mf2 = mmap_file(f2, f2_size, 0, 0);
+        mf1 = mmap_file(f1, f1_size, PROT_WRITE | PROT_READ, 0);
+
+        if (is_binary(mf1->buf, mf1->len)) {
+            log_debug("%s is binary. skipping", file_path);
+            goto diff_cleanup;
         }
 
-        mmapped_file_t *mf1 = ftc_diff.mf1;
-        mmapped_file_t *mf2 = ftc_diff.mf2;
+        if (mf1 && mf2)
+            dmp_diff_new(&(diff), &opts, mf1->buf, mf1->len, mf2->buf, mf2->len);
+
+        if (!diff) {
+            log_err("diff is null. I guess someone wrote the exact same bytes to this file?");
+            goto diff_cleanup;
+        }
+
         di.path = file_path_rel;
         di.mf1 = mf1;
         di.mf2 = mf2;
-        dmp_diff_print_raw(stderr, ftc_diff.diff);
-        dmp_diff_foreach(ftc_diff.diff, send_diff_chunk, &di);
+        dmp_diff_print_raw(stderr, diff);
+        dmp_diff_foreach(diff, send_diff_chunk, &di);
 
         if (mf1->len != mf2->len) {
             if (ftruncate(mf1->fd, mf2->len) != 0) {
-                die("resizing %s failed", ftc_diff.f1);
+                die("resizing %s failed", f1);
             }
-            log_debug("resized %s to %u bytes", ftc_diff.f1, mf2->len);
+            log_debug("resized %s to %u bytes", f1, mf2->len);
         }
 
         munmap(mf1->buf, mf1->len);
@@ -165,55 +197,21 @@ void push_changes(const char *base_path, const char *full_path) {
         memcpy(mf1->buf, mf2->buf, mf1->len);
         rv = msync(mf1->buf, mf1->len, MS_SYNC);
 
-        log_debug("rv %i wrote %i bytes to %s", rv, mf1->len, ftc_diff.f1);
+        log_debug("rv %i wrote %i bytes to %s", rv, mf1->len, f1);
 
-        ftc_diff_cleanup(&ftc_diff);
+        diff_cleanup:;
+        if (diff)
+            dmp_diff_free(diff);
+        munmap_file(mf1);
+        munmap_file(mf2);
+        free(mf1);
+        free(mf2);
         cleanup:;
         free(orig_path);
         free(file_path);
+        free(file_path);
+        free(file_path_rel);
     }
-}
-
-
-void diff_files(ftc_diff_t *f, const char *f1, const char *f2) {
-    struct stat file_stats;
-    int rv;
-    off_t f1_size;
-    off_t f2_size;
-    dmp_options opts;
-
-    memset(&opts, 0, sizeof(opts));
-    opts.timeout = 0.5; /* give up diffing after 0.5 seconds of processing */
-
-    f->f1 = f1; /* not sure if this is a good idea*/
-    f->f2 = f2;
-
-    rv = lstat(f1, &file_stats);
-    if (rv != 0) {
-        die("Error lstat()ing file %s.", f1);
-    }
-    f1_size = file_stats.st_size;
-    rv = lstat(f2, &file_stats);
-    if (rv != 0) {
-        die("Error lstat()ing file %s.", f2);
-    }
-    f2_size = file_stats.st_size;
-    f1_size = f2_size > f1_size ? f2_size : f1_size;
-
-    f->mf2 = mmap_file(f2, f2_size, 0, 0);
-    f->mf1 = mmap_file(f1, f1_size, PROT_WRITE | PROT_READ, 0);
-
-    if (f->mf1 && f->mf2)
-        dmp_diff_new(&(f->diff), &opts, f->mf1->buf, f->mf1->len, f->mf2->buf, f->mf2->len);
-}
-
-
-void ftc_diff_cleanup(ftc_diff_t *f) {
-    dmp_diff_free(f->diff);
-    munmap_file(f->mf1);
-    munmap_file(f->mf2);
-    free(f->mf1);
-    free(f->mf2);
 }
 
 
