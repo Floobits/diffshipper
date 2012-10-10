@@ -206,9 +206,8 @@ void push_changes(const char *base_path, const char *full_path) {
         munmap_file(mf2);
         free(mf1);
         free(mf2);
-        cleanup:;
         free(orig_path);
-        free(file_path);
+        cleanup:;
         free(file_path);
         free(file_path_rel);
     }
