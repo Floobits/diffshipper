@@ -128,9 +128,9 @@ void push_changes(const char *base_path, const char *full_path) {
         dir = dir_list[i];
         asprintf(&file_path, "%s%s", full_path, dir->d_name);
         asprintf(&file_path_rel, "%s%s", path, dir->d_name);
-        if (ignored(file_path)) {
+        if (ignored(file_path_rel)) {
             /* we triggered this event */
-            unignore_path(file_path);
+            unignore_path(file_path_rel);
             goto cleanup;
         }
 
