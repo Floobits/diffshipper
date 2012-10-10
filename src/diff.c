@@ -21,14 +21,10 @@
 
 struct timeval now;
 
-int modified_filter(const struct dirent *dir) {
-    struct stat dir_info;
-    lstat(dir->d_name, &dir_info);
-    /* check it out if it's modified in the last 10 seconds */
-    if (dir_info.st_mtimespec.tv_sec > now.tv_sec - 10) {
-        return 1;
-    }
-    return 0;
+int modified_filter(const struct dirent *d) {
+    if (d->d_name[0] == '.')
+        return 0;
+    return 1;
 }
 
 
