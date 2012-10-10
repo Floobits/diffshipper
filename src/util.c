@@ -71,6 +71,11 @@ int ignored(const char *path) {
         }
     }
     pthread_mutex_unlock(&ignore_mtx);
+    if (rv) {
+        log_debug("file %s is ignored", path);
+    } else {
+        log_debug("file %s is not ignored", path);
+    }
     return rv;
 }
 
