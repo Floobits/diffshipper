@@ -6,7 +6,6 @@
 #error "Inotify and FSEvents not found. Cannot build!"
 #endif
 
-
 #include "diff.h"
 #include "log.h"
 #include "net.h"
@@ -29,6 +28,7 @@ void event_cb(ConstFSEventStreamRef streamRef, void *cb_data, size_t count, void
     }
 }
 #endif
+
 
 void init() {
     pthread_t remote_changes;
@@ -77,6 +77,11 @@ int main(int argc, char **argv) {
         die("error creating copying files to tmp dir %s", TMP_BASE);
 
     log_msg("Watching %s", path);
+
+    rv = server_connect("127.0.0.1", "3148");
+    if (rv != 0)
+        die("Couldn't connect to server");
+
 #ifdef FSEVENTS
     CFStringRef cfs_path = CFStringCreateWithCString(NULL, argv[1], kCFStringEncodingUTF8); /* pretty sure I'm leaking this */
     CFArrayRef paths = CFArrayCreate(NULL, (const void **)&cfs_path, 1, NULL); /* ditto */
@@ -89,13 +94,6 @@ int main(int argc, char **argv) {
     stream = FSEventStreamCreate(NULL, &event_cb, &ctx, paths, kFSEventStreamEventIdSinceNow, latency, kFSEventStreamCreateFlagNone);
     FSEventStreamScheduleWithRunLoop(stream, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
     FSEventStreamStart(stream);
-#endif
-
-    rv = server_connect("127.0.0.1", "3148");
-    if (rv != 0)
-        die("Couldn't connect to server");
-
-#ifdef FSEVENTS
     CFRunLoopRun();
 #endif
     /* We never get here */
