@@ -27,10 +27,11 @@ void event_cb(ConstFSEventStreamRef streamRef, void *cb_data, size_t count, void
 
 void init() {
     pthread_t remote_changes;
-
     ignored_paths = NULL;
     ignored_paths_len = 0;
+
     set_log_level(LOG_LEVEL_DEBUG);
+
     if (pthread_cond_init(&server_conn_ready, NULL)) {
         die("pthread_cond_init failed!");
     }
