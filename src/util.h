@@ -3,6 +3,16 @@
 
 #include <pthread.h>
 
+#ifdef INOTIFY
+#include <inotifytools/inotifytools.h>
+#include <inotifytools/inotify.h>
+#endif
+
+#ifdef FSEVENTS
+#include <CoreFoundation/CoreFoundation.h>
+#include <CoreServices/CoreServices.h>
+#endif
+
 #ifndef TRUE
 #define TRUE 1
 #endif
