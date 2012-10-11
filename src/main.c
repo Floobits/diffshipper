@@ -80,6 +80,25 @@ int main(int argc, char **argv) {
     if (rv != 0)
         die("Couldn't connect to server");
 
+#ifdef INOTIFY
+    rv = inotifytools_initialize();
+    if (rv != 0)
+        die("inotifytools_initialize() failed");
+
+    rv = inotifytools_watch_recursively(path, IN_ALL_EVENTS);
+    if (rv != 0)
+        die("%s", strerror(inotifytools_error()));
+
+    inotifytools_set_printf_timefmt("%T");
+
+    struct inotify_event *event;
+    event = inotifytools_next_event(-1);
+    while (event) {
+        inotifytools_printf(event, "%T %w%f %e\n");
+        event = inotifytools_next_event(-1);
+    }
+#endif
+
 #ifdef FSEVENTS
     CFStringRef cfs_path = CFStringCreateWithCString(NULL, argv[1], kCFStringEncodingUTF8); /* pretty sure I'm leaking this */
     CFArrayRef paths = CFArrayCreate(NULL, (const void **)&cfs_path, 1, NULL); /* ditto */
