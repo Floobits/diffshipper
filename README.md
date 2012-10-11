@@ -10,8 +10,8 @@ This program monitors a directory for changed files using [FSEvents](http://en.w
 
 Dependencies: automake, [Jansson](http://www.digip.org/jansson/), pthreads. Linux users also need libinotifytools-dev.
 
-    git clone https://github.com/ggreer/diff-patch-cloud.git
-    cd diff-patch-cloud
+    git clone https://github.com/ggreer/diffshipper.git
+    cd diffshipper
     git submodule update --init
     ./autogen.sh
 

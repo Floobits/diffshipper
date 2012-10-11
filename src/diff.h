@@ -7,7 +7,7 @@
 
 #include "file.h"
 
-#define TMP_BASE "/tmp/diff-patch-cloud"
+#define TMP_BASE "/tmp/diffshipper"
 
 typedef struct {
   char *path;

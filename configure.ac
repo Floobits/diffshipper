@@ -1,4 +1,4 @@
-AC_INIT([diffmon], [0.1], [https://github.com/ggreer/diff-patch-cloud/issues], [diffmon], [https://github.com/ggreer/diff-patch-cloud])
+AC_INIT([diffmon], [0.1], [https://github.com/ggreer/diffshipper/issues], [diffshipper], [https://github.com/ggreer/diffshipper])
 AC_PROG_CC
 AC_PREREQ([2.59])
 
