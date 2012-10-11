@@ -41,9 +41,9 @@ int send_diff_chunk(void *baton, dmp_operation_t op, const void *data, uint32_t 
     diff_info_t *di = (diff_info_t*)baton;
     off_t offset;
     char *msg;
-    int msg_len;
-    char *data_str;
-    char *data_safe;
+    int msg_len = 0;
+    char *data_str = NULL;
+    char *data_safe = NULL;
 
     /* Just so you know, I know this is bad. */
     switch (op) {
@@ -78,8 +78,10 @@ int send_diff_chunk(void *baton, dmp_operation_t op, const void *data, uint32_t 
     log_debug("msg: %s", msg);
     send_bytes(msg, msg_len);
     fwrite(data, (size_t)len, 1, stdout);
-    free(data_str);
-    free(data_safe);
+    if (data_str)
+        free(data_str);
+    if (data_safe)
+        free(data_safe);
 
     return 0;
 }
