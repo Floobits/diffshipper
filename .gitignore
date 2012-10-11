@@ -13,7 +13,7 @@ config.log
 config.status
 configure
 depcomp
-diffmon
+diffshipper
 gmon.out
 install-sh
 Makefile
