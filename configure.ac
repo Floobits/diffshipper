@@ -15,8 +15,8 @@ LDFLAGS="$LDFLAGS -Lextern/diff-match-patch-c/"
 AC_CHECK_HEADERS([pthread.h])
 
 AC_CHECK_HEADERS([CoreFoundation/CoreFoundation.h], [
-    CF_CFLAGS="-I /System/Library/Frameworks/CoreFoundation.framework/Headers"
-    CF_LDFLAGS="-framework CoreFoundation -framework CoreServices"
+    CFLAGS="$CFLAGS -I /System/Library/Frameworks/CoreFoundation.framework/Headers"
+    LDFLAGS="$LDFLAGS -framework CoreFoundation -framework CoreServices"
     AC_DEFINE([FSEVENTS], [1], [FSEvents exists])
     AC_DEFINE([FS_WATCHER], [1], [FSEvents or Inotify exists])
     ],
@@ -25,15 +25,13 @@ AC_CHECK_HEADERS([CoreFoundation/CoreFoundation.h], [
 )
 
 AC_CHECK_HEADERS([sys/inotify.h], [
+    LIBS="$LIBS -linotifytools"
     AC_DEFINE([INOTIFY], [1], [Inotify exists])
     AC_DEFINE([FS_WATCHER], [1], [FSEvents or Inotify exists])
     ],
     [],
     []
 )
-
-CFLAGS="$CFLAGS $CF_CFLAGS"
-LDFLAGS="$LDFLAGS $CF_LDFLAGS"
 
 CFLAGS="$CFLAGS -Wall -Wextra -D_GNU_SOURCE -g"
 
