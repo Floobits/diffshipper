@@ -10,6 +10,8 @@ This program monitors a directory for changed files using [FSEvents](http://en.w
 
 Dependencies: automake, [Jansson](http://www.digip.org/jansson/), pthreads. Linux users also need libinotifytools-dev.
 
+    apt-get install build-essential automake libjansson-dev libinotifytools-dev
+
     git clone https://github.com/ggreer/diffshipper.git
     cd diffshipper
     git submodule update --init
