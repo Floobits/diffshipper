@@ -12,9 +12,6 @@ void parse_opts(int argc, char **argv) {
     char ch;
     int opt_index = 0;
 
-    if (argc < 2)
-        die("No path to watch specified");
-
     struct option longopts[] = {
         {"host", required_argument, NULL, 'h'},
         {"port", required_argument, NULL, 'p'}
@@ -28,11 +25,16 @@ void parse_opts(int argc, char **argv) {
             case 'p':
                 opts.port = optarg;
             break;
+            default:
+                die("I don't understand you!");
         }
     }
 
     argc -= optind;
     argv += optind;
+
+    if (argc < 1)
+        die("No path to watch specified");
 
     opts.path = realpath(argv[0], NULL);
 
