@@ -82,11 +82,11 @@ int main(int argc, char **argv) {
 
 #ifdef INOTIFY
     rv = inotifytools_initialize();
-    if (rv != 0)
-        die("inotifytools_initialize() failed");
+    if (rv == 0)
+        die("inotifytools_initialize() failed: %s", strerror(inotifytools_error()));
 
     rv = inotifytools_watch_recursively(path, IN_ALL_EVENTS);
-    if (rv != 0)
+    if (rv == 0)
         die("%s", strerror(inotifytools_error()));
 
     inotifytools_set_printf_timefmt("%T");
