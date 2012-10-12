@@ -34,7 +34,7 @@ void parse_opts(int argc, char **argv) {
     argc -= optind;
     argv += optind;
 
-    opts.path = realpath(argv[1], NULL);
+    opts.path = realpath(argv[0], NULL);
 
     if (!opts.host) {
         asprintf(&opts.host, "127.0.0.1");
@@ -42,4 +42,6 @@ void parse_opts(int argc, char **argv) {
     if (!opts.port) {
         asprintf(&opts.port, "3148");
     }
+
+    log_debug("options: host %s port %s path %s", opts.host, opts.port, opts.path);
 }
