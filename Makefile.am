@@ -1,7 +1,7 @@
 ACLOCAL_AMFLAGS = ${ACLOCAL_FLAGS}
 
 bin_PROGRAMS = diffshipper
-diffshipper_SOURCES = src/diff.c src/file.c src/log.c src/net.c src/main.c src/util.c
+diffshipper_SOURCES = src/diff.c src/file.c src/log.c src/net.c src/main.c src/options.c src/util.c
 diffshipper_LDADD = -ldmpc -ljansson -lpthread
 #dist_bin_SCRIPTS = auto_rsync notify_loop
 

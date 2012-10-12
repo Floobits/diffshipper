@@ -9,6 +9,7 @@
 #include "diff.h"
 #include "log.h"
 #include "net.h"
+#include "options.h"
 #include "util.h"
 
 #ifdef FSEVENTS
@@ -61,10 +62,9 @@ int main(int argc, char **argv) {
     char *path;
 
     init();
-
-    if (argc < 2)
-        die("No path to watch specified");
-    path = realpath(argv[1], NULL);
+    init_opts();
+    parse_opts(argc, argv);
+    path = opts.path;
 
     rv = run_cmd("mkdir -p %s%s", TMP_BASE, path);
     if (rv != 0)
