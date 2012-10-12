@@ -87,7 +87,7 @@ int main(int argc, char **argv) {
 
     rv = inotifytools_watch_recursively(path, IN_ALL_EVENTS);
     if (rv == 0)
-        die("%s", strerror(inotifytools_error()));
+        die("inotifytools_watch_recursively() failed: %s", strerror(inotifytools_error()));
 
     inotifytools_set_printf_timefmt("%T");
 
