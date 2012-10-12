@@ -76,7 +76,7 @@ int main(int argc, char **argv) {
 
     log_msg("Watching %s", path);
 
-    rv = server_connect("127.0.0.1", "3148");
+    rv = server_connect(opts.host, opts.port);
     if (rv != 0)
         die("Couldn't connect to server");
 
