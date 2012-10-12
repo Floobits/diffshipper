@@ -34,4 +34,6 @@ int ignored(const char *path);
 char *escape_data(char *data);
 char *unescape_data(char *data);
 
+void ftc_asprintf(char **ret, const char *fmt, ...);
+
 #endif

@@ -10,6 +10,7 @@
 int run_cmd(const char *fmt, ...) {
     char *cmd;
     int rv;
+    int unused;
     va_list args;
 
     va_start(args, fmt);
@@ -103,4 +104,13 @@ char *escape_data(char *data) {
 char *unescape_data(char *data) {
     /* LOL pranked you */
     return data;
+}
+
+
+/* To get around gcc's -Wunused-result */
+void ftc_asprintf(char **ret, const char *fmt, ...) {
+    va_list args;
+    va_start(args, fmt);
+    vasprintf(ret, fmt, args);
+    va_end(args);
 }

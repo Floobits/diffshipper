@@ -128,8 +128,8 @@ void push_changes(const char *base_path, const char *full_path) {
     struct stat dir_info;
     for (i = 0; i < results; i++) {
         dir = dir_list[i];
-        asprintf(&file_path, "%s%s", full_path, dir->d_name);
-        asprintf(&file_path_rel, "%s%s", path, dir->d_name);
+        ftc_asprintf(&file_path, "%s%s", full_path, dir->d_name);
+        ftc_asprintf(&file_path_rel, "%s%s", path, dir->d_name);
         if (ignored(file_path_rel)) {
             /* we triggered this event */
             unignore_path(file_path_rel);
@@ -150,7 +150,7 @@ void push_changes(const char *base_path, const char *full_path) {
             goto cleanup;
         }
 
-        asprintf(&orig_path, "%s%s", TMP_BASE, file_path);
+        ftc_asprintf(&orig_path, "%s%s", TMP_BASE, file_path);
 
         const char *f1 = orig_path;
         const char *f2 = file_path;
