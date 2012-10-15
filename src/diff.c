@@ -103,15 +103,15 @@ void push_changes(const char *base_path, const char *full_path) {
     for (i = 0; base_path[i] == full_path[i] && i < (int)strlen(base_path); i++) {
         path_start = full_path + i;
     }
-    path = strdup(path_start + 2);
+    path = strdup(path_start + 2); /* skip last char and trailing slash */
     log_debug("path is %s", path);
 
-    results = scandir(path, &dir_list, &scandir_filter, &alphasort);
+    results = scandir(full_path, &dir_list, &scandir_filter, &alphasort);
     if (results == -1) {
-        log_debug("Error scanning directory %s: %s", path, strerror(errno));
+        log_debug("Error scanning directory %s: %s", full_path, strerror(errno));
         return;
     } else if (results == 0) {
-        log_debug("No results found in directory %s", path);
+        log_debug("No results found in directory %s", full_path);
         return;
     }
 
@@ -219,6 +219,7 @@ void push_changes(const char *base_path, const char *full_path) {
         free(file_path);
         free(file_path_rel);
     }
+    free(path);
 }
 
 
