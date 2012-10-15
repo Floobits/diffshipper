@@ -76,7 +76,7 @@ void plog(const unsigned int level, const char *fmt, ...) {
 void die(const char *fmt, ...) {
     va_list args;
     va_start(args, fmt);
-    vplog(LOG_LEVEL_WARN, fmt, args);
+    vplog(LOG_LEVEL_ERR, fmt, args);
     va_end(args);
     exit(1);
 }

@@ -8,6 +8,7 @@
 #include "options.h"
 #include "util.h"
 
+
 #ifdef FSEVENTS
 void event_cb(ConstFSEventStreamRef streamRef, void *cb_data, size_t count, void *paths,
               const FSEventStreamEventFlags flags[], const FSEventStreamEventId ids[]) {
@@ -77,6 +78,7 @@ int main(int argc, char **argv) {
         die("Couldn't connect to server");
 
 #ifdef INOTIFY
+    log_debug("Using Inotify to watch for changes.");
     rv = inotifytools_initialize();
     if (rv == 0)
         die("inotifytools_initialize() failed: %s", strerror(inotifytools_error()));
@@ -96,9 +98,9 @@ int main(int argc, char **argv) {
         filename = inotifytools_filename_from_wd(event->wd);
         log_debug("Change in %s", filename);
         push_changes(path, filename);
-        free(filename);
     } while (event);
 #elif FSEVENTS
+    log_debug("Using FSEvents to watch for changes.");
     CFStringRef cfs_path = CFStringCreateWithCString(NULL, argv[1], kCFStringEncodingUTF8); /* pretty sure I'm leaking this */
     CFArrayRef paths = CFArrayCreate(NULL, (const void **)&cfs_path, 1, NULL); /* ditto */
     FSEventStreamContext ctx;
