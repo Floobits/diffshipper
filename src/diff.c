@@ -60,7 +60,7 @@ int send_diff_chunk(void *baton, dmp_operation_t op, const void *data, uint32_t 
             data_str = malloc(len + 1);
             strncpy(data_str, data, len + 1);
             data_safe = escape_data(data_str);
-            msg_len = asprintf(&msg, "{ \"path\": \"%s\", \"action\": \"-%u@%lld\", \"data\": \"%s\" }\n", di->path, len, offset, data_safe);
+            msg_len = asprintf(&msg, "{ \"path\": \"%s\", \"action\": \"-%u@%lld\", \"data\": \"%s\" }\n", di->path, len, (lli_t)offset, data_safe);
         break;
 
         case DMP_DIFF_INSERT:
@@ -69,7 +69,7 @@ int send_diff_chunk(void *baton, dmp_operation_t op, const void *data, uint32_t 
             data_str = malloc(len + 1);
             strncpy(data_str, data, len + 1);
             data_safe = escape_data(data_str);
-            msg_len = asprintf(&msg, "{ \"path\": \"%s\", \"action\": \"+%u@%lld\", \"data\": \"%s\" }\n", di->path, len, offset, data_safe);
+            msg_len = asprintf(&msg, "{ \"path\": \"%s\", \"action\": \"+%u@%lld\", \"data\": \"%s\" }\n", di->path, len, (lli_t)offset, data_safe);
         break;
 
         default:
@@ -100,14 +100,14 @@ void push_changes(const char *base_path, const char *full_path) {
     gettimeofday(&now, NULL);
 
     for (i = 0; base_path[i] == full_path[i] && i < (int)strlen(base_path); i++) {
-        path_start = &full_path[i];
+        path_start = full_path + i;
     }
     path = strdup(path_start + 2);
     log_debug("path is %s", path);
 
     results = scandir(path, &dir_list, &scandir_filter, &alphasort);
     if (results == -1) {
-        log_debug("Error scanning directory %s", path);
+        log_debug("Error scanning directory %s: %s", path, strerror(errno));
         return;
     } else if (results == 0) {
         log_debug("No results found in directory %s", path);

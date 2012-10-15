@@ -21,6 +21,8 @@
 #define FALSE 0
 #endif
 
+typedef long long int lli_t;
+
 char **ignored_paths;
 int ignored_paths_len;
 pthread_mutex_t ignore_mtx;

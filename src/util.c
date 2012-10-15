@@ -10,11 +10,11 @@
 int run_cmd(const char *fmt, ...) {
     char *cmd;
     int rv;
-    int unused;
     va_list args;
 
     va_start(args, fmt);
-    vasprintf(&cmd, fmt, args);
+    if (vasprintf(&cmd, fmt, args) == -1)
+        die("vasprintf returned -1");
     va_end(args);
 
     log_debug("Running %s", cmd);
@@ -111,6 +111,7 @@ char *unescape_data(char *data) {
 void ftc_asprintf(char **ret, const char *fmt, ...) {
     va_list args;
     va_start(args, fmt);
-    vasprintf(ret, fmt, args);
+    if (vasprintf(ret, fmt, args) == -1)
+        die("vasprintf returned -1");
     va_end(args);
 }

@@ -2,10 +2,6 @@
 #include <stdlib.h>
 
 #include "config.h"
-#ifndef FS_WATCHER
-#error "Inotify and FSEvents not found. Cannot build!"
-#endif
-
 #include "diff.h"
 #include "log.h"
 #include "net.h"
@@ -102,9 +98,7 @@ int main(int argc, char **argv) {
         push_changes(path, filename);
         free(filename);
     } while (event);
-#endif
-
-#ifdef FSEVENTS
+#elif FSEVENTS
     CFStringRef cfs_path = CFStringCreateWithCString(NULL, argv[1], kCFStringEncodingUTF8); /* pretty sure I'm leaking this */
     CFArrayRef paths = CFArrayCreate(NULL, (const void **)&cfs_path, 1, NULL); /* ditto */
     FSEventStreamContext ctx;
@@ -117,7 +111,10 @@ int main(int argc, char **argv) {
     FSEventStreamScheduleWithRunLoop(stream, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
     FSEventStreamStart(stream);
     CFRunLoopRun();
+#else
+#error "Need FSEvents or Inotify to build this"
 #endif
+
     /* We never get here */
     free(path);
     cleanup();
