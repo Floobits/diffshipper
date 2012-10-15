@@ -42,10 +42,10 @@ mmapped_file_t *mmap_file(const char *path, off_t size, int prot, int flags) {
     f_len = size > statbuf.st_size ? size : statbuf.st_size;
     prot = prot ? prot : PROT_READ;
     flags = flags ? flags : MAP_SHARED;
+    log_debug("mmapping %u bytes", f_len);
     buf = mmap(0, f_len, prot, flags, fd, 0);
     if (buf == MAP_FAILED) {
-        log_err("File %s failed to load: %s.", path, strerror(errno));
-        goto cleanup;
+        die("Error mmap()ing %s: %s.", path, strerror(errno));
     }
 
     mf = malloc(sizeof(mmapped_file_t));
@@ -55,8 +55,10 @@ mmapped_file_t *mmap_file(const char *path, off_t size, int prot, int flags) {
     return mf;
 
     cleanup:;
-    if (fd != -1) {
+    if (buf) {
         munmap(buf, f_len);
+    }
+    if (fd != -1) {
         close(fd);
     }
     return NULL;

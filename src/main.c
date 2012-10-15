@@ -47,6 +47,7 @@ void init() {
 
 
 void cleanup() {
+    free(opts.path);
     pthread_cond_destroy(&server_conn_ready);
     pthread_mutex_destroy(&server_conn_mtx);
     pthread_mutex_destroy(&ignore_mtx);
@@ -90,14 +91,14 @@ int main(int argc, char **argv) {
     inotifytools_set_printf_timefmt("%T");
 
     struct inotify_event *event;
-    char *filename;
+    char *full_path;
     event = inotifytools_next_event(-1);
     do {
         event = inotifytools_next_event(-1);
         inotifytools_printf(event, "%T %w%f %e\n");
-        filename = inotifytools_filename_from_wd(event->wd);
-        log_debug("Change in %s", filename);
-        push_changes(path, filename);
+        full_path = inotifytools_filename_from_wd(event->wd);
+        log_debug("Change in %s", full_path);
+        push_changes(path, full_path);
     } while (event);
 #elif FSEVENTS
     log_debug("Using FSEvents to watch for changes.");
@@ -118,8 +119,6 @@ int main(int argc, char **argv) {
 #endif
 
     /* We never get here */
-    free(path);
     cleanup();
-
     return(0);
 }
