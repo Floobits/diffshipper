@@ -70,7 +70,7 @@ int main(int argc, char **argv) {
     if (rv != 0)
         die("error creating temp directory %s", TMP_BASE);
 
-    rv = run_cmd("cp -fr %s/ %s%s", path, TMP_BASE, path);
+    rv = run_cmd("cp -fr %s/* %s%s", path, TMP_BASE, path);
     if (rv != 0)
         die("error creating copying files to tmp dir %s", TMP_BASE);
 
@@ -85,18 +85,23 @@ int main(int argc, char **argv) {
     if (rv == 0)
         die("inotifytools_initialize() failed: %s", strerror(inotifytools_error()));
 
-    rv = inotifytools_watch_recursively(path, IN_ALL_EVENTS);
+    rv = inotifytools_watch_recursively(path, IN_MODIFY);
     if (rv == 0)
         die("inotifytools_watch_recursively() failed: %s", strerror(inotifytools_error()));
 
     inotifytools_set_printf_timefmt("%T");
 
     struct inotify_event *event;
+    char *filename;
     event = inotifytools_next_event(-1);
-    while (event) {
-        inotifytools_printf(event, "%T %w%f %e\n");
+    do {
         event = inotifytools_next_event(-1);
-    }
+        inotifytools_printf(event, "%T %w%f %e\n");
+        filename = inotifytools_filename_from_wd(event->wd);
+        log_debug("Change in %s", filename);
+        push_changes(path, filename);
+        free(filename);
+    } while (event);
 #endif
 
 #ifdef FSEVENTS

@@ -15,9 +15,7 @@ typedef struct {
   mmapped_file_t *mf2;
 } diff_info_t;
 
-typedef int (*filter_fp_t)(const struct dirent *);
-
-int fsevents_filter(const struct dirent *d);
+int scandir_filter(const struct dirent *d);
 int send_diff_chunk(void *baton, dmp_operation_t op, const void *data, uint32_t len);
 
 void push_changes(const char *base_path, const char *full_path);
