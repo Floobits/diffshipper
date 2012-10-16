@@ -34,7 +34,7 @@ int scandir_filter(const struct dirent *d) {
         return 1;
     }
 
-    return 1;
+    return 0;
 }
 
 
