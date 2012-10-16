@@ -23,16 +23,14 @@ struct timeval now;
 
 
 int scandir_filter(const struct dirent *d) {
-    log_debug("Filtering %s", d->d_name);
+    log_debug("Examining %s", d->d_name);
     if (d->d_name[0] == '.')
         return 0;
 
     struct stat dir_info;
     lstat(d->d_name, &dir_info);
-    /* check it out if it's modified in the last 5 seconds */
-    if (dir_info.st_mtime > now.tv_sec - 5) {
+    if (dir_info.st_mtime > now.tv_sec - 5)
         return 1;
-    }
 
     return 0;
 }
