@@ -13,7 +13,7 @@
 #include <unistd.h>
 
 #include "diff.h"
-#include "file.h"
+#include "mmap.h"
 #include "log.h"
 #include "net.h"
 #include "options.h"

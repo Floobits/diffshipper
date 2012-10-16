@@ -5,7 +5,7 @@
 
 #include "dmp.h"
 
-#include "file.h"
+#include "mmap.h"
 
 #define TMP_BASE "/tmp/diffshipper"
 

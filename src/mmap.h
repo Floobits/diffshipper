@@ -1,5 +1,5 @@
-#ifndef FILE_H
-#define FILE_H
+#ifndef MMAP_H
+#define MMAP_H
 
 #include <sys/types.h>
 
