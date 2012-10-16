@@ -5,6 +5,7 @@ typedef struct {
     char *host;
     char *port;
     char *path;
+    int mtime;
 } options_t;
 
 options_t opts;

@@ -16,6 +16,7 @@
 #include "file.h"
 #include "log.h"
 #include "net.h"
+#include "options.h"
 #include "util.h"
 
 
@@ -29,7 +30,7 @@ int scandir_filter(const struct dirent *d) {
 
     struct stat dir_info;
     lstat(d->d_name, &dir_info);
-    if (dir_info.st_mtime > now.tv_sec - 5)
+    if (dir_info.st_mtime > now.tv_sec - opts.mtime)
         return 1;
 
     return 0;
