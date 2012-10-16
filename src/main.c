@@ -102,7 +102,7 @@ int main(int argc, char **argv) {
     } while (event);
 #elif FSEVENTS
     log_debug("Using FSEvents to watch for changes.");
-    CFStringRef cfs_path = CFStringCreateWithCString(NULL, argv[1], kCFStringEncodingUTF8); /* pretty sure I'm leaking this */
+    CFStringRef cfs_path = CFStringCreateWithCString(NULL, path, kCFStringEncodingUTF8); /* pretty sure I'm leaking this */
     CFArrayRef paths = CFArrayCreate(NULL, (const void **)&cfs_path, 1, NULL); /* ditto */
     FSEventStreamContext ctx;
     memset(&ctx, 0, sizeof(ctx));
