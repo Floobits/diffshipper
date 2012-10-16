@@ -92,7 +92,6 @@ int main(int argc, char **argv) {
 
     struct inotify_event *event;
     char *full_path;
-    event = inotifytools_next_event(-1);
     do {
         event = inotifytools_next_event(-1);
         inotifytools_printf(event, "%T %w%f %e\n");
