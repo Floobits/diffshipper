@@ -82,31 +82,3 @@ int msync_file(mmapped_file_t *mf, off_t len) {
     munmap(mf->buf, mf->len);
     return msync(mf->buf, len, MS_SYNC);
 }
-
-
-int is_binary(const void* buf, const int buf_len) {
-    int suspicious_bytes = 0;
-    int total_bytes = buf_len > 1024 ? 1024 : buf_len;
-    const unsigned char *buf_c = buf;
-    int i;
-
-    if (buf_len == 0) {
-        return 0;
-    }
-
-    for (i = 0; i < total_bytes; i++) {
-        if (buf_c[i] == '\0') {
-            /* NULL char. It's binary */
-            return 1;
-        } else if ((buf_c[i] < 7 || buf_c[i] > 14) && (buf_c[i] < 32 || buf_c[i] > 127)) {
-            suspicious_bytes++;
-            /* Disk IO is so slow that it's worthwhile to do this calculation after every suspicious byte. */
-            /* This is true even on a 1.6Ghz Atom with an Intel 320 SSD. */
-            if ((suspicious_bytes * 100) / total_bytes > 10) {
-                return 1;
-            }
-        }
-    }
-
-    return 0;
-}

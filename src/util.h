@@ -38,4 +38,6 @@ char *unescape_data(char *data);
 
 void ftc_asprintf(char **ret, const char *fmt, ...);
 
+int is_binary(const void* buf, const int buf_len);
+
 #endif
