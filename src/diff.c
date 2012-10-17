@@ -16,6 +16,7 @@
 #include "mmap.h"
 #include "log.h"
 #include "net.h"
+#include "scandir.h"
 #include "options.h"
 #include "util.h"
 
@@ -23,15 +24,25 @@
 struct timeval now;
 
 
-int scandir_filter(const struct dirent *d) {
+int scandir_filter(const char *path, const struct dirent *d, void *baton) {
     log_debug("Examining %s", d->d_name);
     if (d->d_name[0] == '.')
         return 0;
 
     struct stat dir_info;
-    lstat(d->d_name, &dir_info);
-    if (dir_info.st_mtime > now.tv_sec - opts.mtime)
+    char *full_path = NULL;
+    ftc_asprintf(&full_path, "%s/%s", path, d->d_name);
+    /* TODO: don't leak full_path */
+    int rv = lstat(full_path, &dir_info);
+    if (rv != 0) {
+        log_err("lstat failed for %s: %s", full_path, strerror(errno));
+        return 0;
+    }
+    log_debug("d.mtime %li now %li opts %li", dir_info.st_mtime, now.tv_sec, opts.mtime);
+    if (dir_info.st_mtime > now.tv_sec - opts.mtime) {
+        log_debug("file %s modified in the last %u seconds. shipping", full_path, opts.mtime);
         return 1;
+    }
 
     return 0;
 }
@@ -105,7 +116,7 @@ void push_changes(const char *base_path, const char *full_path) {
     path = strdup(path_start + 2); /* skip last char and trailing slash */
     log_debug("path is %s", path);
 
-    results = scandir(full_path, &dir_list, &scandir_filter, &alphasort);
+    results = ftc_scandir(full_path, &dir_list, &scandir_filter, &full_path);
     if (results == -1) {
         log_debug("Error scanning directory %s: %s", full_path, strerror(errno));
         return;
