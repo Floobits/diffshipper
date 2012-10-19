@@ -35,6 +35,9 @@ void parse_opts(int argc, char **argv) {
         {"debug", no_argument, NULL, 'D'},
         {"host", required_argument, NULL, 'h'},
         {"port", required_argument, NULL, 'p'},
+        {"room", required_argument, NULL, 'r'},
+        {"secret", required_argument, NULL, 's'},
+        {"username", required_argument, NULL, 'u'},
         {"version", no_argument, NULL, 'v'},
         { NULL, 0, NULL, 0 }
     };
@@ -48,6 +51,15 @@ void parse_opts(int argc, char **argv) {
             break;
             case 'p':
                 opts.port = optarg;
+            break;
+            case 'r':
+                opts.room = optarg;
+            break;
+            case 's':
+                opts.secret = optarg;
+            break;
+            case 'u':
+                opts.username = optarg;
             break;
             case 'v':
                 print_version();
