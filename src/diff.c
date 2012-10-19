@@ -54,9 +54,9 @@ int send_diff_chunk(void *baton, dmp_operation_t op, const void *data, uint32_t 
     char *msg;
     int msg_len = 0;
     char *data_str = NULL;
-    char *data_safe = NULL;
+    char *action_str = NULL;
+    json_t *obj = NULL;
 
-    /* Just so you know, I know this is bad. */
     switch (op) {
         case DMP_DIFF_EQUAL:
             /* Don't care */
@@ -64,14 +64,15 @@ int send_diff_chunk(void *baton, dmp_operation_t op, const void *data, uint32_t 
             return 0;
         break;
 
-        /* TODO: escape stuff. especially newlines and double-quotes */
         case DMP_DIFF_DELETE:
             offset = data - di->mf1->buf;
             log_debug("delete. offset: %i bytes", offset);
             data_str = malloc(len + 1);
             strncpy(data_str, data, len + 1);
-            data_safe = escape_data(data_str);
-            msg_len = asprintf(&msg, "{ \"path\": \"%s\", \"action\": \"-%u@%lld\", \"data\": \"%s\" }\n", di->path, len, (lli_t)offset, data_safe);
+            ftc_asprintf(&action_str, "-%u@%lld", len, (lli_t)offset);
+            obj = json_pack("{s:s s:s s:s}", "path", di->path, "action", action_str, "data", data_str);
+            msg = json_dumps(obj, 0);
+            msg_len = strlen(msg) + 1;
         break;
 
         case DMP_DIFF_INSERT:
@@ -79,21 +80,27 @@ int send_diff_chunk(void *baton, dmp_operation_t op, const void *data, uint32_t 
             log_debug("insert. offset: %i bytes", offset);
             data_str = malloc(len + 1);
             strncpy(data_str, data, len + 1);
-            data_safe = escape_data(data_str);
-            msg_len = asprintf(&msg, "{ \"path\": \"%s\", \"action\": \"+%u@%lld\", \"data\": \"%s\" }\n", di->path, len, (lli_t)offset, data_safe);
+            ftc_asprintf(&action_str, "+%u@%lld", len, (lli_t)offset);
+            obj = json_pack("{s:s s:s s:s}", "path", di->path, "action", action_str, "data", data_str);
+            msg = json_dumps(obj, 0);
+            msg_len = strlen(msg) + 1;
         break;
 
         default:
             die("WTF?!?!");
     }
     log_debug("msg: %s", msg);
+    msg = realloc(msg, msg_len+1);
+    msg[msg_len-1] = '\n';
+    msg[msg_len] = '\0';
     send_bytes(msg, msg_len);
     fwrite(data, (size_t)len, 1, stdout);
+    free(msg);
     if (data_str)
         free(data_str);
-    if (data_safe)
-        free(data_safe);
-
+    if (action_str)
+        free(action_str);
+    json_decref(obj);
     return 0;
 }
 
