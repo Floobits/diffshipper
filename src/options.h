@@ -6,6 +6,9 @@ typedef struct {
     char *port;
     char *path;
     int mtime;
+    char *username;
+    char *secret;
+    char *room;
 } options_t;
 
 options_t opts;

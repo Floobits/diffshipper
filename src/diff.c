@@ -90,10 +90,9 @@ int send_diff_chunk(void *baton, dmp_operation_t op, const void *data, uint32_t 
         default:
             die("WTF?!?!");
     }
-    log_debug("msg: %s", msg);
     msg = realloc(msg, msg_len+1);
-    msg[msg_len-1] = '\n';
-    msg[msg_len] = '\0';
+    strcat(msg, "\n");
+    log_debug("msg: %s", msg);
     send_bytes(msg, msg_len);
     fwrite(data, (size_t)len, 1, stdout);
     free(msg);

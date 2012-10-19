@@ -13,6 +13,7 @@
 #include "diff.h"
 #include "log.h"
 #include "net.h"
+#include "options.h"
 #include "util.h"
 
 
@@ -39,8 +40,17 @@ int server_connect(const char *host, const char *port) {
 
     log_debug("Connected to %s:%s", host, port);
 
-    char msg[] = "{\"v\": \"0.01\"}\n";
-    ssize_t bytes_sent = send_bytes(&msg, strlen(msg));
+    json_t *obj = NULL;
+    int json_dumps_flags = JSON_ENSURE_ASCII;
+    char *msg;
+    size_t msg_len;
+    obj = json_pack("{s:s s:s s:s}", "user", opts.username, "secret", opts.secret, "room", opts.room);
+    msg = json_dumps(obj, json_dumps_flags);
+    msg_len = strlen(msg) + 1;
+    msg = realloc(msg, msg_len+1);
+    strcat(msg, "\n");
+
+    ssize_t bytes_sent = send_bytes(msg, strlen(msg));
     if (bytes_sent == -1)
         die("send_bytes() error: %s", strerror(errno));
     /* TODO: check # of bytes sent was correct */
