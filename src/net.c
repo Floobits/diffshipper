@@ -50,10 +50,9 @@ int server_connect(const char *host, const char *port) {
     msg = realloc(msg, msg_len+1);
     strcat(msg, "\n");
 
-    ssize_t bytes_sent = send_bytes(msg, strlen(msg));
-    if (bytes_sent == -1)
-        die("send_bytes() error: %s", strerror(errno));
-    /* TODO: check # of bytes sent was correct */
+    ssize_t bytes_sent = send_bytes(msg, msg_len);
+    if (bytes_sent != (ssize_t)msg_len)
+        die("tried to send %u bytes but only sent %i", msg_len, bytes_sent);
 
     net_buf = malloc(100);
     net_buf_len = 0;
