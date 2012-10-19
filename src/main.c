@@ -107,7 +107,7 @@ int main(int argc, char **argv) {
     memset(&ctx, 0, sizeof(ctx));
     ctx.info = path;
     FSEventStreamRef stream;
-    CFAbsoluteTime latency = 0.25;
+    CFAbsoluteTime latency = 0.15;
 
     stream = FSEventStreamCreate(NULL, &event_cb, &ctx, paths, kFSEventStreamEventIdSinceNow, latency, kFSEventStreamCreateFlagNone);
     FSEventStreamScheduleWithRunLoop(stream, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
