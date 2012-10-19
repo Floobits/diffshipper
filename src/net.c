@@ -51,6 +51,7 @@ int server_connect(const char *host, const char *port) {
     strcat(msg, "\n");
 
     ssize_t bytes_sent = send_bytes(msg, msg_len);
+    free(msg);
     if (bytes_sent != (ssize_t)msg_len)
         die("tried to send %u bytes but only sent %i", msg_len, bytes_sent);
 
