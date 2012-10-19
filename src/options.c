@@ -80,10 +80,10 @@ void parse_opts(int argc, char **argv) {
     opts.path = realpath(argv[0], NULL);
 
     if (!opts.host) {
-        ftc_asprintf(&opts.host, "127.0.0.1");
+        ds_asprintf(&opts.host, "127.0.0.1");
     }
     if (!opts.port) {
-        ftc_asprintf(&opts.port, "3148");
+        ds_asprintf(&opts.port, "3148");
     }
 
     log_debug("options: host %s port %s path %s", opts.host, opts.port, opts.path);

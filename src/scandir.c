@@ -5,7 +5,7 @@
 #include "scandir.h"
 #include "util.h"
 
-int ftc_scandir(const char *dirname,
+int ds_scandir(const char *dirname,
                struct dirent ***namelist,
                filter_fp filter,
                void *baton

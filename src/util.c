@@ -108,7 +108,7 @@ char *unescape_data(char *data) {
 
 
 /* To get around gcc's -Wunused-result */
-void ftc_asprintf(char **ret, const char *fmt, ...) {
+void ds_asprintf(char **ret, const char *fmt, ...) {
     va_list args;
     va_start(args, fmt);
     if (vasprintf(ret, fmt, args) == -1)

@@ -36,7 +36,7 @@ int ignored(const char *path);
 char *escape_data(char *data);
 char *unescape_data(char *data);
 
-void ftc_asprintf(char **ret, const char *fmt, ...);
+void ds_asprintf(char **ret, const char *fmt, ...);
 
 int is_binary(const void* buf, const int buf_len);
 

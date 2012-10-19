@@ -3,6 +3,8 @@
 
 #include <pthread.h>
 
+#define DS_PROTO_VERSION "0.01"
+
 struct addrinfo *server_info;
 int server_sock;
 pthread_cond_t server_conn_ready;

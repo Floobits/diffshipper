@@ -31,7 +31,7 @@ int scandir_filter(const char *path, const struct dirent *d, void *baton) {
 
     struct stat dir_info;
     char *full_path = NULL;
-    ftc_asprintf(&full_path, "%s/%s", path, d->d_name);
+    ds_asprintf(&full_path, "%s/%s", path, d->d_name);
     int rv = lstat(full_path, &dir_info);
     if (rv != 0) {
         log_err("lstat failed for %s: %s", full_path, strerror(errno));
@@ -71,7 +71,7 @@ int send_diff_chunk(void *baton, dmp_operation_t op, const void *data, uint32_t 
             log_debug("delete. offset: %i bytes", offset);
             data_str = malloc(len + 1);
             strncpy(data_str, data, len + 1);
-            ftc_asprintf(&action_str, "-%u@%lld", len, (lli_t)offset);
+            ds_asprintf(&action_str, "-%u@%lld", len, (lli_t)offset);
             obj = json_pack("{s:s s:s s:s}", "path", di->path, "action", action_str, "data", data_str);
             msg = json_dumps(obj, json_dumps_flags);
             msg_len = strlen(msg) + 1;
@@ -82,7 +82,7 @@ int send_diff_chunk(void *baton, dmp_operation_t op, const void *data, uint32_t 
             log_debug("insert. offset: %i bytes", offset);
             data_str = malloc(len + 1);
             strncpy(data_str, data, len + 1);
-            ftc_asprintf(&action_str, "+%u@%lld", len, (lli_t)offset);
+            ds_asprintf(&action_str, "+%u@%lld", len, (lli_t)offset);
             obj = json_pack("{s:s s:s s:s}", "path", di->path, "action", action_str, "data", data_str);
             msg = json_dumps(obj, json_dumps_flags);
             msg_len = strlen(msg) + 1;
@@ -124,7 +124,7 @@ void push_changes(const char *base_path, const char *full_path) {
     path = strdup(path_start + 2); /* skip last char and trailing slash */
     log_debug("path is %s", path);
 
-    results = ftc_scandir(full_path, &dir_list, &scandir_filter, &full_path);
+    results = ds_scandir(full_path, &dir_list, &scandir_filter, &full_path);
     if (results == -1) {
         log_debug("Error scanning directory %s: %s", full_path, strerror(errno));
         return;
@@ -139,8 +139,8 @@ void push_changes(const char *base_path, const char *full_path) {
     struct stat dir_info;
     for (i = 0; i < results; i++) {
         dir = dir_list[i];
-        ftc_asprintf(&file_path, "%s%s", full_path, dir->d_name);
-        ftc_asprintf(&file_path_rel, "%s%s", path, dir->d_name);
+        ds_asprintf(&file_path, "%s%s", full_path, dir->d_name);
+        ds_asprintf(&file_path_rel, "%s%s", path, dir->d_name);
         if (ignored(file_path_rel)) {
             /* we triggered this event */
             unignore_path(file_path_rel);
@@ -161,7 +161,7 @@ void push_changes(const char *base_path, const char *full_path) {
             goto cleanup;
         }
 
-        ftc_asprintf(&orig_path, "%s%s", TMP_BASE, file_path);
+        ds_asprintf(&orig_path, "%s%s", TMP_BASE, file_path);
 
         const char *f1 = orig_path;
         const char *f2 = file_path;
