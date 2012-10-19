@@ -42,7 +42,7 @@ void parse_opts(int argc, char **argv) {
         { NULL, 0, NULL, 0 }
     };
 
-    while ((ch = getopt_long(argc, argv, "Dh:p:v", longopts, &opt_index)) != -1) {
+    while ((ch = getopt_long(argc, argv, "Dh:p:r:s:u:v", longopts, &opt_index)) != -1) {
         switch (ch) {
             case 'D':
                 set_log_level(LOG_LEVEL_DEBUG);
