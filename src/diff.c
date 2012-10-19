@@ -32,19 +32,20 @@ int scandir_filter(const char *path, const struct dirent *d, void *baton) {
     struct stat dir_info;
     char *full_path = NULL;
     ftc_asprintf(&full_path, "%s/%s", path, d->d_name);
-    /* TODO: don't leak full_path */
     int rv = lstat(full_path, &dir_info);
     if (rv != 0) {
         log_err("lstat failed for %s: %s", full_path, strerror(errno));
-        return 0;
-    }
-    log_debug("d.mtime %li now %li opts %li", dir_info.st_mtime, now.tv_sec, opts.mtime);
-    if (dir_info.st_mtime > now.tv_sec - opts.mtime) {
-        log_debug("file %s modified in the last %u seconds. shipping", full_path, opts.mtime);
-        return 1;
+        rv = 0;
+    } else if (dir_info.st_mtime > now.tv_sec - opts.mtime) {
+        log_debug("file %s modified in the last %u seconds. GO TIME!", full_path, opts.mtime);
+        rv = 1;
+    } else {
+        log_debug("skipping d.mtime %li now %li opts %li", dir_info.st_mtime, now.tv_sec, opts.mtime);
+        rv = 0;
     }
 
-    return 0;
+    free(full_path);
+    return rv;
 }
 
 
