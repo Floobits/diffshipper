@@ -56,6 +56,7 @@ int send_diff_chunk(void *baton, dmp_operation_t op, const void *data, uint32_t 
     char *data_str = NULL;
     char *action_str = NULL;
     json_t *obj = NULL;
+    int json_dumps_flags = JSON_ENSURE_ASCII;
 
     switch (op) {
         case DMP_DIFF_EQUAL:
@@ -71,7 +72,7 @@ int send_diff_chunk(void *baton, dmp_operation_t op, const void *data, uint32_t 
             strncpy(data_str, data, len + 1);
             ftc_asprintf(&action_str, "-%u@%lld", len, (lli_t)offset);
             obj = json_pack("{s:s s:s s:s}", "path", di->path, "action", action_str, "data", data_str);
-            msg = json_dumps(obj, 0);
+            msg = json_dumps(obj, json_dumps_flags);
             msg_len = strlen(msg) + 1;
         break;
 
@@ -82,7 +83,7 @@ int send_diff_chunk(void *baton, dmp_operation_t op, const void *data, uint32_t 
             strncpy(data_str, data, len + 1);
             ftc_asprintf(&action_str, "+%u@%lld", len, (lli_t)offset);
             obj = json_pack("{s:s s:s s:s}", "path", di->path, "action", action_str, "data", data_str);
-            msg = json_dumps(obj, 0);
+            msg = json_dumps(obj, json_dumps_flags);
             msg_len = strlen(msg) + 1;
         break;
 
