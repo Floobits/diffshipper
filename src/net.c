@@ -40,18 +40,26 @@ int server_connect(const char *host, const char *port) {
 
     log_debug("Connected to %s:%s", host, port);
 
-    json_t *obj = NULL;
+    json_t *json_obj = NULL;
     int json_dumps_flags = JSON_ENSURE_ASCII;
     char *msg;
     size_t msg_len;
-    obj = json_pack("{s:s s:s s:s}", "user", opts.username, "secret", opts.secret, "room", opts.room);
-    msg = json_dumps(obj, json_dumps_flags);
+    json_error_t json_err;
+    json_obj = json_pack_ex(&json_err, 0, "{s:s s:s s:s}", "user", opts.username, "secret", opts.secret, "room", opts.room);
+    if (!json_obj) {
+        log_json_err(&json_err);
+        die("error packing json");
+    }
+    msg = json_dumps(json_obj, json_dumps_flags);
+    if (!msg) {
+        die("error dumping json");
+        return -1; /* make scan-build happy */
+    }
     msg_len = strlen(msg) + 1;
     msg = realloc(msg, msg_len+1);
     strcat(msg, "\n");
 
     ssize_t bytes_sent = send_bytes(msg, msg_len);
-    free(msg);
     if (bytes_sent != (ssize_t)msg_len)
         die("tried to send %u bytes but only sent %i", msg_len, bytes_sent);
 
@@ -59,6 +67,9 @@ int server_connect(const char *host, const char *port) {
     net_buf_len = 0;
     net_buf_size = 100;
     pthread_cond_broadcast(&server_conn_ready);
+
+    free(msg);
+    json_decref(json_obj);
 
     return rv;
 }
@@ -122,7 +133,7 @@ void *remote_change_worker() {
     pthread_cond_wait(&server_conn_ready, &server_conn_mtx);
     pthread_mutex_unlock(&server_conn_mtx);
 
-    json_t *json;
+    json_t *json_obj;
     json_error_t json_err;
 
     /* yeah this is retarded */
@@ -137,12 +148,12 @@ void *remote_change_worker() {
             die("no bytes!");
         }
         log_debug("parsing %s", buf);
-        json = json_loadb(buf, rv, 0, &json_err);
-        if (!json) {
+        json_obj = json_loadb(buf, rv, 0, &json_err);
+        if (!json_obj) {
             log_json_err(&json_err);
             continue;
         }
-        rv = json_unpack_ex(json, &json_err, 0, "{s:s, s:s, s:s}", "path", &path, "action", &action_str, "data", &diff_data);
+        rv = json_unpack_ex(json_obj, &json_err, 0, "{s:s, s:s, s:s}", "path", &path, "action", &action_str, "data", &diff_data);
         if (rv != 0) {
             log_json_err(&json_err);
             continue;
@@ -165,7 +176,7 @@ void *remote_change_worker() {
         apply_diff(path, op, diff_data, diff_size, diff_pos);
 
         cleanup:;
-        json_decref(json);
+        json_decref(json_obj);
     }
 
     free(path);
