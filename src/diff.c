@@ -69,29 +69,25 @@ int send_diff_chunk(void *baton, dmp_operation_t op, const void *data, uint32_t 
 
         case DMP_DIFF_DELETE:
             offset = data - di->mf1->buf;
-            log_debug("delete. offset: %i bytes", offset);
             data_str = malloc(len + 1);
             strncpy(data_str, data, len + 1);
             ds_asprintf(&action_str, "-%u@%lld", len, (lli_t)offset);
-            obj = json_pack("{s:s s:s s:s}", "path", di->path, "action", action_str, "data", data_str);
-            msg = json_dumps(obj, json_dumps_flags);
-            msg_len = strlen(msg) + 1;
         break;
 
         case DMP_DIFF_INSERT:
             offset = data - di->mf2->buf;
-            log_debug("insert. offset: %i bytes", offset);
             data_str = malloc(len + 1);
             strncpy(data_str, data, len + 1);
             ds_asprintf(&action_str, "+%u@%lld", len, (lli_t)offset);
-            obj = json_pack("{s:s s:s s:s}", "path", di->path, "action", action_str, "data", data_str);
-            msg = json_dumps(obj, json_dumps_flags);
-            msg_len = strlen(msg) + 1;
         break;
 
         default:
             die("WTF?!?!");
     }
+    obj = json_pack("{s:s s:{s:s s:s s:s}}", "path", di->path, "patch", "action", action_str, "data", data_str, "md5", "test");
+    msg = json_dumps(obj, json_dumps_flags);
+    msg_len = strlen(msg) + 1;
+
     msg = realloc(msg, msg_len+1);
     strcat(msg, "\n");
     log_debug("msg: %s", msg);

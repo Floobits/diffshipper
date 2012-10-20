@@ -126,6 +126,7 @@ void *remote_change_worker() {
     char action;
     char *action_str;
     char *diff_data;
+    char *md5sum;
     size_t diff_pos;
     size_t diff_size;
     dmp_operation_t op = DMP_DIFF_EQUAL;
@@ -139,7 +140,8 @@ void *remote_change_worker() {
     /* yeah this is retarded */
     path = malloc(1000);
     diff_data = malloc(100000);
-    action_str = malloc(50);
+    action_str = malloc(100);
+    md5sum = malloc(100);
 
     while (TRUE) {
         rv = recv_bytes(&buf);
@@ -153,7 +155,7 @@ void *remote_change_worker() {
             log_json_err(&json_err);
             continue;
         }
-        rv = json_unpack_ex(json_obj, &json_err, 0, "{s:s, s:s, s:s}", "path", &path, "action", &action_str, "data", &diff_data);
+        rv = json_unpack_ex(json_obj, &json_err, 0, "{s:s s:{s:s s:s s:s}}", "path", &path, "patch", "action", &action_str, "data", &diff_data, "md5", &md5sum);
         if (rv != 0) {
             log_json_err(&json_err);
             continue;
