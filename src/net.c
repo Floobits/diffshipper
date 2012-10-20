@@ -137,12 +137,6 @@ void *remote_change_worker() {
     json_t *json_obj;
     json_error_t json_err;
 
-    /* yeah this is retarded */
-    path = malloc(1000);
-    diff_data = malloc(100000);
-    action_str = malloc(100);
-    md5sum = malloc(100);
-
     while (TRUE) {
         rv = recv_bytes(&buf);
         if (!rv) {
