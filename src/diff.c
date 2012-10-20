@@ -34,6 +34,7 @@ int scandir_filter(const char *path, const struct dirent *d, void *baton) {
     ds_asprintf(&full_path, "%s/%s", path, d->d_name);
     int rv = lstat(full_path, &dir_info);
     if (rv != 0) {
+        /* TODO: strerror isn't thread-safe on many platforms */
         log_err("lstat failed for %s: %s", full_path, strerror(errno));
         rv = 0;
     } else if (dir_info.st_mtime > now.tv_sec - opts.mtime) {
