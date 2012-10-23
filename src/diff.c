@@ -84,7 +84,7 @@ int send_diff_chunk(void *baton, dmp_operation_t op, const void *data, uint32_t 
         default:
             die("WTF?!?!");
     }
-    obj = json_pack("{s:s s:{s:s s:s s:s}}", "path", di->path, "patch", "action", action_str, "data", data_str, "md5", "test");
+    obj = json_pack("{s:s s:s s:{s:s s:s s:s}}", "path", di->path, "action", "patch", "patch", "action", action_str, "data", data_str, "md5", "test");
     msg = json_dumps(obj, json_dumps_flags);
     msg_len = strlen(msg) + 1;
 
