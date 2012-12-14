@@ -34,6 +34,7 @@ void parse_opts(int argc, char **argv) {
     struct option longopts[] = {
         {"debug", no_argument, NULL, 'D'},
         {"host", required_argument, NULL, 'h'},
+        {"owner", required_argument, NULL, 'o'},
         {"port", required_argument, NULL, 'p'},
         {"room", required_argument, NULL, 'r'},
         {"secret", required_argument, NULL, 's'},
@@ -48,6 +49,9 @@ void parse_opts(int argc, char **argv) {
                 set_log_level(LOG_LEVEL_DEBUG);
             case 'h':
                 opts.host = optarg;
+            break;
+            case 'o':
+                opts.owner = optarg;
             break;
             case 'p':
                 opts.port = optarg;

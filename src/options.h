@@ -8,6 +8,7 @@ typedef struct {
     int mtime;
     char *username;
     char *secret;
+    char *owner;
     char *room;
 } options_t;
 

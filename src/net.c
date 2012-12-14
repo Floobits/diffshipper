@@ -45,7 +45,7 @@ int server_connect(const char *host, const char *port) {
     char *msg;
     size_t msg_len;
     json_error_t json_err;
-    json_obj = json_pack_ex(&json_err, 0, "{s:s s:s s:s s:s}", "version", DS_PROTO_VERSION, "username", opts.username, "secret", opts.secret, "room", opts.room);
+    json_obj = json_pack_ex(&json_err, 0, "{s:s s:s s:s s:s s:s}", "version", DS_PROTO_VERSION, "username", opts.username, "secret", opts.secret, "owner", opts.owner, "room", opts.room);
     if (!json_obj) {
         log_json_err(&json_err);
         die("error packing json");
