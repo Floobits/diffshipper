@@ -19,6 +19,8 @@ int server_connect(const char *host, const char *port);
 ssize_t send_bytes(const void *buf, const size_t len);
 ssize_t recv_bytes(char **buf);
 
+/* TODO: send/recv_json functions */
+
 void *remote_change_worker();
 
 void net_cleanup();
