@@ -160,7 +160,7 @@ void *remote_change_worker() {
         json_obj = json_loadb(buf, rv, 0, &json_err);
         if (!json_obj) {
             log_json_err(&json_err);
-            continue;
+            die("couldn't load buffer into json object!");
         }
         rv = json_unpack_ex(json_obj, &json_err, 0, "{s:s}", "name", &name);
         if (rv != 0) {
@@ -169,53 +169,14 @@ void *remote_change_worker() {
         }
         log_debug("name: %s", name);
         /* "patch", "get_buf", "create_buf", "highlight", "msg", "delete_buf", "rename_buf" */
-        /* TODO: split these out into their own functions */
         if (strcmp(name, "room_info") == 0) {
             on_room_info(json_obj);
         } else if (strcmp(name, "get_buf") == 0) {
-            buf_t buf;
-            rv = json_unpack_ex(json_obj, &json_err, 0, "{s:s s:s s:s}", "buf", &(buf.buf), "md5", &(buf.md5), "path", &(buf.path));
-            if (rv != 0) {
-                log_json_err(&json_err);
-                die("Avenge me, Othello! Shiiiiiiiiiiiiit!");
-            }
+            on_get_buf(json_obj);
         } else if (strcmp(name, "patch") == 0) {
-            int buf_id;
-            int user_id;
-            char *username;
-            char *md5_before;
-            char *md5_after;
-            char *patch_str;
-            rv = json_unpack_ex(
-                json_obj, &json_err, 0, "{s:i s:i s:s s:s s:s s:s s:s}", 
-                "id", &buf_id,
-                "user_id", &user_id,
-                "username", &username,
-                "patch", &patch_str,
-                "path", &path,
-                "md5_before", &md5_before,
-                "md5_after", &md5_after
-            );
-            if (rv != 0) {
-                log_json_err(&json_err);
-                continue;
-            }
-            ignore_path(path);
-            apply_patch(buf_id, patch_str);
+            on_patch(json_obj);
         } else if (strcmp(name, "msg") == 0) {
-            char *username;
-            char *msg;
-
-            rv = json_unpack_ex(json_obj, &json_err, 0, "{s:s s:s}", "username", &username, "data", &msg);
-            if (rv != 0) {
-                log_json_err(&json_err);
-                continue;
-            }
-
-            log_msg("Message from user %s: %s", username, msg);
-
-            free(username);
-            free(msg);
+            on_msg(json_obj);
         } else {
             log_err("Unknown event name: %s", name);
         }
