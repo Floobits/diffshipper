@@ -86,7 +86,7 @@ int send_diff_chunk(void *baton, dmp_operation_t op, const void *data, uint32_t 
             die("WTF?!?!");
     }
     /* TODO: build a valid patch string */
-    ftc_asprintf(&patch_str, "action", action_str, "data", data_str);
+    ds_asprintf(&patch_str, "action", action_str, "data", data_str);
     obj = json_pack("{s:s s:s s:{s:s s:s}}", "path", di->path, "name", "patch", "patch", patch_str, "md5", "test");
     msg = json_dumps(obj, json_dumps_flags);
     msg_len = strlen(msg) + 1;
