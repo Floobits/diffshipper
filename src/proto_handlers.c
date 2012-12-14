@@ -1,4 +1,9 @@
+#include <errno.h>
+#include <fcntl.h>
+#include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 #include <xlocale.h>
 
 #include <jansson.h>
@@ -13,12 +18,22 @@
 void on_get_buf(json_t *json_obj) {
     int rv;
     json_error_t json_err;
+    int fd;
     buf_t buf;
     rv = json_unpack_ex(json_obj, &json_err, 0, "{s:s s:s s:s}", "buf", &(buf.buf), "md5", &(buf.md5), "path", &(buf.path));
     if (rv != 0) {
         log_json_err(&json_err);
         die("Avenge me, Othello! Shiiiiiiiiiiiiit!");
     }
+    ignore_path(buf.path);
+    /* TODO: strcat base bath onto buf path before opening */
+    fd = open(buf.path, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR);
+    if (fd < 0) {
+        die("Error opening file %s: %s", buf.path, strerror(errno));
+    }
+    rv = write(fd, buf.buf, strlen(buf.buf));
+    log_debug("wrote %i bytes", rv);
+    close(fd);
 }
 
 
