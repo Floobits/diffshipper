@@ -119,18 +119,45 @@ ssize_t recv_bytes(char **buf) {
 }
 
 
+ssize_t send_json(const char *fmt, ...) {
+    char *msg;
+    size_t msg_len;
+    json_error_t json_err;
+    va_list args;
+    json_t *json_obj;
+
+    va_start(args, fmt);
+    json_obj = json_vpack_ex(&json_err, 0, fmt, args);
+    va_end(args);
+
+    if (!json_obj) {
+        log_json_err(&json_err);
+        die("error packing json");
+    }
+
+    msg = json_dumps(json_obj, JSON_ENSURE_ASCII);
+    if (!msg) {
+        die("error dumping json");
+        return -1;
+    }
+    msg_len = strlen(msg) + 1;
+    msg = realloc(msg, msg_len+1);
+    strcat(msg, "\n");
+
+    ssize_t bytes_sent = send_bytes(msg, msg_len);
+    if (bytes_sent != (ssize_t)msg_len)
+        die("tried to send %u bytes but only sent %i", msg_len, bytes_sent);
+
+    free(msg);
+    return bytes_sent;
+}
+
+
 void *remote_change_worker() {
     char *buf = NULL;
     ssize_t rv;
     char *path;
-    char action;
-    char *action_str;
-    char *diff_data;
-    char *md5sum;
     char *name;
-    size_t diff_pos;
-    size_t diff_size;
-    dmp_operation_t op = DMP_DIFF_EQUAL;
 
     pthread_cond_wait(&server_conn_ready, &server_conn_mtx);
     pthread_mutex_unlock(&server_conn_mtx);
@@ -157,35 +184,58 @@ void *remote_change_worker() {
         }
         log_debug("name: %s", name);
         /* "patch", "get_buf", "create_buf", "highlight", "msg", "delete_buf", "rename_buf" */
+        /* TODO: split these out into their own functions */
         if (strcmp(name, "room_info") == 0) {
-            /* TODO */
+            const char *buf_id_str;
+            json_t *bufs_obj;
+            json_t *buf_obj;
+            rv = json_unpack_ex(json_obj, &json_err, 0, "{s:o}", "bufs", &bufs_obj);
+            if (rv != 0) {
+                log_json_err(&json_err);
+                die("Avenge me, Othello! Shiiiiiiiiiiiiit!");
+            }
+            json_object_foreach(bufs_obj, buf_id_str, buf_obj) {
+                send_json("{s:s s:i}", "name", "get_buf", "id", atoi(buf_id_str));
+            }
+        } else if (strcmp(name, "get_buf") == 0) {
+            buf_t buf;
+            rv = json_unpack_ex(json_obj, &json_err, 0, "{s:s s:s s:s}", "buf", &(buf.buf), "md5", &(buf.md5), "path", &(buf.path));
+            if (rv != 0) {
+                log_json_err(&json_err);
+                die("Avenge me, Othello! Shiiiiiiiiiiiiit!");
+            }
         } else if (strcmp(name, "patch") == 0) {
-            rv = json_unpack_ex(json_obj, &json_err, 0, "{s:s s:{s:s s:s s:s}}", "path", &path, "patch", "action", &action_str, "data", &diff_data, "md5", &md5sum);
+            int buf_id;
+            int user_id;
+            char *username;
+            char *md5_before;
+            char *md5_after;
+            char *patch_str;
+            rv = json_unpack_ex(
+                json_obj, &json_err, 0, "{s:i s:i s:s s:s s:s s:s s:s}", 
+                "id", &buf_id,
+                "user_id", &user_id,
+                "username", &username,
+                "patch", &patch_str,
+                "path", &path,
+                "md5_before", &md5_before,
+                "md5_after", &md5_after
+            );
             if (rv != 0) {
                 log_json_err(&json_err);
                 continue;
             }
-            rv = sscanf(action_str, "%c%zu@%zu", &action, &diff_size, &diff_pos);
-            if (rv != 3) {
-                log_warn("rv %i. unable to parse message: %s", rv, buf);
-                log_debug("path %s action %c diff_size %ul diff_pos %ul data %s", path, action, diff_size, diff_pos, diff_data);
-                goto cleanup;
-            }
-            log_debug("parsed { \"path\": \"%s\", \"action\": \"%c%u@%u\", \"data\": \"%s\" }\n", path, action, diff_size, diff_pos, diff_data);
             ignore_path(path);
-            if (action == '+') {
-                op = DMP_DIFF_INSERT;
-            } else if (action == '-') {
-                op = DMP_DIFF_DELETE;
-            } else {
-                die("unknown action: %c", action);
-            }
-            apply_diff(path, op, diff_data, diff_size, diff_pos);
+            apply_patch(buf_id, patch_str);
         } else if (strcmp(name, "msg") == 0) {
             char *username;
             char *msg;
 
-            json_unpack_ex(json_obj, &json_err, 0, "{s:s s:s}", "username", &username, "data", &msg);
+            rv = json_unpack_ex(json_obj, &json_err, 0, "{s:s s:s}", "username", &username, "data", &msg);
+            if (rv != 0) {
+                log_json_err(&json_err);
+                continue;
+            }
 
             log_msg("Message from user %s: %s", username, msg);
 
@@ -199,11 +249,6 @@ void *remote_change_worker() {
         json_decref(json_obj);
     }
 
-    free(name);
-    free(path);
-    free(action_str);
-    free(diff_data);
-    free(buf);
     pthread_exit(NULL);
     return NULL;
 }
