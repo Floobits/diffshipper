@@ -23,7 +23,7 @@ void on_get_buf(json_t *json_obj) {
     }
     ignore_path(buf.path);
     /* TODO: strcat base bath onto buf path before opening */
-    fd = open(buf.path, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR);
+    fd = open(buf.path, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
     if (fd < 0) {
         die("Error opening file %s: %s", buf.path, strerror(errno));
     }
