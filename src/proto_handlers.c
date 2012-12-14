@@ -28,7 +28,7 @@ void on_get_buf(json_t *json_obj) {
         die("Error opening file %s: %s", buf.path, strerror(errno));
     }
     rv = write(fd, buf.buf, strlen(buf.buf));
-    log_debug("wrote %i bytes", rv);
+    log_debug("wrote %i bytes to %s", rv, buf.path);
     close(fd);
 }
 
