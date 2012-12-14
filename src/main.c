@@ -69,9 +69,9 @@ int main(int argc, char **argv) {
         die("error creating temp directory %s", TMP_BASE);
 
     rv = run_cmd("cp -fr %s/* %s%s", path, TMP_BASE, path);
-    if (rv != 0)
+/*    if (rv != 0)
         die("error creating copying files to tmp dir %s", TMP_BASE);
-
+*/
     log_msg("Watching %s", path);
 
     rv = server_connect(opts.host, opts.port);
