@@ -53,13 +53,9 @@ int scandir_filter(const char *path, const struct dirent *d, void *baton) {
 int send_diff_chunk(void *baton, dmp_operation_t op, const void *data, uint32_t len) {
     diff_info_t *di = (diff_info_t*)baton;
     off_t offset;
-    char *msg;
-    int msg_len = 0;
     char *data_str = NULL;
     char *action_str = NULL;
     char *patch_str = NULL;
-    json_t *obj = NULL;
-    int json_dumps_flags = JSON_ENSURE_ASCII;
 
     switch (op) {
         case DMP_DIFF_EQUAL:
@@ -85,23 +81,12 @@ int send_diff_chunk(void *baton, dmp_operation_t op, const void *data, uint32_t 
         default:
             die("WTF?!?!");
     }
-    /* TODO: build a valid patch string */
-    ds_asprintf(&patch_str, "action", action_str, "data", data_str);
-    obj = json_pack("{s:s s:s s:{s:s s:s}}", "path", di->path, "name", "patch", "patch", patch_str, "md5", "test");
-    msg = json_dumps(obj, json_dumps_flags);
-    msg_len = strlen(msg) + 1;
+    send_json("{s:s s:s s:{s:s s:s}}", "path", di->path, "name", "patch", "patch", patch_str, "md5", "test");
 
-    msg = realloc(msg, msg_len+1);
-    strcat(msg, "\n");
-    log_debug("msg: %s", msg);
-    send_bytes(msg, msg_len);
-    fwrite(data, (size_t)len, 1, stdout);
-    free(msg);
     if (data_str)
         free(data_str);
     if (action_str)
         free(action_str);
-    json_decref(obj);
     return 0;
 }
 
