@@ -127,6 +127,7 @@ void *remote_change_worker() {
     char *action_str;
     char *diff_data;
     char *md5sum;
+    char *name;
     size_t diff_pos;
     size_t diff_size;
     dmp_operation_t op = DMP_DIFF_EQUAL;
@@ -149,32 +150,56 @@ void *remote_change_worker() {
             log_json_err(&json_err);
             continue;
         }
-        rv = json_unpack_ex(json_obj, &json_err, 0, "{s:s s:{s:s s:s s:s}}", "path", &path, "patch", "action", &action_str, "data", &diff_data, "md5", &md5sum);
+        rv = json_unpack_ex(json_obj, &json_err, 0, "{s:s}", "name", &name);
         if (rv != 0) {
             log_json_err(&json_err);
             continue;
         }
-        rv = sscanf(action_str, "%c%zu@%zu", &action, &diff_size, &diff_pos);
-        if (rv != 3) {
-            log_warn("rv %i. unable to parse message: %s", rv, buf);
-            log_debug("path %s action %c diff_size %ul diff_pos %ul data %s", path, action, diff_size, diff_pos, diff_data);
-            goto cleanup;
-        }
-        log_debug("parsed { \"path\": \"%s\", \"action\": \"%c%u@%u\", \"data\": \"%s\" }\n", path, action, diff_size, diff_pos, diff_data);
-        ignore_path(path);
-        if (action == '+') {
-            op = DMP_DIFF_INSERT;
-        } else if (action == '-') {
-            op = DMP_DIFF_DELETE;
+        log_debug("name: %s", name);
+        /* "patch", "get_buf", "create_buf", "highlight", "msg", "delete_buf", "rename_buf" */
+        if (strcmp(name, "room_info") == 0) {
+            /* TODO */
+        } else if (strcmp(name, "patch") == 0) {
+            rv = json_unpack_ex(json_obj, &json_err, 0, "{s:s s:{s:s s:s s:s}}", "path", &path, "patch", "action", &action_str, "data", &diff_data, "md5", &md5sum);
+            if (rv != 0) {
+                log_json_err(&json_err);
+                continue;
+            }
+            rv = sscanf(action_str, "%c%zu@%zu", &action, &diff_size, &diff_pos);
+            if (rv != 3) {
+                log_warn("rv %i. unable to parse message: %s", rv, buf);
+                log_debug("path %s action %c diff_size %ul diff_pos %ul data %s", path, action, diff_size, diff_pos, diff_data);
+                goto cleanup;
+            }
+            log_debug("parsed { \"path\": \"%s\", \"action\": \"%c%u@%u\", \"data\": \"%s\" }\n", path, action, diff_size, diff_pos, diff_data);
+            ignore_path(path);
+            if (action == '+') {
+                op = DMP_DIFF_INSERT;
+            } else if (action == '-') {
+                op = DMP_DIFF_DELETE;
+            } else {
+                die("unknown action: %c", action);
+            }
+            apply_diff(path, op, diff_data, diff_size, diff_pos);
+        } else if (strcmp(name, "msg") == 0) {
+            char *username;
+            char *msg;
+
+            json_unpack_ex(json_obj, &json_err, 0, "{s:s s:s}", "username", &username, "data", &msg);
+
+            log_msg("Message from user %s: %s", username, msg);
+
+            free(username);
+            free(msg);
         } else {
-            die("unknown action: %c", action);
+            log_err("Unknown event name: %s", name);
         }
-        apply_diff(path, op, diff_data, diff_size, diff_pos);
 
         cleanup:;
         json_decref(json_obj);
     }
 
+    free(name);
     free(path);
     free(action_str);
     free(diff_data);
