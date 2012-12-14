@@ -39,7 +39,13 @@ int server_connect(const char *host, const char *port) {
         die("connect() error: %s", strerror(errno));
 
     log_debug("Connected to %s:%s", host, port);
-    send_json("{s:s s:s s:s s:s s:s}", "version", DS_PROTO_VERSION, "username", opts.username, "secret", opts.secret, "room_owner", opts.owner, "room", opts.room);
+    send_json("{s:s s:s s:s s:s s:s}",
+        "version", DS_PROTO_VERSION,
+        "username", opts.username,
+        "secret", opts.secret,
+        "room_owner", opts.owner,
+        "room", opts.room
+    );
 
     net_buf = malloc(100);
     net_buf_len = 0;
