@@ -119,6 +119,8 @@ ssize_t send_json(const char *fmt, ...) {
     msg = realloc(msg, msg_len+1);
     strcat(msg, "\n");
 
+    log_debug("sending json: %s", msg);
+
     ssize_t bytes_sent = send_bytes(msg, msg_len);
     if (bytes_sent != (ssize_t)msg_len)
         die("tried to send %u bytes but only sent %i", msg_len, bytes_sent);
