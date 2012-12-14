@@ -90,5 +90,17 @@ void parse_opts(int argc, char **argv) {
         ds_asprintf(&opts.port, "3148");
     }
 
+    if (!opts.owner)
+        die("No room owner specified");
+
+    if (!opts.room)
+        die("No room specified");
+
+    if (!opts.secret)
+        die("No secret specified");
+
+    if (!opts.username)
+        die("No username specified");
+
     log_debug("options: host %s port %s path %s", opts.host, opts.port, opts.path);
 }
