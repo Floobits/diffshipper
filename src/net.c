@@ -141,7 +141,6 @@ ssize_t send_json(const char *fmt, ...) {
 void *remote_change_worker() {
     char *buf = NULL;
     ssize_t rv;
-    char *path;
     char *name;
 
     pthread_cond_wait(&server_conn_ready, &server_conn_mtx);
@@ -181,7 +180,6 @@ void *remote_change_worker() {
             log_err("Unknown event name: %s", name);
         }
 
-        cleanup:;
         json_decref(json_obj);
     }
 
