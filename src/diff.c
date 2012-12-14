@@ -81,7 +81,13 @@ int send_diff_chunk(void *baton, dmp_operation_t op, const void *data, uint32_t 
         default:
             die("WTF?!?!");
     }
-    send_json("{s:s s:s s:{s:s s:s}}", "path", di->path, "name", "patch", "patch", patch_str, "md5", "test");
+    ds_asprintf(&patch_str, "%s %s", action_str, data_str);
+    send_json("{s:s s:s s:s s:s}",
+        "path", di->path,
+        "name", "patch",
+        "patch", patch_str,
+        "md5", "test"
+    );
 
     if (data_str)
         free(data_str);
