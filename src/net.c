@@ -39,37 +39,12 @@ int server_connect(const char *host, const char *port) {
         die("connect() error: %s", strerror(errno));
 
     log_debug("Connected to %s:%s", host, port);
-
-    json_t *json_obj = NULL;
-    int json_dumps_flags = JSON_ENSURE_ASCII;
-    char *msg;
-    size_t msg_len;
-    json_error_t json_err;
-    json_obj = json_pack_ex(&json_err, 0, "{s:s s:s s:s s:s s:s}", "version", DS_PROTO_VERSION, "username", opts.username, "secret", opts.secret, "room_owner", opts.owner, "room", opts.room);
-    if (!json_obj) {
-        log_json_err(&json_err);
-        die("error packing json");
-    }
-    msg = json_dumps(json_obj, json_dumps_flags);
-    if (!msg) {
-        die("error dumping json");
-        return -1; /* make scan-build happy */
-    }
-    msg_len = strlen(msg) + 1;
-    msg = realloc(msg, msg_len+1);
-    strcat(msg, "\n");
-
-    ssize_t bytes_sent = send_bytes(msg, msg_len);
-    if (bytes_sent != (ssize_t)msg_len)
-        die("tried to send %u bytes but only sent %i", msg_len, bytes_sent);
+    send_json("{s:s s:s s:s s:s s:s}", "version", DS_PROTO_VERSION, "username", opts.username, "secret", opts.secret, "room_owner", opts.owner, "room", opts.room);
 
     net_buf = malloc(100);
     net_buf_len = 0;
     net_buf_size = 100;
     pthread_cond_broadcast(&server_conn_ready);
-
-    free(msg);
-    json_decref(json_obj);
 
     return rv;
 }
@@ -149,6 +124,7 @@ ssize_t send_json(const char *fmt, ...) {
         die("tried to send %u bytes but only sent %i", msg_len, bytes_sent);
 
     free(msg);
+    json_decref(json_obj);
     return bytes_sent;
 }
 
@@ -195,6 +171,7 @@ void *remote_change_worker() {
                 die("Avenge me, Othello! Shiiiiiiiiiiiiit!");
             }
             json_object_foreach(bufs_obj, buf_id_str, buf_obj) {
+                /* TODO: check return value */
                 send_json("{s:s s:i}", "name", "get_buf", "id", atoi(buf_id_str));
             }
         } else if (strcmp(name, "get_buf") == 0) {
