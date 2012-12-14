@@ -14,6 +14,7 @@
 #include "log.h"
 #include "net.h"
 #include "options.h"
+#include "proto_handlers.h"
 #include "util.h"
 
 
@@ -170,18 +171,7 @@ void *remote_change_worker() {
         /* "patch", "get_buf", "create_buf", "highlight", "msg", "delete_buf", "rename_buf" */
         /* TODO: split these out into their own functions */
         if (strcmp(name, "room_info") == 0) {
-            const char *buf_id_str;
-            json_t *bufs_obj;
-            json_t *buf_obj;
-            rv = json_unpack_ex(json_obj, &json_err, 0, "{s:o}", "bufs", &bufs_obj);
-            if (rv != 0) {
-                log_json_err(&json_err);
-                die("Avenge me, Othello! Shiiiiiiiiiiiiit!");
-            }
-            json_object_foreach(bufs_obj, buf_id_str, buf_obj) {
-                /* TODO: check return value */
-                send_json("{s:s s:i}", "name", "get_buf", "id", atoi(buf_id_str));
-            }
+            on_room_info(json_obj);
         } else if (strcmp(name, "get_buf") == 0) {
             buf_t buf;
             rv = json_unpack_ex(json_obj, &json_err, 0, "{s:s s:s s:s}", "buf", &(buf.buf), "md5", &(buf.md5), "path", &(buf.path));
