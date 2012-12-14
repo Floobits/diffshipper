@@ -12,7 +12,7 @@ Dependencies: automake, [Jansson](http://www.digip.org/jansson/), pthreads. Linu
 
     apt-get install build-essential automake libjansson-dev libinotifytools-dev
 
-    git clone https://github.com/ggreer/diffshipper.git
+    git clone https://github.com/Floobits/diffshipper.git
     cd diffshipper
     git submodule update --init
     ./autogen.sh
