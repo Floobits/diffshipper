@@ -11,7 +11,7 @@
 #include "util.h"
 
 
-void set_buf(buf_t *buf) {
+void save_buf(buf_t *buf) {
     char *full_path;
     int fd;
     ssize_t bytes_written;

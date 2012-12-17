@@ -8,7 +8,7 @@ typedef struct {
     char *path;
 } buf_t;
 
-void set_buf(buf_t *buf);
+void save_buf(buf_t *buf);
 void apply_patch(buf_t *buf, char *patch_text);
 
 #endif
