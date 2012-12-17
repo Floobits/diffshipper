@@ -21,13 +21,6 @@
 #define FALSE 0
 #endif
 
-typedef struct {
-    int id;
-    char *buf;
-    char *md5;
-    char *path;
-} buf_t;
-
 typedef long long int lli_t;
 
 char **ignored_paths;

@@ -4,6 +4,7 @@
 
 #include <jansson.h>
 
+#include "buf.h"
 #include "diff.h"
 #include "log.h"
 #include "net.h"
@@ -23,15 +24,6 @@ void on_get_buf(json_t *json_obj) {
         log_json_err(&json_err);
         die("Avenge me, Othello! Shiiiiiiiiiiiiit!");
     }
-    ignore_path(buf.path);
-    ds_asprintf(&full_path, "%s/%s", opts.path, buf.path);
-    fd = open(full_path, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
-    if (fd < 0) {
-        die("Error opening file %s: %s", buf.path, strerror(errno));
-    }
-    rv = write(fd, buf.buf, strlen(buf.buf));
-    log_debug("wrote %i bytes to %s", rv, buf.path);
-    close(fd);
 }
 
 
