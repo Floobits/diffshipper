@@ -2,6 +2,7 @@
 #include <stdlib.h>
 
 #include "config.h"
+#include "buf.h"
 #include "diff.h"
 #include "log.h"
 #include "net.h"
@@ -42,11 +43,13 @@ void init() {
     if (pthread_mutex_init(&ignore_mtx, NULL)) {
         die("pthread_mutex_init failed!");
     }
+    init_bufs();
     pthread_create(&remote_changes, NULL, &remote_change_worker, NULL);
 }
 
 
 void cleanup() {
+    cleanup_bufs();
     free(opts.path);
     pthread_cond_destroy(&server_conn_ready);
     pthread_mutex_destroy(&server_conn_mtx);

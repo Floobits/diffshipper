@@ -22,6 +22,4 @@ void push_changes(const char *base_path, const char *full_path);
 
 void apply_diff(char *path, dmp_operation_t op, char *buf, size_t len, off_t offset);
 
-void apply_patch(int buf_id, char *patch);
-
 #endif

@@ -70,7 +70,7 @@ void on_patch(json_t *json_obj) {
         return;
     }
     ignore_path(path);
-    apply_patch(buf_id, patch_str);
+    apply_patch(bufs[buf_id], patch_str);
 }
 
 

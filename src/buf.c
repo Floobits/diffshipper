@@ -11,6 +11,18 @@
 #include "util.h"
 
 
+void init_bufs() {
+    bufs_len = 0;
+    bufs_size = BUFS_START_SIZE;
+    bufs = calloc(bufs_size, sizeof(buf_t*));
+}
+
+
+void cleanup_bufs() {
+    free(bufs);
+}
+
+
 void save_buf(buf_t *buf) {
     char *full_path;
     int fd;
@@ -25,6 +37,7 @@ void save_buf(buf_t *buf) {
     log_debug("wrote %i bytes to %s", bytes_written, buf->path);
     close(fd);
 }
+
 
 void apply_patch(buf_t *buf, char *patch_text) {
     

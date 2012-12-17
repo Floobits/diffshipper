@@ -278,7 +278,3 @@ void apply_diff(char *path, dmp_operation_t op, char *buf, size_t len, off_t off
     munmap_file(mf);
     free(mf);
 }
-
-void apply_patch(int buf_id, char *patch) {
-    log_debug("buf: %i, patch text: %s", buf_id, patch);
-}
