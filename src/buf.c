@@ -25,3 +25,7 @@ void set_buf(buf_t *buf) {
     log_debug("wrote %i bytes to %s", bytes_written, buf->path);
     close(fd);
 }
+
+void apply_patch(buf_t *buf, char *patch_text) {
+    
+}

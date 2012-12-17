@@ -9,5 +9,6 @@ typedef struct {
 } buf_t;
 
 void set_buf(buf_t *buf);
+void apply_patch(buf_t *buf, char *patch_text);
 
 #endif
