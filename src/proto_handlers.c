@@ -7,6 +7,7 @@
 #include "diff.h"
 #include "log.h"
 #include "net.h"
+#include "options.h"
 #include "proto_handlers.h"
 #include "util.h"
 
@@ -16,14 +17,15 @@ void on_get_buf(json_t *json_obj) {
     json_error_t json_err;
     int fd;
     buf_t buf;
+    char *full_path;
     rv = json_unpack_ex(json_obj, &json_err, 0, "{s:s s:s s:s}", "buf", &(buf.buf), "md5", &(buf.md5), "path", &(buf.path));
     if (rv != 0) {
         log_json_err(&json_err);
         die("Avenge me, Othello! Shiiiiiiiiiiiiit!");
     }
     ignore_path(buf.path);
-    /* TODO: strcat base bath onto buf path before opening */
-    fd = open(buf.path, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+    ds_asprintf(&full_path, "%s/%s", opts.path, buf.path);
+    fd = open(full_path, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
     if (fd < 0) {
         die("Error opening file %s: %s", buf.path, strerror(errno));
     }
