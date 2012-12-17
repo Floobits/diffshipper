@@ -22,9 +22,7 @@ void on_get_buf(json_t *json_obj) {
         log_json_err(&json_err);
         die("Avenge me, Othello! Shiiiiiiiiiiiiit!");
     }
-    rv = set_buf(&buf);
-    if (rv)
-        die("error setting buffer");
+    set_buf(&buf);
 }
 
 

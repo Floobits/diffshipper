@@ -8,6 +8,6 @@ typedef struct {
     char *path;
 } buf_t;
 
-int set_buf(buf_t *buf);
+void set_buf(buf_t *buf);
 
 #endif
