@@ -10,7 +10,8 @@
 #include "options.h"
 #include "util.h"
 
-void set_buf(buf_t *buf) {
+
+int set_buf(buf_t *buf) {
     char *full_path;
     int fd;
     int rv;
@@ -23,4 +24,5 @@ void set_buf(buf_t *buf) {
     rv = write(fd, buf->buf, strlen(buf->buf)); /* TODO: not binary-safe */
     log_debug("wrote %i bytes to %s", rv, buf->path);
     close(fd);
+    return rv;
 }

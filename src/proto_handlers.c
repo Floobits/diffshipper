@@ -16,14 +16,15 @@
 void on_get_buf(json_t *json_obj) {
     int rv;
     json_error_t json_err;
-    int fd;
     buf_t buf;
-    char *full_path;
     rv = json_unpack_ex(json_obj, &json_err, 0, "{s:s s:s s:s}", "buf", &(buf.buf), "md5", &(buf.md5), "path", &(buf.path));
     if (rv != 0) {
         log_json_err(&json_err);
         die("Avenge me, Othello! Shiiiiiiiiiiiiit!");
     }
+    rv = set_buf(&buf);
+    if (rv)
+        die("error setting buffer");
 }
 
 
