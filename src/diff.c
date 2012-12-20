@@ -227,7 +227,9 @@ void push_changes(const char *base_path, const char *full_path) {
         cleanup:;
         free(file_path);
         free(file_path_rel);
+        free(dir);
     }
+    free(dir_list);
     free(path);
 }
 
