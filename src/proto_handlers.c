@@ -15,7 +15,7 @@
 
 void on_get_buf(json_t *json_obj) {
     buf_t buf;
-    parse_json(json_obj, "{s:s s:s s:s}", "buf", &(buf.buf), "md5", &(buf.md5), "path", &(buf.path));
+    parse_json(json_obj, "{s:i s:s s:s s:s}", "id", &(buf.id), "buf", &(buf.buf), "md5", &(buf.md5), "path", &(buf.path));
     save_buf(&buf);
 }
 
