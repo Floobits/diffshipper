@@ -26,6 +26,18 @@ void on_get_buf(json_t *json_obj) {
 }
 
 
+void on_join(json_t *json_obj) {
+    int rv;
+    json_error_t json_err;
+    char *username;
+    rv = json_unpack_ex(json_obj, &json_err, 0, "{s:s}", "username", &username);
+    if (rv != 0) {
+        log_json_err(&json_err);
+    }
+    log_msg("User %s joined the room", username);
+}
+
+
 void on_msg(json_t *json_obj) {
     int rv;
     json_error_t json_err;
@@ -42,6 +54,18 @@ void on_msg(json_t *json_obj) {
 
     free(username);
     free(msg);
+}
+
+
+void on_part(json_t *json_obj) {
+    int rv;
+    json_error_t json_err;
+    char *username;
+    rv = json_unpack_ex(json_obj, &json_err, 0, "{s:s}", "username", &username);
+    if (rv != 0) {
+        log_json_err(&json_err);
+    }
+    log_msg("User %s left the room", username);
 }
 
 
@@ -69,8 +93,11 @@ void on_patch(json_t *json_obj) {
         log_json_err(&json_err);
         return;
     }
+    /* TODO: we don't know how to apply patches, so let's just re-get the buf each time */
+    send_json("{s:s s:i}", "name", "get_buf", "id", buf_id);
+    /*
     ignore_path(path);
-    apply_patch(bufs[buf_id], patch_str);
+    apply_patch(bufs[buf_id], patch_str);*/
 }
 
 

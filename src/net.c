@@ -167,15 +167,18 @@ void *remote_change_worker() {
             continue;
         }
         log_debug("name: %s", name);
-        /* "patch", "get_buf", "create_buf", "highlight", "msg", "delete_buf", "rename_buf" */
         if (strcmp(name, "room_info") == 0) {
             on_room_info(json_obj);
         } else if (strcmp(name, "get_buf") == 0) {
             on_get_buf(json_obj);
-        } else if (strcmp(name, "patch") == 0) {
-            on_patch(json_obj);
+        } else if (strcmp(name, "join") == 0) {
+            on_join(json_obj);
         } else if (strcmp(name, "msg") == 0) {
             on_msg(json_obj);
+        } else if (strcmp(name, "part") == 0) {
+            on_part(json_obj);
+        } else if (strcmp(name, "patch") == 0) {
+            on_patch(json_obj);
         } else {
             log_err("Unknown event name: %s", name);
         }
