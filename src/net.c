@@ -161,11 +161,7 @@ void *remote_change_worker() {
             log_json_err(&json_err);
             die("couldn't load buffer into json object!");
         }
-        rv = json_unpack_ex(json_obj, &json_err, 0, "{s:s}", "name", &name);
-        if (rv != 0) {
-            log_json_err(&json_err);
-            continue;
-        }
+        parse_json(json_obj, "{s:s}", "name", &name);
         log_debug("name: %s", name);
         if (strcmp(name, "room_info") == 0) {
             on_room_info(json_obj);

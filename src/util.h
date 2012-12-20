@@ -3,6 +3,8 @@
 
 #include <pthread.h>
 
+#include <jansson.h>
+
 #ifdef INOTIFY
 #include <inotifytools/inotifytools.h>
 #include <inotifytools/inotify.h>
@@ -39,5 +41,7 @@ char *unescape_data(char *data);
 void ds_asprintf(char **ret, const char *fmt, ...);
 
 int is_binary(const void* buf, const int buf_len);
+
+void parse_json(json_t *json_obj, const char *fmt, ...);
 
 #endif

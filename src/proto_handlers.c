@@ -14,64 +14,37 @@
 
 
 void on_get_buf(json_t *json_obj) {
-    int rv;
-    json_error_t json_err;
     buf_t buf;
-    rv = json_unpack_ex(json_obj, &json_err, 0, "{s:s s:s s:s}", "buf", &(buf.buf), "md5", &(buf.md5), "path", &(buf.path));
-    if (rv != 0) {
-        log_json_err(&json_err);
-        die("Avenge me, Othello! Shiiiiiiiiiiiiit!");
-    }
+    parse_json(json_obj, "{s:s s:s s:s}", "buf", &(buf.buf), "md5", &(buf.md5), "path", &(buf.path));
     save_buf(&buf);
 }
 
 
 void on_join(json_t *json_obj) {
-    int rv;
-    json_error_t json_err;
     char *username;
-    rv = json_unpack_ex(json_obj, &json_err, 0, "{s:s}", "username", &username);
-    if (rv != 0) {
-        log_json_err(&json_err);
-    }
+    parse_json(json_obj, "{s:s}", "username", &username);
     log_msg("User %s joined the room", username);
 }
 
 
 void on_msg(json_t *json_obj) {
-    int rv;
-    json_error_t json_err;
     char *username;
     char *msg;
 
-    rv = json_unpack_ex(json_obj, &json_err, 0, "{s:s s:s}", "username", &username, "data", &msg);
-    if (rv != 0) {
-        log_json_err(&json_err);
-        return;
-    }
-
+    parse_json(json_obj, "{s:s s:s}", "username", &username, "data", &msg);
     log_msg("Message from user %s: %s", username, msg);
-
-    free(username);
-    free(msg);
 }
 
 
 void on_part(json_t *json_obj) {
-    int rv;
-    json_error_t json_err;
     char *username;
-    rv = json_unpack_ex(json_obj, &json_err, 0, "{s:s}", "username", &username);
-    if (rv != 0) {
-        log_json_err(&json_err);
-    }
+
+    parse_json(json_obj, "{s:s}", "username", &username);
     log_msg("User %s left the room", username);
 }
 
 
 void on_patch(json_t *json_obj) {
-    int rv;
-    json_error_t json_err;
     int buf_id;
     int user_id;
     char *username;
@@ -79,8 +52,8 @@ void on_patch(json_t *json_obj) {
     char *md5_after;
     char *patch_str;
     char *path;
-    rv = json_unpack_ex(
-        json_obj, &json_err, 0, "{s:i s:i s:s s:s s:s s:s s:s}",
+    parse_json(
+        json_obj, "{s:i s:i s:s s:s s:s s:s s:s}",
         "id", &buf_id,
         "user_id", &user_id,
         "username", &username,
@@ -89,10 +62,6 @@ void on_patch(json_t *json_obj) {
         "md5_before", &md5_before,
         "md5_after", &md5_after
     );
-    if (rv != 0) {
-        log_json_err(&json_err);
-        return;
-    }
     /* TODO: we don't know how to apply patches, so let's just re-get the buf each time */
     send_json("{s:s s:i}", "name", "get_buf", "id", buf_id);
     /*
@@ -102,16 +71,10 @@ void on_patch(json_t *json_obj) {
 
 
 void on_room_info(json_t *json_obj) {
-    int rv;
-    json_error_t json_err;
     const char *buf_id_str;
     json_t *bufs_obj;
     json_t *buf_obj;
-    rv = json_unpack_ex(json_obj, &json_err, 0, "{s:o}", "bufs", &bufs_obj);
-    if (rv != 0) {
-        log_json_err(&json_err);
-        die("Avenge me, Othello! Shiiiiiiiiiiiiit!");
-    }
+    parse_json(json_obj, "{s:o}", "bufs", &bufs_obj);
     json_object_foreach(bufs_obj, buf_id_str, buf_obj) {
         send_json("{s:s s:i}", "name", "get_buf", "id", atoi(buf_id_str));
     }

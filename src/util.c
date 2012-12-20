@@ -143,3 +143,19 @@ int is_binary(const void* buf, const int buf_len) {
 
     return 0;
 }
+
+
+void parse_json(json_t *json_obj, const char *fmt, ...) {
+    int rv;
+    va_list args;
+    json_error_t json_err;
+
+    va_start(args, fmt);
+    rv = json_vunpack_ex(json_obj, &json_err, 0, fmt, args);
+    va_end(args);
+
+    if (rv != 0) {
+        log_json_err(&json_err);
+        die("Couldn't parse json.");
+    }
+}
