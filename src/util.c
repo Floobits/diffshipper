@@ -20,6 +20,8 @@ int run_cmd(const char *fmt, ...) {
     log_debug("Running %s", cmd);
     rv = system(cmd);
 
+    free(cmd);
+
     return rv;
 }
 

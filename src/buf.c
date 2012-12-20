@@ -36,6 +36,7 @@ void save_buf(buf_t *buf) {
     bytes_written = write(fd, buf->buf, strlen(buf->buf)); /* TODO: not binary-safe */
     log_debug("wrote %i bytes to %s", bytes_written, buf->path);
     close(fd);
+    free(full_path);
 }
 
 
