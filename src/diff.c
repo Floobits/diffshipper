@@ -31,8 +31,14 @@ int scandir_filter(const char *path, const struct dirent *d, void *baton) {
 
     struct stat dir_info;
     char *full_path = NULL;
-    ds_asprintf(&full_path, "%s/%s", path, d->d_name);
-    int rv = lstat(full_path, &dir_info);
+    char *tmp = NULL;
+    int rv;
+
+    ds_asprintf(&tmp, "%s/%s", path, d->d_name);
+    full_path = realpath(tmp, NULL);
+    free(tmp);
+
+    rv = lstat(full_path, &dir_info);
     if (rv != 0) {
         /* TODO: strerror isn't thread-safe on many platforms */
         log_err("lstat failed for %s: %s", full_path, strerror(errno));
