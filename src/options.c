@@ -71,6 +71,7 @@ void parse_opts(int argc, char **argv) {
                 exit(1);
             break;
             default:
+                printf("Unrecognized option: %c\n\n", ch);
                 usage();
                 exit(1);
         }
