@@ -8,23 +8,26 @@
 #include "util.h"
 
 
-void print_version() {
-    printf("diffshipper version %s\n", PACKAGE_VERSION);
+static void print_version() {
+    printf("Floobits Diff Shipper v%s\n", PACKAGE_VERSION);
 }
 
 
-void usage() {
+static void usage() {
     printf("Usage: diffshipper [OPTIONS] PATH\n\
 \n\
--h HOST \n\
--p PORT \n\
+-D              debug output\n\
+-h HOST         Host\n\
+-p PORT         Port\n\
+-s SECRET       API secret\n\
+-u USERNAME     Username\n\
 \n");
 }
 
 
 void init_opts() {
     memset(&opts, 0, sizeof(opts));
-    opts.mtime = 2; /* seconds */
+    opts.mtime = 1; /* seconds */
 }
 
 
