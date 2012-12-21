@@ -16,15 +16,16 @@ static void print_version() {
 static void usage() {
     printf("Usage: diffshipper [OPTIONS] PATH\n\
 \n\
--D              Enable debug output\n\
--h HOST         Host\n\
--o OWNER        Room owner\n\
--p PORT         Port\n\
--r ROOMNAME     Room to join\n\
--s SECRET       API secret\n\
--u USERNAME     Username\n\
--v              Print version and exit\n\
+    -D                  Enable debug output\n\
+    -h HOST             Host\n\
+    -o OWNER            Room owner\n\
+    -p PORT             Port\n\
+    -r ROOMNAME         Room to join\n\
+    -s SECRET           API secret\n\
+    -u USERNAME         Username\n\
+    -v                  Print version and exit\n\
 \n");
+    exit(1);
 }
 
 
@@ -74,12 +75,11 @@ void parse_opts(int argc, char **argv) {
             break;
             case 'v':
                 print_version();
-                exit(1);
+                exit(0);
             break;
             default:
                 printf("Unrecognized option: %c\n\n", ch);
                 usage();
-                exit(1);
         }
     }
 
@@ -87,16 +87,15 @@ void parse_opts(int argc, char **argv) {
     argv += optind;
 
     if (argc < 1)
-        die("No path to watch specified");
+        usage();
 
     opts.path = realpath(argv[0], NULL);
 
-    if (!opts.host) {
+    if (!opts.host)
         ds_asprintf(&opts.host, "127.0.0.1");
-    }
-    if (!opts.port) {
+
+    if (!opts.port)
         ds_asprintf(&opts.port, "3148");
-    }
 
     if (!opts.owner)
         die("No room owner specified");
