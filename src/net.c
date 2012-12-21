@@ -57,7 +57,7 @@ int server_connect(const char *host, const char *port) {
 }
 
 
-ssize_t send_bytes(const void *buf, const size_t len) {
+static ssize_t send_bytes(const void *buf, const size_t len) {
     if (len == 0) {
         log_err("nothing to send. wtf?");
         return 0;
@@ -69,7 +69,7 @@ ssize_t send_bytes(const void *buf, const size_t len) {
 }
 
 
-ssize_t recv_bytes(char **buf) {
+static ssize_t recv_bytes(char **buf) {
     ssize_t bytes_received;
     ssize_t buf_len;
     void *net_buf_end;

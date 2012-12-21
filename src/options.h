@@ -17,5 +17,4 @@ options_t opts;
 void init_opts();
 void parse_opts(int argc, char **argv);
 
-
 #endif

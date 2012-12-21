@@ -16,9 +16,6 @@ ssize_t net_buf_size;
 
 int server_connect(const char *host, const char *port);
 
-ssize_t send_bytes(const void *buf, const size_t len);
-ssize_t recv_bytes(char **buf);
-
 ssize_t send_json(const char *fmt, ...);
 
 void *remote_change_worker();
