@@ -35,15 +35,13 @@ void init() {
 
     set_log_level(LOG_LEVEL_DEBUG);
 
-    if (pthread_cond_init(&server_conn_ready, NULL)) {
+    if (pthread_cond_init(&server_conn_ready, NULL))
         die("pthread_cond_init failed!");
-    }
-    if (pthread_mutex_init(&server_conn_mtx, NULL)) {
+    if (pthread_mutex_init(&server_conn_mtx, NULL))
         die("pthread_mutex_init failed!");
-    }
-    if (pthread_mutex_init(&ignore_mtx, NULL)) {
+    if (pthread_mutex_init(&ignore_mtx, NULL))
         die("pthread_mutex_init failed!");
-    }
+
     init_bufs();
     pthread_create(&remote_changes, NULL, &remote_change_worker, NULL);
 }
