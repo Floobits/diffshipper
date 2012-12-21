@@ -179,7 +179,7 @@ void parse_json(json_t *json_obj, const char *fmt, ...) {
     rv = json_vunpack_ex(json_obj, &json_err, 0, fmt, args);
     va_end(args);
 
-    if (rv != 0) {
+    if (rv) {
         log_json_err(&json_err);
         die("Couldn't parse json.");
     }

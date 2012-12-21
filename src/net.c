@@ -27,7 +27,7 @@ int server_connect(const char *host, const char *port) {
     hints.ai_socktype = SOCK_STREAM;
 
     rv = getaddrinfo(host, port, &hints, &server_info);
-    if (rv != 0)
+    if (rv)
         die("getaddrinfo() error: %s", strerror(errno));
 
     server_sock = socket(server_info->ai_family, server_info->ai_socktype, server_info->ai_protocol);

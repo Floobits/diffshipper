@@ -26,7 +26,7 @@ mmapped_file_t *mmap_file(const char *path, off_t size, int prot, int flags) {
     }
 
     rv = fstat(fd, &statbuf);
-    if (rv != 0) {
+    if (rv) {
         log_err("Error fstat()ing file %s. Skipping...", path);
         goto cleanup;
     }

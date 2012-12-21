@@ -39,7 +39,7 @@ int scandir_filter(const char *path, const struct dirent *d, void *baton) {
     free(tmp);
 
     rv = lstat(full_path, &dir_info);
-    if (rv != 0) {
+    if (rv) {
         /* TODO: strerror isn't thread-safe on many platforms */
         log_err("lstat failed for %s: %s", full_path, strerror(errno));
         rv = 0;
@@ -174,12 +174,12 @@ void push_changes(const char *base_path, const char *full_path) {
         off_t f2_size;
 
         rv = lstat(f1, &file_stats);
-        if (rv != 0) {
+        if (rv) {
             die("Error lstat()ing file %s.", f1);
         }
         f1_size = file_stats.st_size;
         rv = lstat(f2, &file_stats);
-        if (rv != 0) {
+        if (rv) {
             die("Error lstat()ing file %s.", f2);
         }
         f2_size = file_stats.st_size;
@@ -248,7 +248,7 @@ void apply_diff(char *path, dmp_operation_t op, char *buf, size_t len, off_t off
     log_debug("patching %s: %lu bytes at %lu", path, len, offset);
 
     rv = lstat(path, &file_stats);
-    if (rv != 0) {
+    if (rv) {
         die("Error lstat()ing file %s.", path);
     }
 
