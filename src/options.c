@@ -16,11 +16,14 @@ static void print_version() {
 static void usage() {
     printf("Usage: diffshipper [OPTIONS] PATH\n\
 \n\
--D              debug output\n\
+-D              Enable debug output\n\
 -h HOST         Host\n\
+-o OWNER        Room owner\n\
 -p PORT         Port\n\
+-r ROOMNAME     Room to join\n\
 -s SECRET       API secret\n\
 -u USERNAME     Username\n\
+-v              Print version and exit\n\
 \n");
 }
 
