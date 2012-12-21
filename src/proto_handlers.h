@@ -3,11 +3,6 @@
 
 #include <jansson.h>
 
-void on_get_buf(json_t *json_obj);
-void on_join(json_t *json_obj);
-void on_msg(json_t *json_obj);
-void on_part(json_t *json_obj);
-void on_patch(json_t *json_obj);
-void on_room_info(json_t *json_obj);
+void *remote_change_worker();
 
 #endif

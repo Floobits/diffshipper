@@ -101,6 +101,28 @@ static ssize_t recv_bytes(char **buf) {
 }
 
 
+json_t *recv_json() {
+    char *buf = NULL;
+    ssize_t rv;
+    json_t *json_obj;
+    json_error_t json_err;
+
+    rv = recv_bytes(&buf);
+    if (!rv) {
+        /* TODO: reconnect or error out or something*/
+        die("no bytes!");
+    }
+    log_debug("parsing %s", buf);
+    json_obj = json_loadb(buf, rv, 0, &json_err);
+    if (!json_obj) {
+        log_json_err(&json_err);
+        die("couldn't load buffer into json object!");
+    }
+
+    return json_obj;
+}
+
+
 ssize_t send_json(const char *fmt, ...) {
     char *msg;
     size_t msg_len;
@@ -135,56 +157,6 @@ ssize_t send_json(const char *fmt, ...) {
     free(msg);
     json_decref(json_obj);
     return bytes_sent;
-}
-
-
-void *remote_change_worker() {
-    char *buf = NULL;
-    ssize_t rv;
-    char *name;
-
-    pthread_cond_wait(&server_conn_ready, &server_conn_mtx);
-    pthread_mutex_unlock(&server_conn_mtx);
-
-    json_t *json_obj;
-    json_error_t json_err;
-
-    while (TRUE) {
-        rv = recv_bytes(&buf);
-        if (!rv) {
-            /* TODO: reconnect or error out or something*/
-            die("no bytes!");
-        }
-        log_debug("parsing %s", buf);
-        json_obj = json_loadb(buf, rv, 0, &json_err);
-        if (!json_obj) {
-            log_json_err(&json_err);
-            die("couldn't load buffer into json object!");
-        }
-        parse_json(json_obj, "{s:s}", "name", &name);
-        log_debug("name: %s", name);
-        /* TODO: handle create/rename/delete buf */
-        if (strcmp(name, "room_info") == 0) {
-            on_room_info(json_obj);
-        } else if (strcmp(name, "get_buf") == 0) {
-            on_get_buf(json_obj);
-        } else if (strcmp(name, "join") == 0) {
-            on_join(json_obj);
-        } else if (strcmp(name, "msg") == 0) {
-            on_msg(json_obj);
-        } else if (strcmp(name, "part") == 0) {
-            on_part(json_obj);
-        } else if (strcmp(name, "patch") == 0) {
-            on_patch(json_obj);
-        } else {
-            log_err("Unknown event name: %s", name);
-        }
-
-        json_decref(json_obj);
-    }
-
-    pthread_exit(NULL);
-    return NULL;
 }
 
 

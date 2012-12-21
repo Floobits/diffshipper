@@ -6,6 +6,7 @@
 #include "diff.h"
 #include "log.h"
 #include "net.h"
+#include "proto_handlers.h"
 #include "options.h"
 #include "util.h"
 

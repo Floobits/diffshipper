@@ -13,21 +13,21 @@
 #include "util.h"
 
 
-void on_get_buf(json_t *json_obj) {
+static void on_get_buf(json_t *json_obj) {
     buf_t buf;
     parse_json(json_obj, "{s:i s:s s:s s:s}", "id", &(buf.id), "buf", &(buf.buf), "md5", &(buf.md5), "path", &(buf.path));
     save_buf(&buf);
 }
 
 
-void on_join(json_t *json_obj) {
+static void on_join(json_t *json_obj) {
     char *username;
     parse_json(json_obj, "{s:s}", "username", &username);
     log_msg("User %s joined the room", username);
 }
 
 
-void on_msg(json_t *json_obj) {
+static void on_msg(json_t *json_obj) {
     char *username;
     char *msg;
 
@@ -36,7 +36,7 @@ void on_msg(json_t *json_obj) {
 }
 
 
-void on_part(json_t *json_obj) {
+static void on_part(json_t *json_obj) {
     char *username;
 
     parse_json(json_obj, "{s:s}", "username", &username);
@@ -44,7 +44,7 @@ void on_part(json_t *json_obj) {
 }
 
 
-void on_patch(json_t *json_obj) {
+static void on_patch(json_t *json_obj) {
     int buf_id;
     int user_id;
     char *username;
@@ -70,7 +70,7 @@ void on_patch(json_t *json_obj) {
 }
 
 
-void on_room_info(json_t *json_obj) {
+static void on_room_info(json_t *json_obj) {
     const char *buf_id_str;
     json_t *bufs_obj;
     json_t *buf_obj;
@@ -78,4 +78,41 @@ void on_room_info(json_t *json_obj) {
     json_object_foreach(bufs_obj, buf_id_str, buf_obj) {
         send_json("{s:s s:i}", "name", "get_buf", "id", atoi(buf_id_str));
     }
+}
+
+
+void *remote_change_worker() {
+    char *name;
+
+    pthread_cond_wait(&server_conn_ready, &server_conn_mtx);
+    pthread_mutex_unlock(&server_conn_mtx);
+
+    json_t *json_obj;
+
+    while (TRUE) {
+        json_obj = recv_json();
+        parse_json(json_obj, "{s:s}", "name", &name);
+        log_debug("name: %s", name);
+        /* TODO: handle create/rename/delete buf */
+        if (strcmp(name, "room_info") == 0) {
+            on_room_info(json_obj);
+        } else if (strcmp(name, "get_buf") == 0) {
+            on_get_buf(json_obj);
+        } else if (strcmp(name, "join") == 0) {
+            on_join(json_obj);
+        } else if (strcmp(name, "msg") == 0) {
+            on_msg(json_obj);
+        } else if (strcmp(name, "part") == 0) {
+            on_part(json_obj);
+        } else if (strcmp(name, "patch") == 0) {
+            on_patch(json_obj);
+        } else {
+            log_err("Unknown event name: %s", name);
+        }
+
+        json_decref(json_obj);
+    }
+
+    pthread_exit(NULL);
+    return NULL;
 }

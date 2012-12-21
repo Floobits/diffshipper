@@ -3,6 +3,8 @@
 
 #include <pthread.h>
 
+#include <jansson.h>
+
 #define DS_PROTO_VERSION "0.01"
 
 struct addrinfo *server_info;
@@ -16,9 +18,8 @@ ssize_t net_buf_size;
 
 int server_connect(const char *host, const char *port);
 
+json_t *recv_json();
 ssize_t send_json(const char *fmt, ...);
-
-void *remote_change_worker();
 
 void net_cleanup();
 
