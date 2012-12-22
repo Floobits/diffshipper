@@ -5,10 +5,8 @@
 #include <jansson.h>
 
 #include "buf.h"
-#include "diff.h"
 #include "log.h"
 #include "net.h"
-#include "options.h"
 #include "proto_handlers.h"
 #include "util.h"
 

@@ -10,12 +10,9 @@
 
 #include <jansson.h>
 
-#include "diff.h"
 #include "log.h"
 #include "net.h"
 #include "options.h"
-#include "proto_handlers.h"
-#include "util.h"
 
 
 int server_connect(const char *host, const char *port) {
