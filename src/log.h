@@ -19,9 +19,6 @@ void log_msg(const char *fmt, ...);
 void log_warn(const char *fmt, ...);
 void log_err(const char *fmt, ...);
 
-void vplog(const unsigned int level, const char *fmt, va_list args);
-void plog(const unsigned int level, const char *fmt, ...);
-
 void die(const char *fmt, ...);
 
 void log_json_err(json_error_t *err);
