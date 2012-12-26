@@ -4,6 +4,7 @@
 typedef struct {
     int id;
     char *buf;
+    size_t len;
     char *md5;
     char *path;
 } buf_t;

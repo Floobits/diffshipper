@@ -56,7 +56,7 @@ static int scandir_filter(const char *path, const struct dirent *d, void *baton)
 }
 
 
-int send_diff_chunk(void *baton, dmp_operation_t op, const void *data, uint32_t len) {
+static int make_patch(void *baton, dmp_operation_t op, const void *data, uint32_t len) {
     diff_info_t *di = (diff_info_t*)baton;
     off_t offset;
     char *data_str = NULL;
@@ -205,7 +205,7 @@ void push_changes(const char *base_path, const char *full_path) {
         di.mf1 = mf1;
         di.mf2 = mf2;
         dmp_diff_print_raw(stderr, diff);
-        dmp_diff_foreach(diff, send_diff_chunk, &di);
+        dmp_diff_foreach(diff, make_patch, &di);
 
         if (mf1->len != mf2->len) {
             if (ftruncate(mf1->fd, mf2->len) != 0) {
@@ -239,50 +239,3 @@ void push_changes(const char *base_path, const char *full_path) {
     free(path);
 }
 
-
-void apply_diff(char *path, dmp_operation_t op, char *buf, size_t len, off_t offset) {
-    struct stat file_stats;
-    int rv;
-    mmapped_file_t *mf;
-
-    log_debug("patching %s: %lu bytes at %lu", path, len, offset);
-
-    rv = lstat(path, &file_stats);
-    if (rv) {
-        die("Error lstat()ing file %s.", path);
-    }
-
-    off_t file_size = file_stats.st_size;
-    if (op == DMP_DIFF_INSERT) {
-        file_size += len;
-    }
-    mf = mmap_file(path, file_size, PROT_WRITE | PROT_READ, 0);
-    if (!mf) {
-        die("mmap of %s failed!", path);
-        return; /* never get here, but make the static analyzer happy */
-    }
-
-    if (mf->len < offset)
-        die("%s is too small to apply patch to!", path);
-
-    void *op_point = mf->buf + offset;
-    if (op == DMP_DIFF_INSERT) {
-        if (ftruncate(mf->fd, file_size) != 0) {
-            die("resizing %s failed", path);
-        }
-        log_debug("memmove(%u, %u, %u)", (size_t)(op_point + len), (size_t)op_point, (file_size - len) - offset);
-        memmove(op_point + len, op_point, (file_size - len) - offset);
-        memcpy(op_point, buf, len);
-    } else if (op == DMP_DIFF_DELETE) {
-        file_size = mf->len - len;
-        memmove(op_point, op_point + len, file_size - offset);
-        if (ftruncate(mf->fd, file_size) != 0) {
-            die("resizing %s failed", path);
-        }
-    }
-    log_debug("resized %s to %u bytes", path, file_size);
-    rv = msync(mf->buf, file_size, MS_SYNC);
-    log_debug("rv %i wrote %i bytes to %s", rv, file_size, path);
-    munmap_file(mf);
-    free(mf);
-}
