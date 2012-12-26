@@ -17,7 +17,9 @@ size_t bufs_size;
 void init_bufs();
 void cleanup_bufs();
 
+buf_t *get_buf(const char *path);
 void save_buf(buf_t *buf);
+
 void apply_patch(buf_t *buf, char *patch_text);
 
 #endif

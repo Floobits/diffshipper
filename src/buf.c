@@ -29,6 +29,23 @@ void cleanup_bufs() {
 }
 
 
+buf_t *get_buf(const char *path) {
+    size_t i;
+    buf_t *buf = NULL;
+
+    for (i = 0; i < bufs_len; i++) {
+        buf = bufs[i];
+        if (buf == NULL)
+            continue;
+
+        if (strcmp(buf->path, path) == 0)
+            break;
+    }
+
+    return buf;
+}
+
+
 void save_buf(buf_t *buf) {
     char *full_path;
     int fd;
