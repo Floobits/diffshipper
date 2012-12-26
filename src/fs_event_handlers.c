@@ -229,6 +229,9 @@ void push_changes(const char *base_path, const char *full_path) {
         md5_append(&md5_state, mf2->buf, mf2->len);
         md5_finish(&md5_state, md5_after);
 
+        log_debug("md5 before: %s", md5_before);
+        log_debug("md5 after: %s", md5_after);
+
         send_json(
             "{s:i s:i s:s s:s s:s s:s s:s}",
             "id", buf->id,

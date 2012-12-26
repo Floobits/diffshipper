@@ -15,9 +15,29 @@
 
 
 static void on_get_buf(json_t *json_obj) {
-    buf_t buf;
-    parse_json(json_obj, "{s:i s:s s:s s:s}", "id", &(buf.id), "buf", &(buf.buf), "md5", &(buf.md5), "path", &(buf.path));
-    save_buf(&buf);
+    buf_t *buf;
+    buf_t *tmp = malloc(sizeof(buf_t));
+
+    parse_json(json_obj, "{s:i s:s s:s s:s}",
+        "id", &(tmp->id),
+        "buf", &(tmp->buf),
+        "md5", &(tmp->md5),
+        "path", &(tmp->path)
+    );
+
+    buf = bufs[tmp->id];
+    if (buf) {
+        buf->id = tmp->id;
+        buf->buf = tmp->buf; /* TODO: memory leak */
+        buf->md5 = tmp->md5;
+        buf->path = tmp->path;
+        free(tmp);
+    } else {
+        buf = tmp;
+    }
+
+
+    save_buf(buf);
 }
 
 

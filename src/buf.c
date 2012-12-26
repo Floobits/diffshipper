@@ -50,8 +50,9 @@ void save_buf(buf_t *buf) {
     char *full_path;
     int fd;
     ssize_t bytes_written;
-    ignore_path(buf->path);
+    /* TODO: not sure if this is right. shouldn't we be writing to both files? */
     ds_asprintf(&full_path, "%s/%s", opts.path, buf->path);
+    ignore_path(full_path);
     fd = open(full_path, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
     if (fd < 0) {
         die("Error opening file %s: %s", buf->path, strerror(errno));
