@@ -12,7 +12,7 @@
 #include <time.h>
 #include <unistd.h>
 
-#include "diff.h"
+#include "fs_event_handlers.h"
 #include "mmap.h"
 #include "log.h"
 #include "net.h"
