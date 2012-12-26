@@ -163,9 +163,9 @@ void push_changes(const char *base_path, const char *full_path) {
 
         ds_asprintf(&orig_path, "%s%s", TMP_BASE, file_path);
 
-        buf_t *buf = get_buf(file_path);
+        buf_t *buf = get_buf(file_path_rel);
         if (buf == NULL) {
-            log_err("buf not found for path %s", file_path);
+            log_err("buf not found for path %s", file_path_rel);
             goto cleanup;
         }
 

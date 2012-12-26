@@ -25,7 +25,32 @@ void init_bufs() {
 
 
 void cleanup_bufs() {
+    size_t i;
+    for (i = 0; i < bufs_len; i++) {
+        free(bufs[i]);
+    }
     free(bufs);
+}
+
+
+void add_buf_to_bufs(buf_t *buf) {
+    size_t i;
+
+    bufs_len++;
+
+    if (bufs_len > bufs_size) {
+        bufs_size *= 1.5;
+        bufs = realloc(bufs, bufs_size * sizeof(buf_t*));
+    }
+
+    for (i = bufs_len - 1; i > 0; i--) {
+        if (buf->id < bufs[i]->id) {
+            break;
+        }
+        bufs[i] = bufs[i-1];
+    }
+    bufs[i] = buf;
+    log_debug("added buf id %i to position %i", buf->id, i);
 }
 
 
@@ -38,6 +63,7 @@ buf_t *get_buf(const char *path) {
         if (buf == NULL)
             continue;
 
+        log_debug("path %s buf path %s", path, buf->path);
         if (strcmp(buf->path, path) == 0)
             break;
     }
@@ -50,6 +76,7 @@ void save_buf(buf_t *buf) {
     char *full_path;
     int fd;
     ssize_t bytes_written;
+    log_debug("saving buf %i path %s", buf->id, buf->path);
     /* TODO: not sure if this is right. shouldn't we be writing to both files? */
     ds_asprintf(&full_path, "%s/%s", opts.path, buf->path);
     ignore_path(full_path);

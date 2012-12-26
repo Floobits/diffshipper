@@ -30,12 +30,12 @@ static void on_get_buf(json_t *json_obj) {
         buf->id = tmp->id;
         buf->buf = tmp->buf; /* TODO: memory leak */
         buf->md5 = tmp->md5;
-        buf->path = tmp->path;
+        buf->path = tmp->path; /* TODO: ditto */
         free(tmp);
     } else {
         buf = tmp;
+        add_buf_to_bufs(buf);
     }
-
 
     save_buf(buf);
 }

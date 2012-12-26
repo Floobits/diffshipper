@@ -17,6 +17,7 @@ size_t bufs_size;
 void init_bufs();
 void cleanup_bufs();
 
+void add_buf_to_bufs(buf_t *buf);
 buf_t *get_buf(const char *path);
 void save_buf(buf_t *buf);
 
