@@ -12,6 +12,8 @@
 #include <time.h>
 #include <unistd.h>
 
+#include "md5.h"
+
 #include "buf.h"
 #include "fs_event_handlers.h"
 #include "mmap.h"
@@ -168,8 +170,8 @@ void push_changes(const char *base_path, const char *full_path) {
         }
 
         char *patch_str;
-        char *md5_before;
-        char *md5_after;
+        md5_byte_t md5_before[16];
+        md5_byte_t md5_after[16];
         const char *f1 = orig_path;
         const char *f2 = file_path;
         dmp_diff *diff = NULL;
@@ -216,13 +218,24 @@ void push_changes(const char *base_path, const char *full_path) {
         di.mf2 = mf2;
         dmp_diff_print_raw(stderr, diff);
         dmp_diff_foreach(diff, make_patch, &di);
+
+        md5_state_t md5_state;
+
+        md5_init(&md5_state);
+        md5_append(&md5_state, mf1->buf, mf1->len);
+        md5_finish(&md5_state, md5_before);
+
+        md5_init(&md5_state);
+        md5_append(&md5_state, mf2->buf, mf2->len);
+        md5_finish(&md5_state, md5_after);
+
         send_json(
             "{s:i s:i s:s s:s s:s s:s s:s}",
             "id", buf->id,
             "patch", patch_str,
             "path", buf->path,
-            "md5_before", md5_before,
-            "md5_after", md5_after
+            "md5_before", &md5_before,
+            "md5_after", &md5_after
         );
 
 
