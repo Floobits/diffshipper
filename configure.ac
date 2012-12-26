@@ -9,8 +9,8 @@ m4_ifdef(
     [AM_SILENT_RULES([yes])]
 )
 
-CFLAGS="$CFLAGS -Iextern/diff-match-patch-c/src/"
-LDFLAGS="$LDFLAGS -Lextern/diff-match-patch-c/"
+CFLAGS="$CFLAGS -Iextern/diff-match-patch-c/src/ -Iextern/md5/"
+LDFLAGS="$LDFLAGS -Lextern/diff-match-patch-c/ -Lextern/md5/"
 
 AC_CHECK_HEADERS([pthread.h])
 
