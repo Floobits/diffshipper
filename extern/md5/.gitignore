@@ -1,0 +1,5 @@
+*.a
+*.dSYM/
+*.dylib
+*.o
+*.so
