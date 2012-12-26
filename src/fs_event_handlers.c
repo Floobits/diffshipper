@@ -12,6 +12,7 @@
 #include <time.h>
 #include <unistd.h>
 
+#include "buf.h"
 #include "fs_event_handlers.h"
 #include "mmap.h"
 #include "log.h"
@@ -160,6 +161,15 @@ void push_changes(const char *base_path, const char *full_path) {
 
         ds_asprintf(&orig_path, "%s%s", TMP_BASE, file_path);
 
+        buf_t *buf = get_buf(file_path);
+        if (buf == NULL) {
+            log_err("buf not found for path %s", file_path);
+            goto cleanup;
+        }
+
+        char *patch_str;
+        char *md5_before;
+        char *md5_after;
         const char *f1 = orig_path;
         const char *f2 = file_path;
         dmp_diff *diff = NULL;
@@ -206,6 +216,15 @@ void push_changes(const char *base_path, const char *full_path) {
         di.mf2 = mf2;
         dmp_diff_print_raw(stderr, diff);
         dmp_diff_foreach(diff, make_patch, &di);
+        send_json(
+            "{s:i s:i s:s s:s s:s s:s s:s}",
+            "id", buf->id,
+            "patch", patch_str,
+            "path", buf->path,
+            "md5_before", md5_before,
+            "md5_after", md5_after
+        );
+
 
         if (mf1->len != mf2->len) {
             if (ftruncate(mf1->fd, mf2->len) != 0) {
