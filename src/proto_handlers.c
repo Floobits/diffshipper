@@ -124,7 +124,7 @@ void *remote_change_worker() {
 
     json_t *json_obj;
 
-    while (TRUE) {
+    while (1) {
         json_obj = recv_json();
         parse_json(json_obj, "{s:s}", "name", &name);
         log_debug("name: %s", name);

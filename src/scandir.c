@@ -27,7 +27,7 @@ int ds_scandir(const char *dirname,
     }
 
     while ((entry = readdir(dirp)) != NULL) {
-        if ((*filter)(dirname, entry, baton) == FALSE) {
+        if (!(*filter)(dirname, entry, baton)) {
             continue;
         }
         if (results_len >= names_len) {

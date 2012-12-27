@@ -15,14 +15,6 @@
 #include <CoreServices/CoreServices.h>
 #endif
 
-#ifndef TRUE
-#define TRUE 1
-#endif
-
-#ifndef FALSE
-#define FALSE 0
-#endif
-
 typedef long long int lli_t;
 
 char **ignored_paths;
