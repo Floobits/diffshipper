@@ -31,7 +31,7 @@ static void usage() {
 
 void init_opts() {
     memset(&opts, 0, sizeof(opts));
-    opts.mtime = 1; /* seconds */
+    opts.mtime = 2; /* seconds */
 }
 
 
