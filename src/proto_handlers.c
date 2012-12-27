@@ -16,26 +16,35 @@
 
 static void on_get_buf(json_t *json_obj) {
     buf_t *buf;
-    buf_t *tmp = malloc(sizeof(buf_t));
+    buf_t tmp;
 
     parse_json(json_obj, "{s:i s:s s:s s:s}",
-        "id", &(tmp->id),
-        "buf", &(tmp->buf),
-        "md5", &(tmp->md5),
-        "path", &(tmp->path)
+        "id", &(tmp.id),
+        "buf", &(tmp.buf),
+        "md5", &(tmp.md5),
+        "path", &(tmp.path)
     );
 
-    buf = get_buf_by_id(tmp->id);
-    if (buf) {
-        buf->id = tmp->id;
-        buf->buf = tmp->buf; /* TODO: memory leak */
-        buf->md5 = tmp->md5;
-        buf->path = tmp->path; /* TODO: ditto */
-        free(tmp);
-    } else {
-        buf = tmp;
+    buf = get_buf_by_id(tmp.id);
+    if (buf == NULL) {
+        buf = calloc(1, sizeof(buf_t));
+        buf->id = tmp.id;
+        buf->buf = strdup(tmp.buf);
+        buf->md5 = strdup(tmp.md5);
+        buf->path = strdup(tmp.path);
         add_buf_to_bufs(buf);
     }
+    if (buf->buf)
+        free(buf->buf);
+    if (buf->md5)
+        free(buf->md5);
+    if (buf->path)
+        free(buf->path);
+
+    buf->id = tmp.id;
+    buf->buf = strdup(tmp.buf);
+    buf->md5 = strdup(tmp.md5);
+    buf->path = strdup(tmp.path);
 
     save_buf(buf);
 }

@@ -91,11 +91,8 @@ buf_t *get_buf(const char *path) {
     buf_t *buf = NULL;
 
     for (i = 0; i < bufs_len; i++) {
-        if (buf == NULL)
-            continue;
-
-        log_debug("path %s buf path %s", path, buf->path);
-        if (strcmp(buf->path, path) == 0) {
+        log_debug("path %s buf path %s", path, bufs[i]->path);
+        if (strcmp(bufs[i]->path, path) == 0) {
             buf = bufs[i];
             break;
         }
