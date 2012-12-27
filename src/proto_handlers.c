@@ -73,6 +73,7 @@ static void on_patch(json_t *json_obj) {
     char *md5_after;
     char *patch_str;
     char *path;
+
     parse_json(
         json_obj, "{s:i s:i s:s s:s s:s s:s s:s}",
         "id", &buf_id,
@@ -83,8 +84,6 @@ static void on_patch(json_t *json_obj) {
         "md5_before", &md5_before,
         "md5_after", &md5_after
     );
-    /* TODO: we don't know how to apply patches, so let's just re-get the buf each time */
-    /*send_json("{s:s s:i}", "name", "get_buf", "id", buf_id);*/
 
     ignore_path(path);
     apply_patch(bufs[buf_id], patch_str);
