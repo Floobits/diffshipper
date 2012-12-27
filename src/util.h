@@ -5,15 +5,6 @@
 
 #include <jansson.h>
 
-#ifdef INOTIFY
-#include <inotifytools/inotifytools.h>
-#include <inotifytools/inotify.h>
-#endif
-
-#ifdef FSEVENTS
-#include <CoreFoundation/CoreFoundation.h>
-#include <CoreServices/CoreServices.h>
-#endif
 
 typedef long long int lli_t;
 

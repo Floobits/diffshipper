@@ -2,6 +2,17 @@
 #include <stdlib.h>
 
 #include "config.h"
+
+#ifdef INOTIFY
+#include <inotifytools/inotifytools.h>
+#include <inotifytools/inotify.h>
+#endif
+
+#ifdef FSEVENTS
+#include <CoreFoundation/CoreFoundation.h>
+#include <CoreServices/CoreServices.h>
+#endif
+
 #include "buf.h"
 #include "fs_event_handlers.h"
 #include "log.h"
