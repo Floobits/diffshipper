@@ -85,8 +85,14 @@ static void on_patch(json_t *json_obj) {
         "md5_after", &md5_after
     );
 
+    log_debug("patch for buf %i (%s) from %s (id %i)", buf_id, path, username, user_id);
+
     ignore_path(path);
-    apply_patch(bufs[buf_id], patch_str);
+    buf_t *buf = get_buf_by_id(buf_id);
+    if (buf == NULL) {
+        die("we got a patch for a nonexistent buf id: %i", buf_id);
+    }
+    apply_patch(buf, patch_str);
 }
 
 
