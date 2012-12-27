@@ -247,7 +247,8 @@ void push_changes(const char *base_path, const char *full_path) {
         log_debug("md5 after: %s", md5_after_hex);
 
         send_json(
-            "{s:i s:s s:s s:s s:s}",
+            "{s:i s:s s:s s:s s:s s:s}",
+            "name", "patch",
             "id", buf->id,
             "patch", di.patch_str,
             "path", buf->path,
