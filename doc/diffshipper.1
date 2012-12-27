@@ -1,0 +1,47 @@
+.\" generated with Ronn/v0.7.3
+.\" http://github.com/rtomayko/ronn/tree/0.7.3
+.
+.TH "DIFFSHIPPER" "1" "December 2012" "" ""
+.
+.SH "NAME"
+\fBdiffshipper\fR \- Floobits diff shipper\. The mediocre fall\-back solution for people with unsupported editors\.
+.
+.SH "SYNOPSIS"
+\fBdiffshipper \-r ROOM_NAME \-o ROOM_OWNER \-u USERNAME \-s API_SECRET PATH\fR
+.
+.SH "DESCRIPTION"
+Join a Floobits room and monitor files in PATH for changes\.
+.
+.SH "OPTIONS"
+.
+.IP "\(bu" 4
+\fB\-D\fR Enable debug output\en\e
+.
+.IP "\(bu" 4
+\fB\-h HOST\fR Host\en\e
+.
+.IP "\(bu" 4
+\fB\-o OWNER\fR Room owner\en\e
+.
+.IP "\(bu" 4
+\fB\-p PORT\fR Port\en\e
+.
+.IP "\(bu" 4
+\fB\-r ROOMNAME\fR Room to join\en\e
+.
+.IP "\(bu" 4
+\fB\-s SECRET\fR API secret\en\e
+.
+.IP "\(bu" 4
+\fB\-u USERNAME\fR Username\en\e
+.
+.IP "\(bu" 4
+\fB\-v\fR Print version and exit\en\e
+.
+.IP "" 0
+.
+.SH "EXAMPLES"
+\fBdiffshipper \-r testroom \-o myuser \-u myuser \-s ve3aiCoo ~/code/collab_project/\fR
+.
+.P
+Join https://floobits\.com/r/myuser/testroom/ and keep files in ~/code/collab_project/ synced with that room\.
