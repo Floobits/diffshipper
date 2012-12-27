@@ -29,6 +29,9 @@ static void on_get_buf(json_t *json_obj) {
     if (buf == NULL) {
         buf = calloc(1, sizeof(buf_t));
         buf->id = tmp.id;
+        /* Strings from parse_json disappear once json_obj has 0 refcount.
+         * This happens at the end of the loop in remote_change_worker.
+         */
         buf->buf = strdup(tmp.buf);
         buf->md5 = strdup(tmp.md5);
         buf->path = strdup(tmp.path);
@@ -102,6 +105,7 @@ static void on_patch(json_t *json_obj) {
         die("we got a patch for a nonexistent buf id: %i", buf_id);
     }
     apply_patch(buf, patch_str);
+    /* TODO: check md5sums */
 }
 
 
