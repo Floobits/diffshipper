@@ -215,7 +215,7 @@ void push_changes(const char *base_path, const char *full_path) {
         di.mf1 = mf1;
         di.mf2 = mf2;
         di.patch_str = malloc(10000 * sizeof(char));
-        di.patch_str[0] = '\0';
+        strcpy(di.patch_str, "");
 
         dmp_diff_print_raw(stderr, diff);
         dmp_diff_foreach(diff, make_patch, &di);
@@ -247,7 +247,7 @@ void push_changes(const char *base_path, const char *full_path) {
         log_debug("md5 after: %s", md5_after_hex);
 
         send_json(
-            "{s:i s:s s:s s:s s:s s:s}",
+            "{s:s s:i s:s s:s s:s s:s}",
             "name", "patch",
             "id", buf->id,
             "patch", di.patch_str,
