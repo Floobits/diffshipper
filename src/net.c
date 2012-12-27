@@ -109,7 +109,7 @@ json_t *recv_json() {
         /* TODO: reconnect or error out or something*/
         die("no bytes!");
     }
-    log_debug("parsing %s", buf);
+
     json_obj = json_loadb(buf, rv, 0, &json_err);
     if (!json_obj) {
         log_json_err(&json_err);

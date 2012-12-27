@@ -217,7 +217,6 @@ void push_changes(const char *base_path, const char *full_path) {
         di.patch_str = malloc(10000 * sizeof(char));
         strcpy(di.patch_str, "");
 
-        dmp_diff_print_raw(stderr, diff);
         dmp_diff_foreach(diff, make_patch, &di);
 
         md5_state_t md5_state;
