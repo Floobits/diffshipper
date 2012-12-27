@@ -215,7 +215,9 @@ void push_changes(const char *base_path, const char *full_path) {
         di.buf = buf;
         di.mf1 = mf1;
         di.mf2 = mf2;
-        di.patch_str = NULL;
+        di.patch_str = malloc(10000 * sizeof(char));
+        di.patch_str[0] = '\0';
+
         dmp_diff_print_raw(stderr, diff);
         dmp_diff_foreach(diff, make_patch, &di);
 
@@ -254,6 +256,7 @@ void push_changes(const char *base_path, const char *full_path) {
             "md5_after", md5_after_hex
         );
 
+        free(di.patch_str);
 
         if (mf1->len != mf2->len) {
             if (ftruncate(mf1->fd, mf2->len) != 0) {
