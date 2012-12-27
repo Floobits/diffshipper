@@ -204,8 +204,7 @@ void push_changes(const char *base_path, const char *full_path) {
             goto diff_cleanup;
         }
 
-        if (mf1 && mf2)
-            dmp_diff_new(&(diff), &opts, mf1->buf, mf1->len, mf2->buf, mf2->len);
+        dmp_diff_new(&(diff), &opts, mf1->buf, mf1->len, mf2->buf, mf2->len);
 
         if (!diff) {
             log_err("diff is null. I guess someone wrote the exact same bytes to this file?");
