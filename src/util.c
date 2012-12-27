@@ -83,25 +83,6 @@ int ignored(const char *path) {
 }
 
 
-int binary_search(const int needle, int haystack[], int start, int end) {
-    int mid;
-
-    if (start == end) {
-        return -1;
-    }
-
-    mid = (start + end) / 2; /* can screw up on arrays with > 2 billion elements */
-
-    if (needle < haystack[mid]) {
-        return binary_search(needle, haystack, start, mid);
-    } else if (needle > haystack[mid]) {
-        return binary_search(needle, haystack, mid + 1, end);
-    }
-
-    return mid;
-}
-
-
 char *escape_data(char *data) {
     char *escaped;
     int data_len = strlen(data);

@@ -34,7 +34,6 @@ int run_cmd(const char *fmt, ...);
 void ignore_path(const char *path);
 void unignore_path(const char *path);
 int ignored(const char *path);
-int binary_search(const int needle, int haystack[], int start, int end);
 
 char *escape_data(char *data);
 char *unescape_data(char *data);

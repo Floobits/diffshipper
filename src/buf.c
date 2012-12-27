@@ -54,6 +54,38 @@ void add_buf_to_bufs(buf_t *buf) {
 }
 
 
+static int binary_search(const int buf_id, int start, int end) {
+    int mid;
+
+    if (start == end) {
+        return -1;
+    }
+
+    mid = (start + end) / 2; /* can screw up on arrays with > 2 billion elements */
+
+    if (buf_id < bufs[mid]->id) {
+        return binary_search(buf_id, start, mid);
+    } else if (buf_id > bufs[mid]->id) {
+        return binary_search(buf_id, mid + 1, end);
+    }
+
+    return mid;
+}
+
+
+buf_t *get_buf_by_id(const int buf_id) {
+    int index;
+    buf_t *buf = NULL;
+
+    index = binary_search(buf_id, 0, bufs_len);
+    if (index > 0) {
+        buf = bufs[index];
+    }
+
+    return buf;
+}
+
+
 buf_t *get_buf(const char *path) {
     size_t i;
     buf_t *buf = NULL;
