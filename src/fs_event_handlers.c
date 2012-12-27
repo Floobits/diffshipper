@@ -64,7 +64,7 @@ static int make_patch(void *baton, dmp_operation_t op, const void *data, uint32_
     off_t offset;
     char *data_str = NULL;
     char *action_str = NULL;
-    char *patch_str = NULL;
+    char *patch_str = di->patch_str;
 
     switch (op) {
         case DMP_DIFF_EQUAL:
@@ -92,7 +92,7 @@ static int make_patch(void *baton, dmp_operation_t op, const void *data, uint32_
     }
     ds_asprintf(&patch_str, "%s %s", action_str, data_str);
     send_json("{s:s s:s s:s s:s}",
-        "path", di->path,
+        "path", di->buf->path,
         "name", "patch",
         "patch", patch_str,
         "md5", "test"
@@ -169,7 +169,6 @@ void push_changes(const char *base_path, const char *full_path) {
             goto cleanup;
         }
 
-        char *patch_str;
         md5_byte_t md5_before[16];
         md5_byte_t md5_after[16];
         const char *f1 = orig_path;
@@ -213,9 +212,10 @@ void push_changes(const char *base_path, const char *full_path) {
             goto diff_cleanup;
         }
 
-        di.path = file_path_rel;
+        di.buf = buf;
         di.mf1 = mf1;
         di.mf2 = mf2;
+        di.patch_str = NULL;
         dmp_diff_print_raw(stderr, diff);
         dmp_diff_foreach(diff, make_patch, &di);
 
@@ -229,16 +229,29 @@ void push_changes(const char *base_path, const char *full_path) {
         md5_append(&md5_state, mf2->buf, mf2->len);
         md5_finish(&md5_state, md5_after);
 
-        log_debug("md5 before: %s", md5_before);
-        log_debug("md5 after: %s", md5_after);
+        /* TODO: throw this in util */
+        char md5_before_hex[33];
+        char md5_after_hex[33];
+        md5_before_hex[32] = '\0';
+        md5_after_hex[32] = '\0';
+        int j;
+        for (j = 0; j < 16; j++) {
+            snprintf(&(md5_before_hex[j*2]), 3, "%02x", md5_before[j]);
+        }
+        log_debug("md5 before: %s", md5_before_hex);
+
+        for (j = 0; j < 16; j++) {
+            snprintf(&(md5_after_hex[j*2]), 3, "%02x", md5_after[j]);
+        }
+        log_debug("md5 after: %s", md5_after_hex);
 
         send_json(
-            "{s:i s:i s:s s:s s:s s:s s:s}",
+            "{s:i s:s s:s s:s s:s}",
             "id", buf->id,
-            "patch", patch_str,
+            "patch", di.patch_str,
             "path", buf->path,
-            "md5_before", &md5_before,
-            "md5_after", &md5_after
+            "md5_before", md5_before_hex,
+            "md5_after", md5_after_hex
         );
 
 
