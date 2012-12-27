@@ -25,7 +25,7 @@ static void on_get_buf(json_t *json_obj) {
         "path", &(tmp->path)
     );
 
-    buf = bufs[tmp->id];
+    buf = get_buf_by_id(tmp->id);
     if (buf) {
         buf->id = tmp->id;
         buf->buf = tmp->buf; /* TODO: memory leak */
