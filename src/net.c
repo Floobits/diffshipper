@@ -116,6 +116,8 @@ json_t *recv_json() {
         die("couldn't load buffer into json object!");
     }
 
+    free(buf);
+
     return json_obj;
 }
 
