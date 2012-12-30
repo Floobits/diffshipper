@@ -78,7 +78,7 @@ buf_t *get_buf_by_id(const int buf_id) {
     buf_t *buf = NULL;
 
     index = binary_search(buf_id, 0, bufs_len);
-    if (index > 0) {
+    if (index >= 0) {
         buf = bufs[index];
     }
 
