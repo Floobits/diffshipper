@@ -124,6 +124,8 @@ void save_buf(buf_t *buf) {
 
 /*void apply_diff(char *path, dmp_operation_t op, char *buf, size_t len, off_t offset)*/
 void apply_patch(buf_t *buf, char *patch_text) {
+    char *full_path;
+    int fd;
     struct stat file_stats;
     int rv;
     mmapped_file_t *mf;
@@ -135,28 +137,35 @@ void apply_patch(buf_t *buf, char *patch_text) {
 
     log_debug("patching %s: %lu bytes at %lu", path, len, offset);
 
-    rv = lstat(path, &file_stats);
+    ds_asprintf(&full_path, "%s/%s", opts.path, buf->path);
+    ignore_path(full_path);
+    fd = open(full_path, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+    if (fd < 0) {
+        die("Error opening file %s: %s", buf->path, strerror(errno));
+    }
+
+    rv = lstat(full_path, &file_stats);
     if (rv) {
-        die("Error lstat()ing file %s.", path);
+        die("Error lstat()ing file %s.", full_path);
     }
 
     off_t file_size = file_stats.st_size;
     if (op == DMP_DIFF_INSERT) {
         file_size += len;
     }
-    mf = mmap_file(path, file_size, PROT_WRITE | PROT_READ, 0);
+    mf = mmap_file(full_path, file_size, PROT_WRITE | PROT_READ, 0);
     if (!mf) {
         /* return to make the static analyzer happy */
-        return die("mmap of %s failed!", path);
+        return die("mmap of %s failed!", full_path);
     }
 
     if (mf->len < offset)
-        die("%s is too small to apply patch to!", path);
+        die("%s is too small to apply patch to!", full_path);
 
     void *op_point = mf->buf + offset;
     if (op == DMP_DIFF_INSERT) {
         if (ftruncate(mf->fd, file_size) != 0) {
-            die("resizing %s failed", path);
+            die("resizing %s failed", full_path);
         }
         log_debug("memmove(%u, %u, %u)", (size_t)(op_point + len), (size_t)op_point, (file_size - len) - offset);
         memmove(op_point + len, op_point, (file_size - len) - offset);
@@ -165,12 +174,13 @@ void apply_patch(buf_t *buf, char *patch_text) {
         file_size = mf->len - len;
         memmove(op_point, op_point + len, file_size - offset);
         if (ftruncate(mf->fd, file_size) != 0) {
-            die("resizing %s failed", path);
+            die("resizing %s failed", full_path);
         }
     }
-    log_debug("resized %s to %u bytes", path, file_size);
+    log_debug("resized %s to %u bytes", full_path, file_size);
     rv = msync(mf->buf, file_size, MS_SYNC);
-    log_debug("rv %i wrote %i bytes to %s", rv, file_size, path);
+    log_debug("rv %i wrote %i bytes to %s", rv, file_size, full_path);
     munmap_file(mf);
     free(mf);
+    free(full_path);
 }
