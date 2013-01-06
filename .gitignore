@@ -16,7 +16,7 @@ depcomp
 diffshipper
 gmon.out
 install-sh
-Makefile
+/Makefile
 Makefile.in
 missing
 src/config.h*
