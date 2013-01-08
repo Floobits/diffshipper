@@ -121,6 +121,7 @@ void save_buf(buf_t *buf) {
         }
     }
     if (strlen(buf_path) > 0) {
+        ignore_path(buf_path);
         rv = run_cmd("mkdir -p %s", buf_path);
         if (rv)
             die("error creating temp directory %s", buf_path);
