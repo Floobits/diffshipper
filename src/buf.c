@@ -105,11 +105,27 @@ buf_t *get_buf(const char *path) {
 void save_buf(buf_t *buf) {
     char *full_path;
     int fd;
+    int rv;
     ssize_t bytes_written;
     log_debug("saving buf %i path %s", buf->id, buf->path);
     /* TODO: not sure if this is right. shouldn't we be writing to both files? */
     ds_asprintf(&full_path, "%s/%s", opts.path, buf->path);
     ignore_path(full_path);
+
+    char *buf_path = strdup(full_path);
+    int i;
+    for (i = strlen(buf_path); i > 0; i--) {
+        if (buf_path[i] == '/') {
+            buf_path[i] = '\0';
+            break;
+        }
+    }
+    if (strlen(buf_path) > 0) {
+        rv = run_cmd("mkdir -p %s", buf_path);
+        if (rv)
+            die("error creating temp directory %s", buf_path);
+    }
+
     fd = open(full_path, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
     if (fd < 0) {
         die("Error opening file %s: %s", full_path, strerror(errno));
