@@ -75,24 +75,25 @@ static int make_patch(void *baton, dmp_operation_t op, const void *data, uint32_
             offset = data - di->mf1->buf;
             data_str = malloc(len + 1);
             strncpy(data_str, data, len + 1);
-            ds_asprintf(&action_str, "-%u@%lld", len, (lli_t)offset);
+            ds_asprintf(&action_str, "@@ -%u@%lld @@", len, (lli_t)offset);
         break;
 
         case DMP_DIFF_INSERT:
             offset = data - di->mf2->buf;
             data_str = malloc(len + 1);
             strncpy(data_str, data, len + 1);
-            ds_asprintf(&action_str, "+%u@%lld", len, (lli_t)offset);
+            ds_asprintf(&action_str, "@@ +%u@%lld @@", len, (lli_t)offset);
         break;
 
         default:
             die("WTF?!?!");
     }
-    ds_asprintf(&patch_str, "%s %s", action_str, data_str);
-    if (data_str)
-        free(data_str);
-    if (action_str)
-        free(action_str);
+    log_debug("%s %s", action_str, data_str);
+    char *cur_patch_str;
+    ds_asprintf(&cur_patch_str, "%s %s", action_str, data_str);
+    strcat(patch_str, cur_patch_str);
+    free(data_str);
+    free(action_str);
     return 0;
 }
 
@@ -164,8 +165,7 @@ void push_changes(const char *base_path, const char *full_path) {
         const char *f2 = file_path;
         dmp_diff *diff = NULL;
         dmp_options opts;
-        memset(&opts, 0, sizeof(opts));
-        opts.timeout = 0.5; /* give up diffing after 0.5 seconds of processing */
+        dmp_options_init(&opts);
 
         mmapped_file_t *mf1;
         mmapped_file_t *mf2;
@@ -193,7 +193,8 @@ void push_changes(const char *base_path, const char *full_path) {
             goto diff_cleanup;
         }
 
-        dmp_diff_new(&(diff), &opts, mf1->buf, mf1->len, mf2->buf, mf2->len);
+        if (dmp_diff_new(&(diff), &opts, mf1->buf, mf1->len, mf2->buf, mf2->len) != 0)
+            die("dmp_diff_new failed");
 
         if (!diff) {
             log_err("diff is null. I guess someone wrote the exact same bytes to this file?");
@@ -206,6 +207,8 @@ void push_changes(const char *base_path, const char *full_path) {
         /* TODO */
         di.patch_str = malloc(10000 * sizeof(char));
         strcpy(di.patch_str, "");
+
+        dmp_diff_print_raw(stdout, diff);
 
         dmp_diff_foreach(diff, make_patch, &di);
 
@@ -230,7 +233,7 @@ void push_changes(const char *base_path, const char *full_path) {
             if (ftruncate(mf1->fd, mf2->len) != 0) {
                 die("resizing %s failed", f1);
             }
-            log_debug("resized %s to %u bytes", f1, mf2->len);
+            log_debug("resized %s from %u to %u bytes", f1, mf1->len, mf2->len);
         }
 
         munmap(mf1->buf, mf1->len);
