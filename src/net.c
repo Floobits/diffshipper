@@ -73,7 +73,8 @@ static ssize_t recv_bytes(char **buf) {
     ssize_t net_buf_left;
     void *line_end;
 
-    do {
+    line_end = memchr(net_buf, '\n', net_buf_len);
+    while(line_end == NULL) {
         net_buf_end = net_buf + net_buf_len;
         net_buf_left = net_buf_size - net_buf_len;
         bytes_received = recv(server_sock, net_buf_end, net_buf_left, 0);
@@ -88,7 +89,7 @@ static ssize_t recv_bytes(char **buf) {
             net_buf = realloc(net_buf, net_buf_size);
         }
         line_end = memchr(net_buf, '\n', net_buf_len);
-    } while(line_end == NULL);
+    }
 
     buf_len = line_end - net_buf;
     log_debug("buf_len: %i", buf_len);
