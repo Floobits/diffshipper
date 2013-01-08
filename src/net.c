@@ -78,20 +78,24 @@ static ssize_t recv_bytes(char **buf) {
         net_buf_left = net_buf_size - net_buf_len;
         bytes_received = recv(server_sock, net_buf_end, net_buf_left, 0);
         net_buf_len += bytes_received;
-        log_debug("received %u bytes", bytes_received);
+        log_debug("received %u bytes. net_buf_len %i", bytes_received, net_buf_len);
         if (bytes_received == 0) {
+            log_debug("no bytes received");
             return 0;
         } else if (bytes_received == net_buf_left) {
             net_buf_size *= 1.5;
+            log_debug("reallocating net_buf to %i bytes", net_buf_size);
             net_buf = realloc(net_buf, net_buf_size);
         }
         line_end = memchr(net_buf, '\n', net_buf_len);
     } while(line_end == NULL);
 
     buf_len = line_end - net_buf;
+    log_debug("buf_len: %i", buf_len);
     *buf = realloc(*buf, buf_len + 1);
     memcpy(*buf, net_buf, buf_len);
     (*buf)[buf_len] = '\0';
+    log_debug("buf: %s", *buf);
     memmove(net_buf, line_end + 1, buf_len - 1);
     net_buf_len -= buf_len + 1;
     return buf_len;
@@ -113,7 +117,7 @@ json_t *recv_json() {
     json_obj = json_loadb(buf, rv, 0, &json_err);
     if (!json_obj) {
         log_json_err(&json_err);
-        die("couldn't load buffer into json object!");
+        die("couldn't load buffer into json object!\nbuffer: %s", buf);
     }
 
     free(buf);

@@ -154,6 +154,15 @@ void apply_patch(buf_t *buf, char *patch_text) {
     lli_t len = 0;
     lli_t offset = 0;
     int op = DMP_DIFF_INSERT;
+    int add_len, add_off, del_len, del_off;
+
+    log_debug("Patch: %s", patch_text);
+
+    /*@@ -1,8 +1,7 @@ */
+    char *patch_header = strdup(patch_text);
+    rv = sscanf(patch_header, "@@ -%i,%i +%i,%i @@", &del_off, &del_len, &add_off, &add_len);
+
+    log_debug("rv %i @@ -%i,%i +%i,%i @@", rv, del_off, del_len, add_off, add_len);
 
     log_debug("patching %s: %lu bytes at %lu", path, len, offset);
 
