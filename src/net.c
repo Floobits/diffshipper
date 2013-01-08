@@ -96,8 +96,10 @@ static ssize_t recv_bytes(char **buf) {
     memcpy(*buf, net_buf, buf_len);
     (*buf)[buf_len] = '\0';
     log_debug("buf: %s", *buf);
-    memmove(net_buf, line_end + 1, buf_len - 1);
     net_buf_len -= buf_len + 1;
+    memmove(net_buf, line_end + 1, net_buf_len);
+    ((char*)net_buf)[net_buf_len] = '\0';
+    log_debug("%i bytes left in net_buf: %s", net_buf_len, net_buf);
     return buf_len;
 }
 
