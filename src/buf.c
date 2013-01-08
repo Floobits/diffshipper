@@ -44,7 +44,7 @@ void add_buf_to_bufs(buf_t *buf) {
     }
 
     for (i = bufs_len - 1; i > 0; i--) {
-        if (buf->id < bufs[i]->id) {
+        if (buf->id > bufs[i-1]->id) {
             break;
         }
         bufs[i] = bufs[i-1];
