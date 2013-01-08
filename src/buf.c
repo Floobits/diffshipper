@@ -110,7 +110,6 @@ void save_buf(buf_t *buf) {
     log_debug("saving buf %i path %s", buf->id, buf->path);
     /* TODO: not sure if this is right. shouldn't we be writing to both files? */
     ds_asprintf(&full_path, "%s/%s", opts.path, buf->path);
-    ignore_path(full_path);
 
     char *buf_path = strdup(full_path);
     int i;
@@ -127,10 +126,11 @@ void save_buf(buf_t *buf) {
             die("error creating temp directory %s", buf_path);
     }
 
+    ignore_path(full_path);
     fd = open(full_path, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
-    if (fd < 0) {
+    if (fd < 0)
         die("Error opening file %s: %s", full_path, strerror(errno));
-    }
+
     buf->len = strlen(buf->buf); /* TODO: not binary-safe */
     bytes_written = write(fd, buf->buf, buf->len);
     log_debug("wrote %i bytes to %s", bytes_written, buf->path);
@@ -141,6 +141,8 @@ void save_buf(buf_t *buf) {
 
 /*void apply_diff(char *path, dmp_operation_t op, char *buf, size_t len, off_t offset)*/
 void apply_patch(buf_t *buf, char *patch_text) {
+    /* use getline on patch_text to parse offsets */
+    /* un-escape stuff */
     char *full_path;
     int fd;
     struct stat file_stats;
