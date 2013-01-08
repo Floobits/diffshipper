@@ -89,13 +89,6 @@ static int make_patch(void *baton, dmp_operation_t op, const void *data, uint32_
             die("WTF?!?!");
     }
     ds_asprintf(&patch_str, "%s %s", action_str, data_str);
-/*    send_json("{s:s s:s s:s s:s}",
-        "path", di->buf->path,
-        "name", "patch",
-        "patch", patch_str,
-        "md5", "test"
-    );
-*/
     if (data_str)
         free(data_str);
     if (action_str)
@@ -210,6 +203,7 @@ void push_changes(const char *base_path, const char *full_path) {
         di.buf = buf;
         di.mf1 = mf1;
         di.mf2 = mf2;
+        /* TODO */
         di.patch_str = malloc(10000 * sizeof(char));
         strcpy(di.patch_str, "");
 
