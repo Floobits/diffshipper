@@ -3,6 +3,8 @@
 #include <stdarg.h>
 #include <string.h>
 
+#include "md5.h"
+
 #include "log.h"
 #include "util.h"
 
@@ -183,4 +185,22 @@ void parse_json(json_t *json_obj, const char *fmt, ...) {
         log_json_err(&json_err);
         die("Couldn't parse json.");
     }
+}
+
+char *md5(void *buf, size_t len) {
+    md5_byte_t md5[16];
+    md5_state_t md5_state;
+
+    md5_init(&md5_state);
+    md5_append(&md5_state, buf, len);
+    md5_finish(&md5_state, md5);
+
+    char *md5_hex = malloc(sizeof(char) * 33);
+    md5_hex[32] = '\0';
+    int i;
+    for (i = 0; i < 16; i++) {
+        snprintf(&(md5_hex[i*2]), 3, "%02x", md5[i]);
+    }
+    log_debug("md5 hex: %s", md5_hex);
+    return md5_hex;
 }

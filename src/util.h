@@ -27,4 +27,6 @@ int is_binary(const void* buf, const int buf_len);
 
 void parse_json(json_t *json_obj, const char *fmt, ...);
 
+char *md5(void *buf, size_t len);
+
 #endif

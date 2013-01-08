@@ -12,8 +12,6 @@
 #include <time.h>
 #include <unistd.h>
 
-#include "md5.h"
-
 #include "buf.h"
 #include "fs_event_handlers.h"
 #include "mmap.h"
@@ -169,8 +167,6 @@ void push_changes(const char *base_path, const char *full_path) {
             goto cleanup;
         }
 
-        md5_byte_t md5_before[16];
-        md5_byte_t md5_after[16];
         const char *f1 = orig_path;
         const char *f2 = file_path;
         dmp_diff *diff = NULL;
@@ -219,31 +215,8 @@ void push_changes(const char *base_path, const char *full_path) {
 
         dmp_diff_foreach(diff, make_patch, &di);
 
-        md5_state_t md5_state;
-
-        md5_init(&md5_state);
-        md5_append(&md5_state, mf1->buf, mf1->len);
-        md5_finish(&md5_state, md5_before);
-
-        md5_init(&md5_state);
-        md5_append(&md5_state, mf2->buf, mf2->len);
-        md5_finish(&md5_state, md5_after);
-
-        /* TODO: throw this in util */
-        char md5_before_hex[33];
-        char md5_after_hex[33];
-        md5_before_hex[32] = '\0';
-        md5_after_hex[32] = '\0';
-        int j;
-        for (j = 0; j < 16; j++) {
-            snprintf(&(md5_before_hex[j*2]), 3, "%02x", md5_before[j]);
-        }
-        log_debug("md5 before: %s", md5_before_hex);
-
-        for (j = 0; j < 16; j++) {
-            snprintf(&(md5_after_hex[j*2]), 3, "%02x", md5_after[j]);
-        }
-        log_debug("md5 after: %s", md5_after_hex);
+        char *md5_before = md5(mf1->buf, mf1->len);
+        char *md5_after = md5(mf2->buf, mf2->len);
 
         send_json(
             "{s:s s:i s:s s:s s:s s:s}",
@@ -251,10 +224,12 @@ void push_changes(const char *base_path, const char *full_path) {
             "id", buf->id,
             "patch", di.patch_str,
             "path", buf->path,
-            "md5_before", md5_before_hex,
-            "md5_after", md5_after_hex
+            "md5_before", md5_before,
+            "md5_after", md5_after
         );
 
+        free(md5_before);
+        free(md5_after);
         free(di.patch_str);
 
         if (mf1->len != mf2->len) {
