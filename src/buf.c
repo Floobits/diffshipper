@@ -153,14 +153,11 @@ void apply_patch(buf_t *buf, char *patch_text) {
 
     lli_t len = 0;
     lli_t offset = 0;
-    int op = DMP_DIFF_INSERT;
     int add_len, add_off, del_len, del_off;
 
-    log_debug("Patch: %s", patch_text);
-
-    /*@@ -1,8 +1,7 @@ */
     char *patch_header = strdup(patch_text);
     char *patch_header_end = strchr(patch_header, '\n');
+    char *patch_body = strchr(patch_text, '\n');;
     if (patch_header_end != NULL) {
         patch_header_end = '\0';
     } else {
@@ -170,12 +167,18 @@ void apply_patch(buf_t *buf, char *patch_text) {
     free(patch_header);
 
     log_debug("rv %i @@ -%i,%i +%i,%i @@", rv, del_off, del_len, add_off, add_len);
+    len = add_len - del_len;
+    offset = del_off;
+    if (del_off != add_off) {
+        die("FUCK");
+    }
 
     log_debug("patching %s: %lu bytes at %lu", path, len, offset);
+    log_debug("Patch body: %s", patch_body);
 
     ds_asprintf(&full_path, "%s/%s", opts.path, buf->path);
     ignore_path(full_path);
-    fd = open(full_path, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+    fd = open(full_path, O_WRONLY, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
     if (fd < 0) {
         die("Error opening file %s: %s", full_path, strerror(errno));
     }
@@ -186,7 +189,7 @@ void apply_patch(buf_t *buf, char *patch_text) {
     }
 
     off_t file_size = file_stats.st_size;
-    if (op == DMP_DIFF_INSERT) {
+    if (len > 0) {
         file_size += len;
     }
     mf = mmap_file(full_path, file_size, PROT_WRITE | PROT_READ, 0);
@@ -199,14 +202,14 @@ void apply_patch(buf_t *buf, char *patch_text) {
         die("%s is too small to apply patch to!", full_path);
 
     void *op_point = mf->buf + offset;
-    if (op == DMP_DIFF_INSERT) {
+    if (len > 0) {
         if (ftruncate(mf->fd, file_size) != 0) {
             die("resizing %s failed", full_path);
         }
         log_debug("memmove(%u, %u, %u)", (size_t)(op_point + len), (size_t)op_point, (file_size - len) - offset);
         memmove(op_point + len, op_point, (file_size - len) - offset);
         memcpy(op_point, buf, len);
-    } else if (op == DMP_DIFF_DELETE) {
+    } else if (len < 0) {
         file_size = mf->len - len;
         memmove(op_point, op_point + len, file_size - offset);
         if (ftruncate(mf->fd, file_size) != 0) {
