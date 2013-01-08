@@ -162,7 +162,7 @@ void apply_patch(buf_t *buf, char *patch_text) {
 
     rv = lstat(full_path, &file_stats);
     if (rv) {
-        die("Error lstat()ing file %s.", full_path);
+        die("Error lstat()ing file %s", full_path);
     }
 
     off_t file_size = file_stats.st_size;
