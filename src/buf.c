@@ -160,7 +160,14 @@ void apply_patch(buf_t *buf, char *patch_text) {
 
     /*@@ -1,8 +1,7 @@ */
     char *patch_header = strdup(patch_text);
+    char *patch_header_end = strchr(patch_header, '\n');
+    if (patch_header_end != NULL) {
+        patch_header_end = '\0';
+    } else {
+        die("Couldn't find newline in patch!");
+    }
     rv = sscanf(patch_header, "@@ -%i,%i +%i,%i @@", &del_off, &del_len, &add_off, &add_len);
+    free(patch_header);
 
     log_debug("rv %i @@ -%i,%i +%i,%i @@", rv, del_off, del_len, add_off, add_len);
 
