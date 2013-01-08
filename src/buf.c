@@ -112,7 +112,7 @@ void save_buf(buf_t *buf) {
     ignore_path(full_path);
     fd = open(full_path, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
     if (fd < 0) {
-        die("Error opening file %s: %s", buf->path, strerror(errno));
+        die("Error opening file %s: %s", full_path, strerror(errno));
     }
     buf->len = strlen(buf->buf); /* TODO: not binary-safe */
     bytes_written = write(fd, buf->buf, buf->len);
@@ -141,7 +141,7 @@ void apply_patch(buf_t *buf, char *patch_text) {
     ignore_path(full_path);
     fd = open(full_path, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
     if (fd < 0) {
-        die("Error opening file %s: %s", buf->path, strerror(errno));
+        die("Error opening file %s: %s", full_path, strerror(errno));
     }
 
     rv = lstat(full_path, &file_stats);
