@@ -158,38 +158,74 @@ void apply_patch(buf_t *buf, char *patch_text) {
     char *patch_header_end = strchr(patch_header, '\n');
     char *patch_body = strchr(patch_text, '\n');
     if (patch_header_end != NULL) {
-        patch_header_end = '\0';
+        *patch_header_end = '\0';
     } else {
         die("Couldn't find newline in patch!");
     }
     rv = sscanf(patch_header, "@@ -%i,%i +%i,%i @@", &del_off, &del_len, &add_off, &add_len);
+    if (rv != 4) {
+        rv = sscanf(patch_header, "@@ -%i +%i,%i @@", &del_off, &add_off, &add_len);
+        del_len = 0;
+        if (rv != 3) {
+            rv = sscanf(patch_header, "@@ -%i,%i +%i @@", &del_off, &del_len, &add_off);
+            add_len = 0;
+        }
+        if (rv != 3) {
+            log_debug("rv %i @@ -%i,%i +%i,%i @@", rv, del_off, del_len, add_off, add_len);
+            die("Couldn't sscanf patch");
+        }
+    }
     free(patch_header);
 
     log_debug("rv %i @@ -%i,%i +%i,%i @@", rv, del_off, del_len, add_off, add_len);
     len = add_len - del_len;
-    offset = del_off;
+    offset = del_off - 1;
     if (del_off != add_off) {
         die("FUCK");
     }
 
-    log_debug("patching %s: %lu bytes at %lu", path, len, offset);
+    log_debug("patching %s: %li bytes at %li", path, len, offset);
     log_debug("Patch body: %s", patch_body);
     char *patch_row;
     char *insert_data = NULL;
+    char *unescaped;
+    char *escaped_data;
+    char *escaped_data_end;
     patch_row = strchr(patch_body, '\n');
+    int ignore_context = 0;
     while (patch_row != NULL) {
         patch_row++;
         log_debug("patch row: %s", patch_row);
         switch (patch_row[0]) {
             case ' ':
+                if (ignore_context)
+                    break;
+                escaped_data = strdup(patch_row + 1);
+                escaped_data_end = strchr(escaped_data, '\n');
+                if (escaped_data_end != NULL) {
+                    *escaped_data_end = '\0';
+                }
+                unescaped = unescape_data(escaped_data);
+                offset += strlen(unescaped);
+                free(unescaped);
+                free(escaped_data);
+                log_debug("offset: %li", offset);
             break;
             case '+':
                 if (insert_data != NULL) {
                     die("insert data already contained data: %s", insert_data);
                 }
-                insert_data = unescape_data(patch_row + 1);
+                escaped_data = strdup(patch_row + 1);
+                escaped_data_end = strchr(escaped_data, '\n');
+                if (escaped_data_end != NULL) {
+                    *escaped_data_end = '\0';
+                }
+                insert_data = unescape_data(escaped_data);
+                free(escaped_data);
+                ignore_context = 1;
             break;
             case '-':
+                ignore_context = 1;
             break;
             default:
                 if (strlen(patch_row) != 0) {
@@ -220,7 +256,7 @@ void apply_patch(buf_t *buf, char *patch_text) {
         die("mmap of %s failed!", full_path);
 
     if (mf->len < offset)
-        die("%s is too small to apply patch to!", full_path);
+        die("%s is too small to apply patch to! (%li bytes, need %li bytes)", full_path, mf->len, offset);
 
     void *op_point = mf->buf + offset;
     if (len > 0) {
@@ -231,15 +267,15 @@ void apply_patch(buf_t *buf, char *patch_text) {
         memmove(op_point + len, op_point, (file_size - len) - offset);
         if (insert_data) {
             if ((lli_t)strlen(insert_data) != len) {
-                log_err("insert data is %i bytes but we want to insert %i", strlen(insert_data), len);
+                die("insert data is %i bytes but we want to insert %li", strlen(insert_data), len);
             }
             memcpy(op_point, insert_data, len);
         } else {
             die("New length is longer but we couldn't find any data to insert!");
         }
     } else if (len < 0) {
-        file_size = mf->len - len;
-        memmove(op_point, op_point + len, file_size - offset);
+        file_size = mf->len + len;
+        memmove(op_point, op_point - len, file_size - offset);
         if (ftruncate(mf->fd, file_size) != 0) {
             die("resizing %s failed", full_path);
         }
