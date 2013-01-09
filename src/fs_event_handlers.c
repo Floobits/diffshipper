@@ -64,6 +64,7 @@ static int make_patch(void *baton, dmp_operation_t op, const void *data, uint32_
     char *action_str = NULL;
     char *patch_str = di->patch_str;
     char *cur_patch_str;
+    char *escaped_data;
 
     switch (op) {
         case DMP_DIFF_EQUAL:
@@ -76,16 +77,18 @@ static int make_patch(void *baton, dmp_operation_t op, const void *data, uint32_
             offset = data - di->mf1->buf;
             data_str = malloc(len + 1);
             strncpy(data_str, data, len + 1);
+            escaped_data = escape_data(data_str);
             ds_asprintf(&action_str, "@@ -%u,%lld +%u,%lld @@", (lli_t)offset, len, (lli_t)offset, 0);
-            ds_asprintf(&cur_patch_str, "%s\n-%s\n", action_str, data_str);
+            ds_asprintf(&cur_patch_str, "%s\n-%s\n", action_str, escaped_data);
         break;
 
         case DMP_DIFF_INSERT:
             offset = data - di->mf2->buf;
             data_str = malloc(len + 1);
             strncpy(data_str, data, len + 1);
+            escaped_data = escape_data(data_str);
             ds_asprintf(&action_str, "@@ -%u,%lld +%u,%lld @@", (lli_t)offset, 0, (lli_t)offset, len);
-            ds_asprintf(&cur_patch_str, "%s\n+%s\n", action_str, data_str);
+            ds_asprintf(&cur_patch_str, "%s\n+%s\n", action_str, escaped_data);
         break;
 
         default:
@@ -94,6 +97,7 @@ static int make_patch(void *baton, dmp_operation_t op, const void *data, uint32_
     log_debug("cur_patch_str: %s", cur_patch_str);
     /* TODO: check that cur_patch_str fits in patch_str */
     strcat(patch_str, cur_patch_str);
+    free(escaped_data);
     free(data_str);
     free(action_str);
     return 0;
