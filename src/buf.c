@@ -173,8 +173,31 @@ void apply_patch(buf_t *buf, char *patch_text) {
     }
 
     log_debug("patching %s: %lu bytes at %lu", path, len, offset);
-    char *patch_body_raw = unescape_data(patch_body);
-    log_debug("Patch body: %s", patch_body_raw);
+    log_debug("Patch body: %s", patch_body);
+    char *patch_row;
+    char *insert_data = NULL;
+    patch_row = strchr(patch_body, '\n');
+    while (patch_row != NULL) {
+        patch_row++;
+        log_debug("patch row: %s", patch_row);
+        switch (patch_row[0]) {
+            case ' ':
+            break;
+            case '+':
+                if (insert_data != NULL) {
+                    die("insert data already contained data: %s", insert_data);
+                }
+                insert_data = unescape_data(patch_row + 1);
+            break;
+            case '-':
+            break;
+            default:
+                if (strlen(patch_row) != 0) {
+                    die("BAD PATCH");
+                }
+        }
+        patch_row = strchr(patch_row, '\n');
+    }
 
     ds_asprintf(&full_path, "%s/%s", opts.path, buf->path);
     ignore_path(full_path);
@@ -196,10 +219,9 @@ void apply_patch(buf_t *buf, char *patch_text) {
     if (!mf) {
         /* return to make the static analyzer happy */
         return die("mmap of %s failed!", full_path);
-    }
-
-    if (mf->len < offset)
+    } else if (mf->len < offset) {
         die("%s is too small to apply patch to!", full_path);
+    }
 
     void *op_point = mf->buf + offset;
     if (len > 0) {
@@ -208,7 +230,14 @@ void apply_patch(buf_t *buf, char *patch_text) {
         }
         log_debug("memmove(%u, %u, %u)", (size_t)(op_point + len), (size_t)op_point, (file_size - len) - offset);
         memmove(op_point + len, op_point, (file_size - len) - offset);
-        memcpy(op_point, buf, len);
+        if (insert_data) {
+            if ((lli_t)strlen(insert_data) != len) {
+                log_err("insert data is %i bytes but we want to insert %i", strlen(insert_data), len);
+            }
+            memcpy(op_point, insert_data, len);
+        } else {
+            die("New length is longer but we couldn't find any data to insert!");
+        }
     } else if (len < 0) {
         file_size = mf->len - len;
         memmove(op_point, op_point + len, file_size - offset);
@@ -220,7 +249,9 @@ void apply_patch(buf_t *buf, char *patch_text) {
     rv = msync(mf->buf, file_size, MS_SYNC);
     log_debug("rv %i wrote %i bytes to %s", rv, file_size, full_path);
     munmap_file(mf);
-    free(patch_body_raw);
+    if (insert_data) {
+        free(insert_data);
+    }
     free(mf);
     free(full_path);
 }
