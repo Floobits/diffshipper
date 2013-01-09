@@ -68,8 +68,6 @@ static int make_patch(void *baton, dmp_operation_t op, const void *data, uint32_
 
     switch (op) {
         case DMP_DIFF_EQUAL:
-            /* Don't care */
-            log_debug("equal");
             return 0;
         break;
 
