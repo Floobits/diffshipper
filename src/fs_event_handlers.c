@@ -77,7 +77,7 @@ static int make_patch(void *baton, dmp_operation_t op, const void *data, uint32_
             data_str = malloc(len + 1);
             strncpy(data_str, data, len + 1);
             ds_asprintf(&action_str, "@@ -%u,%lld +%u,%lld @@", (lli_t)offset, len, (lli_t)offset, 0);
-            ds_asprintf(&cur_patch_str, "%s\n-%s", action_str, data_str);
+            ds_asprintf(&cur_patch_str, "%s\n-%s\n", action_str, data_str);
         break;
 
         case DMP_DIFF_INSERT:
@@ -85,7 +85,7 @@ static int make_patch(void *baton, dmp_operation_t op, const void *data, uint32_
             data_str = malloc(len + 1);
             strncpy(data_str, data, len + 1);
             ds_asprintf(&action_str, "@@ -%u,%lld +%u,%lld @@", (lli_t)offset, 0, (lli_t)offset, len);
-            ds_asprintf(&cur_patch_str, "%s\n+%s", action_str, data_str);
+            ds_asprintf(&cur_patch_str, "%s\n+%s\n", action_str, data_str);
         break;
 
         default:
@@ -213,6 +213,11 @@ void push_changes(const char *base_path, const char *full_path) {
         dmp_diff_print_raw(stdout, diff);
 
         dmp_diff_foreach(diff, make_patch, &di);
+
+        if (strlen(di.patch_str) == 0) {
+            log_debug("no change. not sending patch");
+            goto diff_cleanup;
+        }
 
         char *md5_before = md5(mf1->buf, mf1->len);
         char *md5_after = md5(mf2->buf, mf2->len);
