@@ -139,7 +139,7 @@ void push_changes(const char *base_path, const char *full_path) {
         ds_asprintf(&file_path_rel, "%s%s", path, dir->d_name);
         if (ignored(file_path)) {
             /* we triggered this event */
-            unignore_path(file_path_rel);
+            unignore_path(file_path);
             goto cleanup;
         }
 
