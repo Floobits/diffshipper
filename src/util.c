@@ -95,7 +95,7 @@ char *escape_data(char *data) {
 
     escaped = malloc(data_len);
 
-    for (i = 0; i < data_len; i++) {
+    for (i = 0; i < data_len - 1; i++) {
         escaped[i + offset] = data[i];
         if (strchr(escape_whitelist, data[i]) == NULL) {
             log_debug("%c not in escape whitelist", data[i]);
@@ -111,9 +111,9 @@ char *escape_data(char *data) {
 }
 
 
-char *unescape_data(char *data) {
+char *unescape_data(char *escaped) {
     /* LOL pranked you */
-    return data;
+    return escaped;
 }
 
 
