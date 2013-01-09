@@ -216,12 +216,11 @@ void apply_patch(buf_t *buf, char *patch_text) {
         file_size += len;
     }
     mf = mmap_file(full_path, file_size, PROT_WRITE | PROT_READ, 0);
-    if (!mf) {
-        /* return to make the static analyzer happy */
-        return die("mmap of %s failed!", full_path);
-    } else if (mf->len < offset) {
+    if (!mf)
+        die("mmap of %s failed!", full_path);
+
+    if (mf->len < offset)
         die("%s is too small to apply patch to!", full_path);
-    }
 
     void *op_point = mf->buf + offset;
     if (len > 0) {
