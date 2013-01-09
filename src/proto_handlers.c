@@ -99,7 +99,6 @@ static void on_patch(json_t *json_obj) {
 
     log_debug("patch for buf %i (%s) from %s (id %i)", buf_id, path, username, user_id);
 
-    ignore_path(path);
     buf_t *buf = get_buf_by_id(buf_id);
     if (buf == NULL) {
         die("we got a patch for a nonexistent buf id: %i", buf_id);
