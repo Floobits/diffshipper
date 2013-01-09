@@ -76,7 +76,7 @@ static int make_patch(void *baton, dmp_operation_t op, const void *data, uint32_
             data_str = malloc(len + 1);
             strncpy(data_str, data, len + 1);
             escaped_data = escape_data(data_str);
-            ds_asprintf(&action_str, "@@ -%u,%lld +%u,%lld @@", (lli_t)offset, len, (lli_t)offset, 0);
+            ds_asprintf(&action_str, "@@ -%u,%lld +%u @@", (lli_t)offset, len, (lli_t)offset);
             ds_asprintf(&cur_patch_str, "%s\n-%s\n", action_str, escaped_data);
         break;
 
@@ -85,7 +85,7 @@ static int make_patch(void *baton, dmp_operation_t op, const void *data, uint32_
             data_str = malloc(len + 1);
             strncpy(data_str, data, len + 1);
             escaped_data = escape_data(data_str);
-            ds_asprintf(&action_str, "@@ -%u,%lld +%u,%lld @@", (lli_t)offset, 0, (lli_t)offset, len);
+            ds_asprintf(&action_str, "@@ -%u +%u,%lld @@", (lli_t)offset, (lli_t)offset, len);
             ds_asprintf(&cur_patch_str, "%s\n+%s\n", action_str, escaped_data);
         break;
 
@@ -192,7 +192,7 @@ void push_changes(const char *base_path, const char *full_path) {
         mf2 = mmap_file(f2, f2_size, 0, 0);
         mf1 = mmap_file(f1, f1_size, PROT_WRITE | PROT_READ, 0);
 
-        if (is_binary(mf1->buf, mf1->len)) {
+        if (is_binary(mf2->buf, mf2->len)) {
             log_debug("%s is binary. skipping", file_path);
             goto diff_cleanup;
         }
