@@ -142,10 +142,7 @@ void save_buf(buf_t *buf) {
 }
 
 
-/*void apply_diff(char *path, dmp_operation_t op, char *buf, size_t len, off_t offset)*/
 void apply_patch(buf_t *buf, char *patch_text) {
-    /* use getline on patch_text to parse offsets */
-    /* un-escape stuff */
     char *full_path;
     int fd;
     struct stat file_stats;
@@ -159,7 +156,7 @@ void apply_patch(buf_t *buf, char *patch_text) {
 
     char *patch_header = strdup(patch_text);
     char *patch_header_end = strchr(patch_header, '\n');
-    char *patch_body = strchr(patch_text, '\n');;
+    char *patch_body = strchr(patch_text, '\n');
     if (patch_header_end != NULL) {
         patch_header_end = '\0';
     } else {
@@ -176,7 +173,8 @@ void apply_patch(buf_t *buf, char *patch_text) {
     }
 
     log_debug("patching %s: %lu bytes at %lu", path, len, offset);
-    log_debug("Patch body: %s", patch_body);
+    char *patch_body_raw = unescape_data(patch_body);
+    log_debug("Patch body: %s", patch_body_raw);
 
     ds_asprintf(&full_path, "%s/%s", opts.path, buf->path);
     ignore_path(full_path);
@@ -222,6 +220,7 @@ void apply_patch(buf_t *buf, char *patch_text) {
     rv = msync(mf->buf, file_size, MS_SYNC);
     log_debug("rv %i wrote %i bytes to %s", rv, file_size, full_path);
     munmap_file(mf);
+    free(patch_body_raw);
     free(mf);
     free(full_path);
 }
