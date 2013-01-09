@@ -112,8 +112,30 @@ char *escape_data(char *data) {
 
 
 char *unescape_data(char *escaped) {
-    /* LOL pranked you */
-    return strdup(escaped);
+    int escaped_len = strlen(escaped);
+    int i;
+    int offset = 0;
+    char escaped_char[3];
+    unsigned int unescaped_char;
+    log_debug("escaped: '%s'", escaped);
+    char *data = strdup(escaped);
+
+    for (i = 0; i < escaped_len; i++) {
+        if (escaped[i] == '%') {
+            /* we assume it's a valid escaped string */
+            strncpy(escaped_char, &escaped[i+1], 3);
+            sscanf(escaped_char, "%02X", &unescaped_char);
+            data[i - offset] = (char)unescaped_char;
+            offset += 2;
+            i += 2;
+        } else {
+            data[i - offset] = escaped[i];
+        }
+    }
+
+    data[i - offset] = '\0';
+    log_debug("unescaped: '%s'", data);
+    return data;
 }
 
 
