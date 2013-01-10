@@ -59,6 +59,7 @@ static int scandir_filter(const char *path, const struct dirent *d, void *baton)
 
 static int make_patch(void *baton, dmp_operation_t op, const void *data, uint32_t len) {
     diff_info_t *di = (diff_info_t*)baton;
+    buf_t *buf = di->buf;
     off_t offset;
     char *data_str = NULL;
     char *action_str = NULL;
@@ -72,7 +73,7 @@ static int make_patch(void *baton, dmp_operation_t op, const void *data, uint32_
         break;
 
         case DMP_DIFF_DELETE:
-            offset = data - di->mf1->buf;
+            offset = data - (void*)buf->buf;
             data_str = malloc(len + 1);
             strncpy(data_str, data, len + 1);
             escaped_data = escape_data(data_str);
@@ -81,7 +82,7 @@ static int make_patch(void *baton, dmp_operation_t op, const void *data, uint32_
         break;
 
         case DMP_DIFF_INSERT:
-            offset = data - di->mf2->buf;
+            offset = data - di->mf->buf;
             data_str = malloc(len + 1);
             strncpy(data_str, data, len + 1);
             escaped_data = escape_data(data_str);
@@ -129,7 +130,6 @@ void push_changes(const char *base_path, const char *full_path) {
         return;
     }
 
-    char *orig_path;
     char *file_path;
     char *file_path_rel;
     struct stat dir_info;
@@ -157,47 +157,34 @@ void push_changes(const char *base_path, const char *full_path) {
             goto cleanup;
         }
 
-        ds_asprintf(&orig_path, "%s%s", TMP_BASE, file_path);
-
         buf_t *buf = get_buf(file_path_rel);
         if (buf == NULL) {
             log_err("buf not found for path %s", file_path_rel);
             goto cleanup;
         }
 
-        const char *f1 = orig_path;
         const char *f2 = file_path;
         dmp_diff *diff = NULL;
         dmp_options opts;
         dmp_options_init(&opts);
 
-        mmapped_file_t *mf1;
-        mmapped_file_t *mf2;
+        mmapped_file_t *mf;
         struct stat file_stats;
-        off_t f1_size;
         off_t f2_size;
 
-        rv = lstat(f1, &file_stats);
-        if (rv) {
-            die("Error lstat()ing file %s.", f1);
-        }
-        f1_size = file_stats.st_size;
         rv = lstat(f2, &file_stats);
         if (rv) {
             die("Error lstat()ing file %s.", f2);
         }
         f2_size = file_stats.st_size;
-        f1_size = f2_size > f1_size ? f2_size : f1_size;
 
-        mf2 = mmap_file(f2, f2_size, 0, 0);
-        mf1 = mmap_file(f1, f1_size, PROT_WRITE | PROT_READ, 0);
-
-        if (is_binary(mf2->buf, mf2->len)) {
+        mf = mmap_file(f2, f2_size, 0, 0);
+        if (is_binary(mf->buf, mf->len)) {
             log_debug("%s is binary. skipping", file_path);
             goto diff_cleanup;
         }
 
-        if (dmp_diff_new(&(diff), &opts, mf1->buf, mf1->len, mf2->buf, mf2->len) != 0)
+        if (dmp_diff_new(&(diff), &opts, buf->buf, buf->len, mf->buf, mf->len) != 0)
             die("dmp_diff_new failed");
 
         if (!diff) {
@@ -206,8 +193,7 @@ void push_changes(const char *base_path, const char *full_path) {
         }
 
         di.buf = buf;
-        di.mf1 = mf1;
-        di.mf2 = mf2;
+        di.mf = mf;
         /* TODO */
         di.patch_str = malloc(10000 * sizeof(char));
         strcpy(di.patch_str, "");
@@ -221,8 +207,7 @@ void push_changes(const char *base_path, const char *full_path) {
             goto diff_cleanup;
         }
 
-        char *md5_before = md5(mf1->buf, mf1->len);
-        char *md5_after = md5(mf2->buf, mf2->len);
+        char *md5_after = md5(mf->buf, mf->len);
 
         send_json(
             "{s:s s:i s:s s:s s:s s:s}",
@@ -230,37 +215,22 @@ void push_changes(const char *base_path, const char *full_path) {
             "id", buf->id,
             "patch", di.patch_str,
             "path", buf->path,
-            "md5_before", md5_before,
+            "md5_before", buf->md5,
             "md5_after", md5_after
         );
 
-        free(md5_before);
         free(md5_after);
         free(di.patch_str);
 
-        if (mf1->len != mf2->len) {
-            if (ftruncate(mf1->fd, mf2->len) != 0) {
-                die("resizing %s failed", f1);
-            }
-            log_debug("resized %s from %u to %u bytes", f1, mf1->len, mf2->len);
-        }
-
-        munmap(mf1->buf, mf1->len);
-        mf1->buf = mmap(0, mf2->len, PROT_WRITE | PROT_READ, MAP_SHARED, mf1->fd, 0);
-        mf1->len = mf2->len;
-        memcpy(mf1->buf, mf2->buf, mf1->len);
-        rv = msync(mf1->buf, mf1->len, MS_SYNC);
-
-        log_debug("rv %i wrote %i bytes to %s", rv, mf1->len, f1);
+        buf->buf = realloc(buf->buf, mf->len + 1);
+        buf->len = mf->len;
+        memcpy(buf->buf, mf->buf, buf->len);
 
         diff_cleanup:;
         if (diff)
             dmp_diff_free(diff);
-        munmap_file(mf1);
-        munmap_file(mf2);
-        free(mf1);
-        free(mf2);
-        free(orig_path);
+        munmap_file(mf);
+        free(mf);
         cleanup:;
         free(file_path);
         free(file_path_rel);
