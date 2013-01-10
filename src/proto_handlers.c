@@ -85,6 +85,7 @@ static void on_patch(json_t *json_obj) {
     char *md5_after;
     char *patch_str;
     char *path;
+    int rv;
 
     parse_json(
         json_obj, "{s:i s:i s:s s:s s:s s:s s:s}",
@@ -102,9 +103,19 @@ static void on_patch(json_t *json_obj) {
     buf_t *buf = get_buf_by_id(buf_id);
     if (buf == NULL) {
         die("we got a patch for a nonexistent buf id: %i", buf_id);
+        return;
     }
-    apply_patch(buf, patch_str);
-    /* TODO: check md5sums */
+    rv = apply_patch(buf, patch_str);
+    if (rv != 1) {
+        send_json("{s:s s:i}", "name", "get_buf", "id", buf_id);
+        return;
+    }
+    if (strcmp(buf->md5, md5_after) != 0) {
+        log_err("Expected md5 %s but got %s after patching", md5_after, buf->md5);
+        send_json("{s:s s:i}", "name", "get_buf", "id", buf_id);
+        return;
+    }
+    save_buf(buf);
 }
 
 

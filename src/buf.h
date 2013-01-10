@@ -22,6 +22,6 @@ buf_t *get_buf_by_id(const int buf_id);
 buf_t *get_buf(const char *path);
 void save_buf(buf_t *buf);
 
-void apply_patch(buf_t *buf, char *patch_text);
+int apply_patch(buf_t *buf, char *patch_text);
 
 #endif

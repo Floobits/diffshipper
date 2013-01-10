@@ -142,16 +142,11 @@ void save_buf(buf_t *buf) {
 }
 
 
-void apply_patch(buf_t *buf, char *patch_text) {
-    char *full_path;
-    int fd;
-    struct stat file_stats;
+int apply_patch(buf_t *buf, char *patch_text) {
     int rv;
-    mmapped_file_t *mf;
-    char *path = buf->path;
 
     lli_t len = 0;
-    lli_t offset = 0;
+    size_t offset = 0;
     int add_len, add_off, del_len, del_off;
 
     char *patch_header = strdup(patch_text);
@@ -184,7 +179,7 @@ void apply_patch(buf_t *buf, char *patch_text) {
         die("FUCK");
     }
 
-    log_debug("patching %s: %li bytes at %li", path, len, offset);
+    log_debug("patching %s: %li bytes at %lu", buf->path, len, offset);
     log_debug("Patch body: %s", patch_body);
     char *patch_row;
     char *insert_data = NULL;
@@ -209,7 +204,7 @@ void apply_patch(buf_t *buf, char *patch_text) {
                 offset += strlen(unescaped);
                 free(unescaped);
                 free(escaped_data);
-                log_debug("offset: %li", offset);
+                log_debug("offset: %lu", offset);
             break;
             case '+':
                 if (insert_data != NULL) {
@@ -235,36 +230,14 @@ void apply_patch(buf_t *buf, char *patch_text) {
         patch_row = strchr(patch_row, '\n');
     }
 
-    ds_asprintf(&full_path, "%s/%s", opts.path, buf->path);
-    ignore_path(full_path);
-    fd = open(full_path, O_WRONLY, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
-    if (fd < 0) {
-        die("Error opening file %s: %s", full_path, strerror(errno));
-    }
+    if (buf->len < offset)
+        die("%s is too small to apply patch to! (%lu bytes, need %lu bytes)", buf->path, buf->len, offset);
 
-    rv = lstat(full_path, &file_stats);
-    if (rv) {
-        die("Error lstat()ing file %s", full_path);
-    }
-
-    off_t file_size = file_stats.st_size;
+    buf->buf = realloc(buf->buf, buf->len + len + 1);
+    void *op_point = buf->buf + offset;
     if (len > 0) {
-        file_size += len;
-    }
-    mf = mmap_file(full_path, file_size, PROT_WRITE | PROT_READ, 0);
-    if (!mf)
-        die("mmap of %s failed!", full_path);
-
-    if (mf->len < offset)
-        die("%s is too small to apply patch to! (%li bytes, need %li bytes)", full_path, mf->len, offset);
-
-    void *op_point = mf->buf + offset;
-    if (len > 0) {
-        if (ftruncate(mf->fd, file_size) != 0) {
-            die("resizing %s failed", full_path);
-        }
-        log_debug("memmove(%u, %u, %u)", (size_t)(op_point + len), (size_t)op_point, (file_size - len) - offset);
-        memmove(op_point + len, op_point, (file_size - len) - offset);
+        log_debug("memmove(%u, %u, %u)", (size_t)(op_point + len), (size_t)op_point, buf->len - offset);
+        memmove(op_point + len, op_point, buf->len - offset);
         if (insert_data) {
             if ((lli_t)strlen(insert_data) != len) {
                 die("insert data is %i bytes but we want to insert %li", strlen(insert_data), len);
@@ -274,19 +247,18 @@ void apply_patch(buf_t *buf, char *patch_text) {
             die("New length is longer but we couldn't find any data to insert!");
         }
     } else if (len < 0) {
-        file_size = mf->len + len;
-        memmove(op_point, op_point - len, file_size - offset);
-        if (ftruncate(mf->fd, file_size) != 0) {
-            die("resizing %s failed", full_path);
-        }
+        memmove(op_point, op_point - len, buf->len + len - offset);
     }
-    log_debug("resized %s to %u bytes", full_path, file_size);
-    rv = msync(mf->buf, file_size, MS_SYNC);
-    log_debug("rv %i wrote %i bytes to %s", rv, file_size, full_path);
-    munmap_file(mf);
+    buf->len += len;
+    buf->buf[buf->len] = '\0';
+
+    log_debug("resized %s to %u bytes", buf->path, buf->len);
     if (insert_data) {
         free(insert_data);
     }
-    free(mf);
-    free(full_path);
+
+    free(buf->md5);
+    buf->md5 = md5(buf->buf, buf->len);
+
+    return 1;
 }
