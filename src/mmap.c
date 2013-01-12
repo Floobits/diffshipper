@@ -69,16 +69,3 @@ void munmap_file(mmapped_file_t *mf) {
     munmap(mf->buf, mf->len);
     close(mf->fd);
 }
-
-
-int msync_file(mmapped_file_t *mf, off_t len) {
-    if (len != mf->len) {
-        if (ftruncate(mf->fd, len) != 0) {
-            die("resizing file failed");
-        }
-        log_debug("resized to %u bytes", len);
-    }
-
-    munmap(mf->buf, mf->len);
-    return msync(mf->buf, len, MS_SYNC);
-}
