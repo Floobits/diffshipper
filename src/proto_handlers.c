@@ -119,6 +119,42 @@ static void on_patch(json_t *json_obj) {
 }
 
 
+static void on_rename_buf(json_t *json_obj) {
+    int buf_id;
+    int user_id;
+    char *username;
+    char *path;
+    char *old_path;
+    buf_t *buf;
+    char *full_path;
+
+    parse_json(json_obj, "{s:i s:s s:s s:i s:s}",
+        "id", &buf_id,
+        "old_path", &old_path,
+        "path", &path,
+        "user_id", &user_id,
+        "username", &username
+    );
+
+    log_debug("user %i %s renamed buf %i from %s to %s", user_id, username, buf_id, old_path, path);
+
+    buf = get_buf_by_id(buf_id);
+    if (buf == NULL) {
+        die("trying to rename a nonexistent buf id: %i", buf_id);
+        return;
+    }
+
+    if (strcmp(old_path, buf->path) != 0) {
+        die("old rename path and buf %i path don't match! old_path: %s, buf path: %s", buf_id, old_path, buf->path);
+    }
+    full_path = get_full_path(buf->path);
+
+    ignore_path(full_path);
+    ignore_path(path);
+    free(full_path);
+}
+
+
 static void on_room_info(json_t *json_obj) {
     const char *buf_id_str;
     json_t *bufs_obj;
@@ -157,6 +193,8 @@ void *remote_change_worker() {
             on_part(json_obj);
         } else if (strcmp(name, "patch") == 0) {
             on_patch(json_obj);
+        } else if (strcmp(name, "rename_buf") == 0) {
+            on_rename_buf(json_obj);
         } else {
             log_err("Unknown event name: %s", name);
         }
