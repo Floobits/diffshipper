@@ -145,6 +145,8 @@ void *remote_change_worker() {
         /* TODO: handle create/rename/delete buf */
         if (strcmp(name, "room_info") == 0) {
             on_room_info(json_obj);
+        } else if (strcmp(name, "create_buf") == 0) {
+            on_get_buf(json_obj);
         } else if (strcmp(name, "get_buf") == 0) {
             on_get_buf(json_obj);
         } else if (strcmp(name, "join") == 0) {
