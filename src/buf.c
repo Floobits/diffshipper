@@ -33,6 +33,13 @@ void cleanup_bufs() {
 }
 
 
+char *get_full_path(char *rel_path) {
+    char *full_path;
+    ds_asprintf(&full_path, "%s/%s", opts.path, rel_path);
+    return full_path;
+}
+
+
 void add_buf_to_bufs(buf_t *buf) {
     size_t i;
 
@@ -108,7 +115,7 @@ void save_buf(buf_t *buf) {
     int rv;
     ssize_t bytes_written;
     log_debug("saving buf %i path %s", buf->id, buf->path);
-    ds_asprintf(&full_path, "%s/%s", opts.path, buf->path);
+    full_path = get_full_path(buf->path);
 
     char *buf_path = strdup(full_path);
     int i;

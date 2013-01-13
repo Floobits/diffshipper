@@ -17,6 +17,8 @@ size_t bufs_size;
 void init_bufs();
 void cleanup_bufs();
 
+char *get_full_path(char *rel_path);
+
 void add_buf_to_bufs(buf_t *buf);
 buf_t *get_buf_by_id(const int buf_id);
 buf_t *get_buf(const char *path);
