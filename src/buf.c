@@ -108,7 +108,6 @@ void save_buf(buf_t *buf) {
     int rv;
     ssize_t bytes_written;
     log_debug("saving buf %i path %s", buf->id, buf->path);
-    /* TODO: not sure if this is right. shouldn't we be writing to both files? */
     ds_asprintf(&full_path, "%s/%s", opts.path, buf->path);
 
     char *buf_path = strdup(full_path);
