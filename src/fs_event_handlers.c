@@ -112,10 +112,10 @@ void push_changes(const char *base_path, const char *full_path) {
     diff_info_t di;
     char *path;
 
-    gettimeofday(&now, NULL);
-
     if (strncmp(base_path, full_path, strlen(base_path)) != 0)
         die("wtf? %s != %s len %li", base_path, full_path, strlen(base_path));
+
+    gettimeofday(&now, NULL);
 
     path = strdup(full_path + strlen(base_path) + 1);
     log_debug("relative path is %s", path);
