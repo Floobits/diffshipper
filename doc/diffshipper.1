@@ -1,7 +1,7 @@
 .\" generated with Ronn/v0.7.3
 .\" http://github.com/rtomayko/ronn/tree/0.7.3
 .
-.TH "DIFFSHIPPER" "1" "December 2012" "" ""
+.TH "DIFFSHIPPER" "1" "January 2013" "" ""
 .
 .SH "NAME"
 \fBdiffshipper\fR \- Floobits diff shipper\. The mediocre fall\-back solution for people with unsupported editors\.
@@ -15,28 +15,34 @@ Join a Floobits room and monitor files in PATH for changes\.
 .SH "OPTIONS"
 .
 .IP "\(bu" 4
-\fB\-D\fR Enable debug output\en\e
+\fB\-\-create\-room\fR Create a room and add PATH
 .
 .IP "\(bu" 4
-\fB\-h HOST\fR Host\en\e
+\fB\-D\fR Enable debug output
 .
 .IP "\(bu" 4
-\fB\-o OWNER\fR Room owner\en\e
+\fB\-h HOST\fR Host
 .
 .IP "\(bu" 4
-\fB\-p PORT\fR Port\en\e
+\fB\-o OWNER\fR Room owner
 .
 .IP "\(bu" 4
-\fB\-r ROOMNAME\fR Room to join\en\e
+\fB\-p PORT\fR Port
 .
 .IP "\(bu" 4
-\fB\-s SECRET\fR API secret\en\e
+\fB\-r ROOMNAME\fR Room to join
 .
 .IP "\(bu" 4
-\fB\-u USERNAME\fR Username\en\e
+\fB\-\-room\-perms PERM\fR Used with \fB\-\-create\-room\fR\. 0 is private, 1 is readable by anyone, 2 is writeable by anyone
 .
 .IP "\(bu" 4
-\fB\-v\fR Print version and exit\en\e
+\fB\-s SECRET\fR API secret
+.
+.IP "\(bu" 4
+\fB\-u USERNAME\fR Username
+.
+.IP "\(bu" 4
+\fB\-v\fR Print version and exit
 .
 .IP "" 0
 .

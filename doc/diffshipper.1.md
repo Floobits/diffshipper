@@ -13,14 +13,16 @@ Join a Floobits room and monitor files in PATH for changes.
 
 ## OPTIONS
 
-  * `-D`                  Enable debug output\n\
-  * `-h HOST`             Host\n\
-  * `-o OWNER`            Room owner\n\
-  * `-p PORT`             Port\n\
-  * `-r ROOMNAME`         Room to join\n\
-  * `-s SECRET`           API secret\n\
-  * `-u USERNAME`         Username\n\
-  * `-v`                  Print version and exit\n\
+  * `--create-room`       Create a room and add PATH
+  * `-D`                  Enable debug output
+  * `-h HOST`             Host
+  * `-o OWNER`            Room owner
+  * `-p PORT`             Port
+  * `-r ROOMNAME`         Room to join
+  * `--room-perms PERM`   Used with `--create-room`. 0 is private, 1 is readable by anyone, 2 is writeable by anyone
+  * `-s SECRET`           API secret
+  * `-u USERNAME`         Username
+  * `-v`                  Print version and exit
 
 
 ## EXAMPLES
