@@ -41,8 +41,14 @@ int api_create_room() {
                  &(req->p_last),
                  CURLFORM_COPYNAME, "username",
                  CURLFORM_COPYCONTENTS, opts.username,
+                 CURLFORM_END);
+    curl_formadd(&(req->p_first),
+                 &(req->p_last),
                  CURLFORM_COPYNAME, "secret",
                  CURLFORM_COPYCONTENTS, opts.secret,
+                 CURLFORM_END);
+    curl_formadd(&(req->p_first),
+                 &(req->p_last),
                  CURLFORM_COPYNAME, "name",
                  CURLFORM_COPYCONTENTS, opts.room,
                  CURLFORM_END);
@@ -72,6 +78,7 @@ int api_create_room() {
       return -1;
     }
 
+    curl_formfree(req->p_first);
     free(url);
     return 0;
 }
