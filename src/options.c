@@ -34,6 +34,7 @@ static void usage() {
 void init_opts() {
     memset(&opts, 0, sizeof(opts));
     opts.mtime = 2; /* seconds */
+    opts.room_perms = -1;
 }
 
 
@@ -45,11 +46,12 @@ void parse_opts(int argc, char **argv) {
     struct option longopts[] = {
         {"create-room", no_argument, NULL, 'c'},
         {"debug", no_argument, NULL, 'D'},
-        {"help", no_argument, NULL, 0 },
+        {"help", no_argument, NULL, 0},
         {"host", required_argument, NULL, 'h'},
         {"owner", required_argument, NULL, 'o'},
         {"port", required_argument, NULL, 'p'},
         {"room", required_argument, NULL, 'r'},
+        {"room-perms", required_argument, NULL, 0},
         {"secret", required_argument, NULL, 's'},
         {"username", required_argument, NULL, 'u'},
         {"version", no_argument, NULL, 'v'},
@@ -89,11 +91,13 @@ void parse_opts(int argc, char **argv) {
                 long_opt = longopts[opt_index].name;
                 if (strcmp(long_opt, "help") == 0) {
                     usage();
-                    break;
+                } else if (strcmp(long_opt, "room-perms") == 0) {
+                    opts.room_perms = atoi(optarg);
                 } else {
                     printf("Unrecognized option: %s\n\n", long_opt);
                     usage();
                 }
+            break;
             default:
                 printf("Unrecognized option: %c\n\n", ch);
                 usage();

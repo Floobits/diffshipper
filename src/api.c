@@ -1,3 +1,5 @@
+#include <stdlib.h>
+
 #include "api.h"
 #include "config.h"
 #include "log.h"
@@ -53,11 +55,13 @@ int api_create_room() {
                  CURLFORM_COPYCONTENTS, opts.room,
                  CURLFORM_END);
 
-    if (opts.room_perms) {
+    if (opts.room_perms >= 0) {
+        char *room_perms;
+        ds_asprintf(&room_perms, "%i", opts.room_perms);
         curl_formadd(&(req->p_first),
                      &(req->p_last),
                      CURLFORM_COPYNAME, "perms",
-                     CURLFORM_COPYCONTENTS, opts.room_perms,
+                     CURLFORM_COPYCONTENTS, room_perms,
                      CURLFORM_END);
     }
 
