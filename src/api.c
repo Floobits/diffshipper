@@ -9,6 +9,11 @@ int api_init() {
 }
 
 
+void api_cleanup() {
+    curl_global_cleanup();
+}
+
+
 int api_create_room() {
     
     return 0;

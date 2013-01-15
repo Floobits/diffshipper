@@ -47,6 +47,9 @@ void init() {
 
     set_log_level(LOG_LEVEL_DEBUG);
 
+    if (api_init())
+        die("api_init failed!");
+
     if (pthread_cond_init(&server_conn_ready, NULL))
         die("pthread_cond_init failed!");
     if (pthread_mutex_init(&server_conn_mtx, NULL))
@@ -60,6 +63,7 @@ void init() {
 
 
 void cleanup() {
+    api_cleanup();
     cleanup_bufs();
     free(opts.path);
     pthread_cond_destroy(&server_conn_ready);
