@@ -16,6 +16,27 @@
 #include "util.h"
 
 
+static void on_delete_buf(json_t *json_obj) {
+    buf_t *buf;
+    int buf_id;
+    int user_id;
+    char *username;
+    char *path;
+
+    parse_json(json_obj, "{s:i s:i s:s s:s}",
+        "id", &buf_id,
+        "user_id", &user_id,
+        "username", &username,
+        "path", &path
+    );
+
+    log_debug("User %s (id %i) deleted buf %i (path %s)", username, user_id, buf_id, path);
+    buf = get_buf_by_id(buf_id);
+    if (buf == NULL)
+        die("tried to delete a buf that doesn't exist. this should never happen!");
+    /* TODO: actually delete the buf */
+}
+
 static void on_get_buf(json_t *json_obj) {
     buf_t *buf;
     buf_t tmp;
@@ -188,6 +209,8 @@ void *remote_change_worker() {
             on_room_info(json_obj);
         } else if (strcmp(name, "create_buf") == 0) {
             on_get_buf(json_obj);
+        } else if (strcmp(name, "delete_buf") == 0) {
+            on_delete_buf(json_obj);
         } else if (strcmp(name, "get_buf") == 0) {
             on_get_buf(json_obj);
         } else if (strcmp(name, "join") == 0) {
