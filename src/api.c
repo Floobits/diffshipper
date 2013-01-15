@@ -1,15 +1,22 @@
 #include "api.h"
+#include "config.h"
 #include "log.h"
 #include "options.h"
+#include "util.h"
+
 
 int api_init() {
+    char *user_agent;
+    ds_asprintf(&user_agent, "Floobits Diffshipper %s", PACKAGE_VERSION);
     curl_global_init(CURL_GLOBAL_ALL);
     req = calloc(1, sizeof(api_req_t));
     req->curl = curl_easy_init();
-    curl_easy_setopt(req->curl, CURLOPT_USERAGENT, "Floobits Diffshipper");
+    curl_easy_setopt(req->curl, CURLOPT_USERAGENT, user_agent);
     /* TODO: verify cert! */
     curl_easy_setopt(req->curl, CURLOPT_SSL_VERIFYPEER, 0L);
     curl_easy_setopt(req->curl, CURLOPT_SSL_VERIFYHOST, 0L);
+
+    free(user_agent);
 
     return 0;
 }
