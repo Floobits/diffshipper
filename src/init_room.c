@@ -32,13 +32,13 @@ void recurse_create_bufs(char *full_path) {
     const char *path_start = full_path;
 
     if (strlen(base_path) > strlen(full_path)) {
-    	die("Base path %s is longer than full path %s!", base_path, full_path);
+        die("Base path %s is longer than full path %s!", base_path, full_path);
     } else if (strcmp(base_path, full_path) == 0) {
-    	log_debug("base path and full path are both %s", base_path);
-    	path = strdup(base_path);
+        log_debug("base path and full path are both %s", base_path);
+        path = strdup(base_path);
     } else {
-	    /* TODO: write a full path -> rel path helper function */
-	    path = strdup(strlen(base_path)); /* skip last char and trailing slash */
+        /* TODO: write a full path -> rel path helper function */
+        path = strdup(strlen(base_path)); /* skip last char and trailing slash */
     }
     log_debug("path is %s", path);
 
