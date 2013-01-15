@@ -10,7 +10,7 @@ typedef struct {
     struct curl_httppost *p_last;
 } api_req_t;
 
-api_req_t req;
+api_req_t *req;
 
 int api_init();
 void api_cleanup();

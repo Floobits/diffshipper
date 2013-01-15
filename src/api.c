@@ -4,11 +4,12 @@
 
 int api_init() {
     curl_global_init(CURL_GLOBAL_ALL);
-    req.curl = curl_easy_init();
-    curl_easy_setopt(req.curl, CURLOPT_USERAGENT, "Floobits Diffshipper");
+    req = calloc(1, sizeof(api_req_t));
+    req->curl = curl_easy_init();
+    curl_easy_setopt(req->curl, CURLOPT_USERAGENT, "Floobits Diffshipper");
     /* TODO: verify cert! */
-    curl_easy_setopt(req.curl, CURLOPT_SSL_VERIFYPEER, 0L);
-    curl_easy_setopt(req.curl, CURLOPT_SSL_VERIFYHOST, 0L);
+    curl_easy_setopt(req->curl, CURLOPT_SSL_VERIFYPEER, 0L);
+    curl_easy_setopt(req->curl, CURLOPT_SSL_VERIFYHOST, 0L);
 
     return 0;
 }
@@ -16,6 +17,7 @@ int api_init() {
 
 void api_cleanup() {
     curl_global_cleanup();
+    free(req);
 }
 
 
@@ -24,15 +26,15 @@ int api_create_room() {
     long http_status;
     CURLcode res;
 
-    curl_easy_setopt(req.curl, CURLOPT_HTTPPOST, req.p_first);
-    curl_easy_setopt(req.curl, CURLOPT_URL, url);
+    curl_easy_setopt(req->curl, CURLOPT_HTTPPOST, req->p_first);
+    curl_easy_setopt(req->curl, CURLOPT_URL, url);
 
-    res = curl_easy_perform(req.curl);
+    res = curl_easy_perform(req->curl);
 
     if (res)
         die("Request failed: %s", curl_easy_strerror(res));
 
-    curl_easy_getinfo(req.curl, CURLINFO_RESPONSE_CODE, &http_status);
+    curl_easy_getinfo(req->curl, CURLINFO_RESPONSE_CODE, &http_status);
 
     log_debug("Got HTTP status code %li\n", http_status);
 
