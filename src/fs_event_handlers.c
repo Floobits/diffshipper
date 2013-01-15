@@ -111,16 +111,14 @@ void push_changes(const char *base_path, const char *full_path) {
     int rv;
     diff_info_t di;
     char *path;
-    const char *path_start = full_path;
 
     gettimeofday(&now, NULL);
 
-    /* TODO: this is totally buggy */
-    for (i = 0; base_path[i] == full_path[i] && i < (int)strlen(base_path); i++) {
-        path_start = full_path + i;
-    }
-    path = strdup(path_start + 2); /* skip last char and trailing slash */
-    log_debug("path is %s", path);
+    if (strncmp(base_path, full_path, strlen(base_path)) != 0)
+        die("wtf? %s != %s len %li", base_path, full_path, strlen(base_path));
+
+    path = strdup(full_path + strlen(base_path) + 1);
+    log_debug("relative path is %s", path);
 
     results = ds_scandir(full_path, &dir_list, &scandir_filter, &full_path);
     if (results == -1) {
