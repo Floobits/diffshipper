@@ -26,7 +26,7 @@ struct timeval now;
 
 
 static int scandir_filter(const char *path, const struct dirent *d, void *baton) {
-    log_debug("Examining %s", d->d_name);
+    log_debug("Examining %s/%s", path, d->d_name);
     if (d->d_name[0] == '.')
         return 0;
 
