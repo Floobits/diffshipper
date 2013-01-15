@@ -63,6 +63,7 @@ int api_create_room() {
                      CURLFORM_COPYNAME, "perms",
                      CURLFORM_COPYCONTENTS, room_perms,
                      CURLFORM_END);
+        free(room_perms);
     }
 
     curl_easy_setopt(req->curl, CURLOPT_HTTPPOST, req->p_first);
