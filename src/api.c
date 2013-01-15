@@ -62,8 +62,10 @@ int api_create_room() {
     log_debug("Got HTTP status code %li\n", http_status);
 
     if (http_status <= 199 || http_status > 299) {
-      if (http_status == 403) {
+      if (http_status == 401) {
           log_err("Access denied. Probably a bad username or API secret.");
+      } else if (http_status == 403) {
+          log_err("You don't have permission to create this room.");
       } else if (http_status == 409) {
           log_err("You already have a room with the same name!");
       }
