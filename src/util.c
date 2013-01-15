@@ -85,27 +85,26 @@ int ignored(const char *path) {
 }
 
 
-char *escape_data(char *data) {
+char *escape_data(const char *data, int len) {
     const char escape_whitelist[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789;,/?:@&=+$-_.!~*'()\0";
     char *escaped;
-    int data_len = strlen(data);
     int i;
     int offset = 0;
     char *escaped_char;
 
-    escaped = malloc(data_len + 1);
+    escaped = malloc(len + 1);
 
-    for (i = 0; i < data_len; i++) {
+    for (i = 0; i < len; i++) {
         escaped[i + offset] = data[i];
         if (strchr(escape_whitelist, data[i]) == NULL) {
             ds_asprintf(&escaped_char, "%%%02X", data[i]);
-            escaped = realloc(escaped, data_len + 1 + offset + strlen(escaped_char));
+            escaped = realloc(escaped, len + 1 + offset + strlen(escaped_char));
             strcpy(&escaped[i + offset], escaped_char);
             offset += strlen(escaped_char);
             free(escaped_char);
         }
     }
-    escaped[data_len + offset] = '\0';
+    escaped[len + offset] = '\0';
     log_debug("escaped: %s", escaped);
     return escaped;
 }
