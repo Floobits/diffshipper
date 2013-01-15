@@ -40,6 +40,7 @@ void parse_opts(int argc, char **argv) {
     int opt_index = 0;
 
     struct option longopts[] = {
+        {"create-room", no_argument, NULL, 'c'},
         {"debug", no_argument, NULL, 'D'},
         {"host", required_argument, NULL, 'h'},
         {"owner", required_argument, NULL, 'o'},
@@ -53,6 +54,9 @@ void parse_opts(int argc, char **argv) {
 
     while ((ch = getopt_long(argc, argv, "Dh:o:p:r:s:u:v", longopts, &opt_index)) != -1) {
         switch (ch) {
+            case 'c':
+                opts.create_room = 1;
+            break;
             case 'D':
                 set_log_level(LOG_LEVEL_DEBUG);
             case 'h':

@@ -13,6 +13,7 @@
 #include <CoreServices/CoreServices.h>
 #endif
 
+#include "api.h"
 #include "buf.h"
 #include "fs_event_handlers.h"
 #include "log.h"
@@ -76,6 +77,12 @@ int main(int argc, char **argv) {
     init_opts();
     parse_opts(argc, argv);
     path = opts.path;
+
+    if (opts.create_room) {
+        rv = api_create_room();
+        if (rv)
+            die("Couldn't create room");
+    }
 
     log_msg("Watching %s", path);
 

@@ -10,6 +10,7 @@ typedef struct {
     char *secret;
     char *owner;
     char *room;
+    int create_room;
 } options_t;
 
 options_t opts;
