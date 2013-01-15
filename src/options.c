@@ -16,11 +16,13 @@ static void print_version() {
 static void usage() {
     printf("Usage: diffshipper [OPTIONS] PATH\n\
 \n\
+    --create-room       Create a room and add PATH\n\
     -D                  Enable debug output\n\
     -h HOST             Host\n\
     -o OWNER            Room owner\n\
     -p PORT             Port\n\
     -r ROOMNAME         Room to join\n\
+    --room-perms PERM   Used with --create-room. 0 = private, 1 = readable by anyone, 2 = writeable by anyone\n\
     -s SECRET           API secret\n\
     -u USERNAME         Username\n\
     -v                  Print version and exit\n\
@@ -37,11 +39,13 @@ void init_opts() {
 
 void parse_opts(int argc, char **argv) {
     char ch;
+    const char *long_opt;
     int opt_index = 0;
 
     struct option longopts[] = {
         {"create-room", no_argument, NULL, 'c'},
         {"debug", no_argument, NULL, 'D'},
+        {"help", no_argument, NULL, 0 },
         {"host", required_argument, NULL, 'h'},
         {"owner", required_argument, NULL, 'o'},
         {"port", required_argument, NULL, 'p'},
@@ -81,6 +85,15 @@ void parse_opts(int argc, char **argv) {
                 print_version();
                 exit(0);
             break;
+            case 0: /* Long option */
+                long_opt = longopts[opt_index].name;
+                if (strcmp(long_opt, "help") == 0) {
+                    usage();
+                    break;
+                } else {
+                    printf("Unrecognized option: %s\n\n", long_opt);
+                    usage();
+                }
             default:
                 printf("Unrecognized option: %c\n\n", ch);
                 usage();

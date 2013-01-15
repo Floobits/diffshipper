@@ -11,6 +11,7 @@ typedef struct {
     char *owner;
     char *room;
     int create_room;
+    int room_perms;
 } options_t;
 
 options_t opts;

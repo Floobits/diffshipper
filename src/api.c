@@ -53,7 +53,13 @@ int api_create_room() {
                  CURLFORM_COPYCONTENTS, opts.room,
                  CURLFORM_END);
 
-    /* TODO: set perms when creating room */
+    if (opts.room_perms) {
+        curl_formadd(&(req->p_first),
+                     &(req->p_last),
+                     CURLFORM_COPYNAME, "perms",
+                     CURLFORM_COPYCONTENTS, opts.room_perms,
+                     CURLFORM_END);
+    }
 
     curl_easy_setopt(req->curl, CURLOPT_HTTPPOST, req->p_first);
     curl_easy_setopt(req->curl, CURLOPT_URL, url);
