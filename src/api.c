@@ -16,6 +16,8 @@ int api_init() {
     curl_easy_setopt(req->curl, CURLOPT_SSL_VERIFYPEER, 0L);
     curl_easy_setopt(req->curl, CURLOPT_SSL_VERIFYHOST, 0L);
 
+    curl_easy_setopt(req->curl, CURLOPT_VERBOSE, 1);
+
     free(user_agent);
 
     return 0;
@@ -32,6 +34,20 @@ int api_create_room() {
     char *url;
     long http_status;
     CURLcode res;
+
+    ds_asprintf(&url, "http://%s:8000/api/room/", opts.host);
+
+    curl_formadd(&(req->p_first),
+                 &(req->p_last),
+                 CURLFORM_COPYNAME, "username",
+                 CURLFORM_COPYCONTENTS, opts.username,
+                 CURLFORM_COPYNAME, "secret",
+                 CURLFORM_COPYCONTENTS, opts.secret,
+                 CURLFORM_COPYNAME, "name",
+                 CURLFORM_COPYCONTENTS, opts.room,
+                 CURLFORM_END);
+
+    /* TODO: set perms when creating room */
 
     curl_easy_setopt(req->curl, CURLOPT_HTTPPOST, req->p_first);
     curl_easy_setopt(req->curl, CURLOPT_URL, url);
