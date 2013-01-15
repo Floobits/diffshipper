@@ -14,11 +14,11 @@
 
 #include "buf.h"
 #include "fs_event_handlers.h"
-#include "mmap.h"
 #include "log.h"
+#include "mmap.h"
 #include "net.h"
-#include "scandir.h"
 #include "options.h"
+#include "scandir.h"
 #include "util.h"
 
 
