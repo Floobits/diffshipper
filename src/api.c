@@ -35,7 +35,7 @@ int api_create_room() {
     long http_status;
     CURLcode res;
 
-    ds_asprintf(&url, "http://%s:8000/api/room/", opts.host);
+    ds_asprintf(&url, "https://%s/api/room/", opts.host);
 
     curl_formadd(&(req->p_first),
                  &(req->p_last),

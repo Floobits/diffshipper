@@ -115,6 +115,7 @@ void push_changes(const char *base_path, const char *full_path) {
 
     gettimeofday(&now, NULL);
 
+    /* TODO: this is totally buggy */
     for (i = 0; base_path[i] == full_path[i] && i < (int)strlen(base_path); i++) {
         path_start = full_path + i;
     }
