@@ -16,7 +16,6 @@
 #include "api.h"
 #include "buf.h"
 #include "fs_event_handlers.h"
-#include "init_room.h"
 #include "log.h"
 #include "net.h"
 #include "proto_handlers.h"
@@ -94,10 +93,6 @@ int main(int argc, char **argv) {
     rv = server_connect(opts.host, opts.port);
     if (rv)
         die("Couldn't connect to server");
-
-    if (opts.create_room) {
-        recurse_create_bufs(opts.path);
-    }
 
 #ifdef INOTIFY
     log_debug("Using Inotify to watch for changes.");

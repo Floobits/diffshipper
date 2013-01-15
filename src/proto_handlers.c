@@ -8,8 +8,10 @@
 #include <jansson.h>
 
 #include "buf.h"
+#include "init_room.h"
 #include "log.h"
 #include "net.h"
+#include "options.h"
 #include "proto_handlers.h"
 #include "util.h"
 
@@ -162,6 +164,9 @@ static void on_room_info(json_t *json_obj) {
     parse_json(json_obj, "{s:o}", "bufs", &bufs_obj);
     json_object_foreach(bufs_obj, buf_id_str, buf_obj) {
         send_json("{s:s s:i}", "name", "get_buf", "id", atoi(buf_id_str));
+    }
+    if (opts.create_room) {
+        recurse_create_bufs(opts.path, 0);
     }
 }
 
