@@ -10,7 +10,7 @@ This program monitors a directory for changed files using [FSEvents](http://en.w
 ## Build Instructions
 
 ### Dependencies
-To build, you'll need automake, [Jansson](http://www.digip.org/jansson/)>=2.4, pthreads, and pkg-config. Linux users also need libinotifytools-dev.
+To build, you'll need automake, [Jansson](http://www.digip.org/jansson/)>=2.4, pthreads, and pkg-config. Linux users also need libinotifytools-dev. Diffshipper also relies on [diff-match-patch-c](https://github.com/ggreer/diff-match-patch-c), but it comes bundled as a submodule in extern.
 
 #### OS X
 
@@ -32,7 +32,7 @@ Again this requires Jansson version 2.4 or greater. If you have an older version
 
 ## Usage
 
-Running the diffshipper requires certain arguments: `-r` is the room name, `-o` is the room owner, `-u` is your Floobits username, and `-s` is your Floobits API secret. You can find (and reset) your secret on [your setting page](https://floobits.com/dash/settings/).
+Running the diffshipper requires certain arguments: `-r` is the room name, `-o` is the room owner, `-u` is your Floobits username, and `-s` is your Floobits API secret. You can find (and reset) your secret on [your settings page](https://floobits.com/dash/settings/).
 
 ### Join a room
 
