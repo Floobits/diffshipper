@@ -26,7 +26,7 @@ struct timeval now;
 
 
 static int scandir_filter(const char *path, const struct dirent *d, void *baton) {
-    log_debug("Examining %s/%s", path, d->d_name);
+    log_debug("Examining %s%s", path, d->d_name);
     if (d->d_name[0] == '.')
         return 0;
 
@@ -111,7 +111,7 @@ void push_changes(const char *base_path, const char *full_path) {
 
     gettimeofday(&now, NULL);
 
-    path = strdup(full_path + strlen(base_path) + 1);
+    path = strdup(full_path + strlen(base_path) + 1); /* Skip trailing slash in full_path */
     log_debug("relative path is %s", path);
 
     results = ds_scandir(full_path, &dir_list, &scandir_filter, &full_path);
