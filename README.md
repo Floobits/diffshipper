@@ -10,7 +10,7 @@ This program monitors a directory for changed files using [FSEvents](http://en.w
 ## Build Instructions
 
 ### Dependencies
-To build, you'll need automake, [Jansson](http://www.digip.org/jansson/)>=2.4, pthreads, and pkg-config. Linux users also need libinotifytools-dev. Diffshipper also relies on [diff-match-patch-c](https://github.com/ggreer/diff-match-patch-c), but it comes bundled as a submodule in extern.
+To build, you'll need automake, [Jansson](http://www.digip.org/jansson/)>=2.4, [libcurl](http://curl.haxx.se/libcurl/), pthreads, and pkg-config. Linux users need libinotifytools-dev. Diffshipper also relies on [diff-match-patch-c](https://github.com/ggreer/diff-match-patch-c), but it comes bundled as a submodule in extern.
 
 #### OS X
 
@@ -18,7 +18,7 @@ To build, you'll need automake, [Jansson](http://www.digip.org/jansson/)>=2.4, p
 
 #### Ubuntu
 
-    apt-get install -y automake build-essential libinotifytools-dev libjansson-dev pkg-config
+    apt-get install -y automake build-essential libcurl4-openssl-dev libinotifytools-dev libjansson-dev pkg-config
 
 ### Building
 
@@ -27,7 +27,7 @@ To build, you'll need automake, [Jansson](http://www.digip.org/jansson/)>=2.4, p
     git submodule update --init
     ./autogen.sh
 
-This requires Jansson version 2.4 or greater. If you have an older version of Ubuntu, `apt-get` might install an incompatible version of Jansson. If this happens, you'll have to `apt-get purge libjansson-dev` and install [Jansson](http://www.digip.org/jansson/) from source.
+Building requires Jansson version 2.4 or greater. If you have an older version of Ubuntu, `apt-get` might install an incompatible version of Jansson. If this happens, you'll have to `apt-get purge libjansson-dev` and install [Jansson](http://www.digip.org/jansson/) from source.
 
 
 ## Usage
@@ -43,4 +43,3 @@ Running the diffshipper requires certain arguments: `-r` is the room name, `-o` 
     diffshipper --create-room --room-perms 2 -r new_room -o myusername -u myusername -s 6kht3k8t4 ~/code/project
 
 `man diffshipper` for more info and examples.
-
