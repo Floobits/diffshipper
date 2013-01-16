@@ -24,10 +24,18 @@ void init_bufs() {
 }
 
 
+static void free_buf(buf_t *buf) {
+    free(buf->buf);
+    free(buf->md5);
+    free(buf->path);
+    free(buf);
+}
+
+
 void cleanup_bufs() {
     size_t i;
     for (i = 0; i < bufs_len; i++) {
-        free(bufs[i]);
+        free_buf(bufs[i]);
     }
     free(bufs);
 }
@@ -37,27 +45,6 @@ char *get_full_path(char *rel_path) {
     char *full_path;
     ds_asprintf(&full_path, "%s/%s", opts.path, rel_path);
     return full_path;
-}
-
-
-void add_buf_to_bufs(buf_t *buf) {
-    size_t i;
-
-    bufs_len++;
-
-    if (bufs_len > bufs_size) {
-        bufs_size *= 1.5;
-        bufs = realloc(bufs, bufs_size * sizeof(buf_t*));
-    }
-
-    for (i = bufs_len - 1; i > 0; i--) {
-        if (buf->id > bufs[i-1]->id) {
-            break;
-        }
-        bufs[i] = bufs[i-1];
-    }
-    bufs[i] = buf;
-    log_debug("added buf id %i to position %i", buf->id, i);
 }
 
 
@@ -106,6 +93,48 @@ buf_t *get_buf(const char *path) {
     }
 
     return buf;
+}
+
+
+void add_buf_to_bufs(buf_t *buf) {
+    size_t i;
+
+    bufs_len++;
+
+    if (bufs_len > bufs_size) {
+        bufs_size *= 1.5;
+        bufs = realloc(bufs, bufs_size * sizeof(buf_t*));
+    }
+
+    for (i = bufs_len - 1; i > 0; i--) {
+        if (buf->id > bufs[i-1]->id) {
+            break;
+        }
+        bufs[i] = bufs[i-1];
+    }
+    bufs[i] = buf;
+    log_debug("added buf id %i to position %i", buf->id, i);
+}
+
+
+void delete_buf(buf_t *buf) {
+    int index;
+    size_t i;
+
+    index = binary_search(buf->id, 0, bufs_len);
+    if (index < 0) {
+        die("couldn't find buf id %i", buf->id);
+    }
+
+    free_buf(bufs[index]);
+
+    if (bufs_len > 0) {
+        /* Shift everything after */
+        bufs_len--;
+        for (i = index; i < bufs_len; i++) {
+            bufs[i] = bufs[i+1];
+        }
+    }
 }
 
 

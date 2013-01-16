@@ -34,7 +34,8 @@ static void on_delete_buf(json_t *json_obj) {
     buf = get_buf_by_id(buf_id);
     if (buf == NULL)
         die("tried to delete a buf that doesn't exist. this should never happen!");
-    /* TODO: actually delete the buf */
+
+    delete_buf(buf);
 }
 
 static void on_get_buf(json_t *json_obj) {
