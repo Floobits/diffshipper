@@ -46,7 +46,7 @@ void recurse_create_bufs(char *full_path, int depth) {
         die("wtf? %s != %s len %li", opts.path, full_path, strlen(opts.path));
         return;
     } else {
-        rel_path = strdup(full_path + strlen(opts.path) + 1); /* skip last char and trailing slash */
+        ds_asprintf(&rel_path, "%s/", full_path + strlen(opts.path) + 1); /* skip slash */
     }
     log_debug("path is %s", rel_path);
 
@@ -91,6 +91,10 @@ void recurse_create_bufs(char *full_path, int depth) {
             die("Error lstat()ing file %s.", file_path);
 
         mf = mmap_file(file_path, file_info.st_size, 0, 0);
+        if (!mf) {
+            log_err("Couldn't open file %s. Skipping.", file_path);
+            goto cleanup;
+        }
         if (is_binary(mf->buf, mf->len)) {
             log_debug("%s is binary. skipping", file_path);
         } else {
