@@ -27,7 +27,7 @@ To build, you'll need automake, [Jansson](http://www.digip.org/jansson/)>=2.4, p
     git submodule update --init
     ./autogen.sh
 
-Again this requires Jansson version 2.4 or greater. If you have an older version of Ubuntu, `apt-get` might install an incompatible version of Jansson. If this happens, you'll have to `apt-get purge libjansson-dev` and install [Jansson](http://www.digip.org/jansson/) from source.
+This requires Jansson version 2.4 or greater. If you have an older version of Ubuntu, `apt-get` might install an incompatible version of Jansson. If this happens, you'll have to `apt-get purge libjansson-dev` and install [Jansson](http://www.digip.org/jansson/) from source.
 
 
 ## Usage
