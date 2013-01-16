@@ -64,7 +64,7 @@ void recurse_create_bufs(char *full_path, int depth) {
     mmapped_file_t *mf;
     struct stat dir_info;
     struct stat file_info;
-    char *escaped_buf;
+    char *buf_str;
 
     for (i = 0; i < results; i++) {
         dir = dir_list[i];
@@ -98,14 +98,15 @@ void recurse_create_bufs(char *full_path, int depth) {
         if (is_binary(mf->buf, mf->len)) {
             log_debug("%s is binary. skipping", file_path);
         } else {
-            escaped_buf = escape_data(mf->buf, mf->len);
+            buf_str = malloc(mf->len + 1);
+            strncpy(buf_str, mf->buf, mf->len);
             send_json(
                 "{s:s s:s s:s}",
                 "name", "create_buf",
                 "path", file_path_rel,
-                "buf", escaped_buf
+                "buf", buf_str
             );
-            free(escaped_buf);
+            free(buf_str);
         }
 
         munmap_file(mf);
