@@ -13,8 +13,5 @@ aclocal $AC_SEARCH_OPTS && \
 autoconf && \
 autoheader && \
 automake --add-missing && \
-cd extern/diff-match-patch-c && \
-make && \
-cd ../.. && \
 ./configure && \
 make
