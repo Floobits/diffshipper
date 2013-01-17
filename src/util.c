@@ -222,7 +222,7 @@ char *md5(void *buf, size_t len) {
     md5_append(&md5_state, buf, len);
     md5_finish(&md5_state, md5);
 
-    char *md5_hex = malloc(sizeof(char) * 33);
+    char *md5_hex = malloc(33);
     md5_hex[32] = '\0';
     int i;
     for (i = 0; i < 16; i++) {

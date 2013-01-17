@@ -62,9 +62,9 @@ static int make_patch(void *baton, dmp_operation_t op, const void *data, uint32_
     buf_t *buf = di->buf;
     off_t offset;
     char *action_str = NULL;
-    char *patch_str = di->patch_str;
     char *cur_patch_str;
     char *escaped_data = NULL;
+    size_t patch_len;
 
     switch (op) {
         case DMP_DIFF_EQUAL:
@@ -89,8 +89,12 @@ static int make_patch(void *baton, dmp_operation_t op, const void *data, uint32_
             die("WTF?!?!");
     }
     log_debug("cur_patch_str: %s", cur_patch_str);
-    /* TODO: check that cur_patch_str fits in patch_str */
-    strcat(patch_str, cur_patch_str);
+    patch_len = strlen(cur_patch_str) + strlen(di->patch) + 1;
+    if (patch_len > di->patch_size) {
+        di->patch = realloc(di->patch, patch_len);
+        di->patch_size = patch_len;
+    }
+    strcat(di->patch, cur_patch_str);
     if (escaped_data)
         free(escaped_data);
     free(action_str);
@@ -188,15 +192,15 @@ void push_changes(const char *base_path, const char *full_path) {
 
         di.buf = buf;
         di.mf = mf;
-        /* TODO */
-        di.patch_str = malloc(10000 * sizeof(char));
-        strcpy(di.patch_str, "");
+        di.patch_size = 100;
+        di.patch = malloc(di.patch_size);
+        strcpy(di.patch, "");
 
         dmp_diff_print_raw(stdout, diff);
 
         dmp_diff_foreach(diff, make_patch, &di);
 
-        if (strlen(di.patch_str) == 0) {
+        if (strlen(di.patch) == 0) {
             log_debug("no change. not sending patch");
             goto diff_cleanup;
         }
@@ -207,14 +211,14 @@ void push_changes(const char *base_path, const char *full_path) {
             "{s:s s:i s:s s:s s:s s:s}",
             "name", "patch",
             "id", buf->id,
-            "patch", di.patch_str,
+            "patch", di.patch,
             "path", buf->path,
             "md5_before", buf->md5,
             "md5_after", md5_after
         );
 
         free(md5_after);
-        free(di.patch_str);
+        free(di.patch);
 
         buf->buf = realloc(buf->buf, mf->len + 1);
         buf->len = mf->len;
