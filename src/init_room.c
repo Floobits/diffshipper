@@ -100,6 +100,7 @@ void recurse_create_bufs(char *full_path, int depth) {
         } else {
             buf_str = malloc(mf->len + 1);
             strncpy(buf_str, mf->buf, mf->len);
+            buf_str[mf->len] = '\0';
             send_json(
                 "{s:s s:s s:s}",
                 "name", "create_buf",
