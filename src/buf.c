@@ -179,121 +179,99 @@ void save_buf(buf_t *buf) {
 
 int apply_patch(buf_t *buf, char *patch_text) {
     int rv;
-
-    lli_t len = 0;
-    size_t offset = 0;
-    int add_len, add_off, del_len, del_off;
+    size_t add_len, add_off, del_len, del_off;
 
     char *patch_header = strdup(patch_text);
     char *patch_header_end = strchr(patch_header, '\n');
     char *patch_body = strchr(patch_text, '\n');
-    if (patch_header_end != NULL) {
+
+    if (patch_header_end != NULL)
         *patch_header_end = '\0';
-    } else {
+    else
         die("Couldn't find newline in patch!");
-    }
-    rv = sscanf(patch_header, "@@ -%i,%i +%i,%i @@", &del_off, &del_len, &add_off, &add_len);
+
+    rv = sscanf(patch_header, "@@ -%lu,%lu +%lu,%lu @@", &del_off, &del_len, &add_off, &add_len);
     if (rv != 4) {
-        rv = sscanf(patch_header, "@@ -%i +%i,%i @@", &del_off, &add_off, &add_len);
-        del_len = 0;
+        rv = sscanf(patch_header, "@@ -%lu +%lu,%lu @@", &del_len, &add_off, &add_len);
+        del_off = 0;
         if (rv != 3) {
-            rv = sscanf(patch_header, "@@ -%i,%i +%i @@", &del_off, &del_len, &add_off);
-            add_len = 0;
+            rv = sscanf(patch_header, "@@ -%lu,%lu +%lu @@", &del_off, &del_len, &add_len);
+            add_off = 0;
         }
-        if (rv != 3) {
-            log_debug("rv %i @@ -%i,%i +%i,%i @@", rv, del_off, del_len, add_off, add_len);
-            die("Couldn't sscanf patch");
-        }
+        if (rv != 3)
+            die("Couldn't sscanf patch: rv %i @@ -%lu,%lu +%lu,%lu @@", rv, del_off, del_len, add_off, add_len);
     }
     free(patch_header);
 
     log_debug("rv %i @@ -%i,%i +%i,%i @@", rv, del_off, del_len, add_off, add_len);
-    len = add_len - del_len;
-    offset = del_off - 1;
-
-    log_debug("patching %s: %li bytes at %lu", buf->path, len, offset);
+    log_debug("patching %s: adding %lu bytes at %lu, deleting %lu bytes at %lu", buf->path, add_len, add_off, del_len, del_off);
     log_debug("Patch body: %s", patch_body);
-    if (del_off != add_off) {
-        die("FUCK");
-    }
-    char *patch_row;
-    char *insert_data = NULL;
+
+    char *patch_row = strchr(patch_body, '\n');
     char *unescaped;
     char *escaped_data;
     char *escaped_data_end;
-    patch_row = strchr(patch_body, '\n');
-    int ignore_context = 0;
+    size_t offset = 0;
+    void *op_point;
     while (patch_row != NULL) {
         patch_row++;
         log_debug("patch row: %s", patch_row);
+        escaped_data = strdup(patch_row + 1);
+        escaped_data_end = strchr(escaped_data, '\n');
+        if (escaped_data_end != NULL) {
+            *escaped_data_end = '\0';
+        }
+        unescaped = unescape_data(escaped_data);
+
         switch (patch_row[0]) {
             case ' ':
-                if (ignore_context)
-                    break;
-                escaped_data = strdup(patch_row + 1);
-                escaped_data_end = strchr(escaped_data, '\n');
-                if (escaped_data_end != NULL) {
-                    *escaped_data_end = '\0';
-                }
-                unescaped = unescape_data(escaped_data);
                 offset += strlen(unescaped);
-                free(unescaped);
-                free(escaped_data);
                 log_debug("offset: %lu", offset);
             break;
             case '+':
-                if (insert_data != NULL) {
-                    die("insert data already contained data: %s", insert_data);
+                if (unescaped == NULL) {
+                    die("No data to insert!");
+                    return 0; /* make static analyzer happy */
                 }
-                escaped_data = strdup(patch_row + 1);
-                escaped_data_end = strchr(escaped_data, '\n');
-                if (escaped_data_end != NULL) {
-                    *escaped_data_end = '\0';
-                }
-                insert_data = unescape_data(escaped_data);
-                free(escaped_data);
-                ignore_context = 1;
+
+                add_len -= offset;
+                buf->len += add_len;
+                buf->buf = realloc(buf->buf, buf->len);
+                op_point = buf->buf + add_off;
+                log_debug("memmove(%u, %u, %u)", add_off + add_len, add_off, add_len);
+                memmove(op_point + add_len, op_point, add_len);
+
+                if (strlen(unescaped) != add_len)
+                    die("insert data is %lu bytes but we want to insert %lu", strlen(unescaped), add_len);
+
+                memcpy(op_point, unescaped, add_len);
             break;
             case '-':
-                ignore_context = 1;
+                del_len -= offset;
+                op_point = buf->buf + del_off;
+                log_debug("memmove(%u, %u, %u)", del_off, del_off + del_len, del_len);
+                memmove(op_point, op_point + del_len, del_len);
+                buf->len -= del_len;
+                buf->buf = realloc(buf->buf, buf->len);
             break;
             default:
-                if (strlen(patch_row) != 0) {
+                if (strlen(patch_row) != 0)
                     die("BAD PATCH");
-                }
         }
+        free(unescaped);
+        free(escaped_data);
         patch_row = strchr(patch_row, '\n');
     }
 
-    if (buf->len < offset)
-        die("%s is too small to apply patch to! (%lu bytes, need %lu bytes)", buf->path, buf->len, offset);
-
-    buf->buf = realloc(buf->buf, buf->len + len + 1);
-    void *op_point = buf->buf + offset;
-    if (len > 0) {
-        log_debug("memmove(%u, %u, %u)", (size_t)(op_point + len), (size_t)op_point, buf->len - offset);
-        memmove(op_point + len, op_point, buf->len - offset);
-        if (insert_data) {
-            if ((lli_t)strlen(insert_data) != len) {
-                die("insert data is %i bytes but we want to insert %li", strlen(insert_data), len);
-            }
-            memcpy(op_point, insert_data, len);
-        } else {
-            die("New length is longer but we couldn't find any data to insert!");
-        }
-    } else if (len < 0) {
-        memmove(op_point, op_point - len, buf->len + len - offset);
-    }
-    buf->len += len;
-    buf->buf[buf->len] = '\0';
-
-    log_debug("resized %s to %u bytes", buf->path, buf->len);
-    if (insert_data) {
-        free(insert_data);
+    if (buf->buf[buf->len] != '\0') {
+        log_err("OMG buf isn't null terminated");
+        buf->buf[buf->len] = '\0';
     }
 
     free(buf->md5);
     buf->md5 = md5(buf->buf, buf->len);
+
+    log_debug("buf: %s", buf->buf);
 
     return 1;
 }
