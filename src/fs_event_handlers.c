@@ -64,7 +64,7 @@ static int make_patch(void *baton, dmp_operation_t op, const void *data, uint32_
     char *action_str = NULL;
     char *patch_str = di->patch_str;
     char *cur_patch_str;
-    char *escaped_data;
+    char *escaped_data = NULL;
 
     switch (op) {
         case DMP_DIFF_EQUAL:
@@ -91,7 +91,8 @@ static int make_patch(void *baton, dmp_operation_t op, const void *data, uint32_
     log_debug("cur_patch_str: %s", cur_patch_str);
     /* TODO: check that cur_patch_str fits in patch_str */
     strcat(patch_str, cur_patch_str);
-    free(escaped_data);
+    if (escaped_data)
+        free(escaped_data);
     free(action_str);
     return 0;
 }
