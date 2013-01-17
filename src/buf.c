@@ -210,12 +210,12 @@ int apply_patch(buf_t *buf, char *patch_text) {
     log_debug("rv %i @@ -%i,%i +%i,%i @@", rv, del_off, del_len, add_off, add_len);
     len = add_len - del_len;
     offset = del_off - 1;
-    if (del_off != add_off) {
-        die("FUCK");
-    }
 
     log_debug("patching %s: %li bytes at %lu", buf->path, len, offset);
     log_debug("Patch body: %s", patch_body);
+    if (del_off != add_off) {
+        die("FUCK");
+    }
     char *patch_row;
     char *insert_data = NULL;
     char *unescaped;
