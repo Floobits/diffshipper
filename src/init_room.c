@@ -90,6 +90,9 @@ void recurse_create_bufs(char *full_path, int depth) {
         if (rv)
             die("Error lstat()ing file %s.", file_path);
 
+        if (file_info.st_size == 0)
+            goto cleanup;
+
         mf = mmap_file(file_path, file_info.st_size, 0, 0);
         if (!mf) {
             log_err("Couldn't open file %s. Skipping.", file_path);
