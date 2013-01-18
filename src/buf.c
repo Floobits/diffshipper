@@ -217,7 +217,9 @@ int apply_patch(buf_t *buf, char *patch_text) {
     void *op_point;
     while (patch_row != NULL) {
         patch_row++;
-        log_debug("patch row: %s", patch_row);
+        log_debug("patch row: \"%s\"", patch_row);
+        if (*patch_row == '\0')
+            break;
         escaped_data = strdup(patch_row + 1);
         escaped_data_end = strchr(escaped_data, '\n');
         if (escaped_data_end != NULL) {
@@ -235,7 +237,6 @@ int apply_patch(buf_t *buf, char *patch_text) {
                     die("No data to insert!");
                     return 0; /* make static analyzer happy */
                 }
-
                 add_len = strlen(unescaped);
                 add_off += offset;
                 buf->len += add_len;
@@ -247,7 +248,7 @@ int apply_patch(buf_t *buf, char *patch_text) {
                 memcpy(op_point, unescaped, add_len);
             break;
             case '-':
-                del_len -= strlen(unescaped);
+                del_len = strlen(unescaped);
                 del_off += offset;
                 op_point = buf->buf + del_off;
                 log_debug("memmove(%u, %u, %u)", del_off, del_off + del_len, del_off);
@@ -257,8 +258,7 @@ int apply_patch(buf_t *buf, char *patch_text) {
                 buf->buf = realloc(buf->buf, buf->len);
             break;
             default:
-                if (strlen(patch_row) != 0)
-                    die("BAD PATCH");
+                die("BAD PATCH");
         }
         free(unescaped);
         free(escaped_data);
@@ -266,6 +266,7 @@ int apply_patch(buf_t *buf, char *patch_text) {
     }
 
     if (buf->buf[buf->len] != '\0') {
+        log_debug("buf: %s", buf->buf);
         log_err("OMG buf isn't null terminated");
         buf->buf[buf->len] = '\0';
     }
