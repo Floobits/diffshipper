@@ -213,7 +213,7 @@ int apply_patch(buf_t *buf, char *patch_text) {
     char *unescaped;
     char *escaped_data;
     char *escaped_data_end;
-    size_t offset = 0;
+    size_t offset;
     void *op_point;
     while (patch_row != NULL) {
         patch_row++;
@@ -229,7 +229,7 @@ int apply_patch(buf_t *buf, char *patch_text) {
 
         switch (patch_row[0]) {
             case ' ':
-                offset += strlen(unescaped);
+                offset = strlen(unescaped);
                 log_debug("offset: %lu", offset);
             break;
             case '+':
