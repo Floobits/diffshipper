@@ -193,10 +193,10 @@ int apply_patch(buf_t *buf, char *patch_text) {
     rv = sscanf(patch_header, "@@ -%lu,%lu +%lu,%lu @@", &del_off, &del_len, &add_off, &add_len);
     if (rv != 4) {
         rv = sscanf(patch_header, "@@ -%lu +%lu,%lu @@", &del_len, &add_off, &add_len);
-        del_off = 0;
+        del_off = 1;
         if (rv != 3) {
             rv = sscanf(patch_header, "@@ -%lu,%lu +%lu @@", &del_off, &del_len, &add_len);
-            add_off = 0;
+            add_off = 1;
         }
         if (rv != 3)
             die("Couldn't sscanf patch: rv %i @@ -%lu,%lu +%lu,%lu @@", rv, del_off, del_len, add_off, add_len);
@@ -204,6 +204,8 @@ int apply_patch(buf_t *buf, char *patch_text) {
     free(patch_header);
 
     log_debug("rv %i @@ -%i,%i +%i,%i @@", rv, del_off, del_len, add_off, add_len);
+    add_off--;
+    del_off--;
     log_debug("patching %s: adding %lu bytes at %lu, deleting %lu bytes at %lu", buf->path, add_len, add_off, del_len, del_off);
     log_debug("Patch body: %s", patch_body);
 
@@ -234,24 +236,24 @@ int apply_patch(buf_t *buf, char *patch_text) {
                     return 0; /* make static analyzer happy */
                 }
 
-                add_len -= offset;
+                add_len = strlen(unescaped);
+                add_off += offset;
                 buf->len += add_len;
+                log_debug("new buf len is %lu", buf->len);
                 buf->buf = realloc(buf->buf, buf->len);
                 op_point = buf->buf + add_off;
-                log_debug("memmove(%u, %u, %u)", add_off + add_len, add_off, add_len);
-                memmove(op_point + add_len, op_point, add_len);
-
-                if (strlen(unescaped) != add_len)
-                    die("insert data is %lu bytes but we want to insert %lu", strlen(unescaped), add_len);
-
+                log_debug("memmove(%u, %u, %u)", add_off + add_len, add_off, add_off);
+                memmove(op_point + add_len, op_point, buf->len - add_off);
                 memcpy(op_point, unescaped, add_len);
             break;
             case '-':
-                del_len -= offset;
+                del_len -= strlen(unescaped);
+                del_off += offset;
                 op_point = buf->buf + del_off;
-                log_debug("memmove(%u, %u, %u)", del_off, del_off + del_len, del_len);
-                memmove(op_point, op_point + del_len, del_len);
+                log_debug("memmove(%u, %u, %u)", del_off, del_off + del_len, del_off);
+                memmove(op_point, op_point + del_len, buf->len - del_off);
                 buf->len -= del_len;
+                log_debug("new buf len is %lu", buf->len);
                 buf->buf = realloc(buf->buf, buf->len);
             break;
             default:
