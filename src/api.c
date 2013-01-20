@@ -33,11 +33,8 @@ void api_cleanup() {
 
 
 int api_create_room() {
-    char *url;
     long http_status;
     CURLcode res;
-
-    url = opts.api_url;
 
     curl_formadd(&(req->p_first),
                  &(req->p_last),
@@ -67,7 +64,7 @@ int api_create_room() {
     }
 
     curl_easy_setopt(req->curl, CURLOPT_HTTPPOST, req->p_first);
-    curl_easy_setopt(req->curl, CURLOPT_URL, url);
+    curl_easy_setopt(req->curl, CURLOPT_URL, opts.api_url);
 
     res = curl_easy_perform(req->curl);
 
