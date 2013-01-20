@@ -2,6 +2,7 @@
 #define OPTIONS_H
 
 typedef struct {
+    char *api_url;
     char *host;
     char *port;
     char *path;

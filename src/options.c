@@ -23,6 +23,7 @@ static void usage() {
     -p PORT             Port\n\
     -r ROOMNAME         Room to join\n\
     --room-perms PERM   Used with --create-room. 0 = private, 1 = readable by anyone, 2 = writeable by anyone\n\
+    --api-url URL       Defaults to floobits.com. This is only needed for debugging/development.\n\
     -s SECRET           API secret\n\
     -u USERNAME         Username\n\
     -v                  Print version and exit\n\
@@ -44,6 +45,7 @@ void parse_opts(int argc, char **argv) {
     int opt_index = 0;
 
     struct option longopts[] = {
+        {"api-url", required_argument, NULL, 0},
         {"create-room", no_argument, NULL, 'c'},
         {"debug", no_argument, NULL, 'D'},
         {"help", no_argument, NULL, 0},
@@ -89,7 +91,9 @@ void parse_opts(int argc, char **argv) {
             break;
             case 0: /* Long option */
                 long_opt = longopts[opt_index].name;
-                if (strcmp(long_opt, "help") == 0) {
+                if (strcmp(long_opt, "api-url") == 0) {
+                    opts.api_url = optarg;
+                } else if (strcmp(long_opt, "help") == 0) {
                     usage();
                 } else if (strcmp(long_opt, "room-perms") == 0) {
                     opts.room_perms = atoi(optarg);
@@ -113,7 +117,10 @@ void parse_opts(int argc, char **argv) {
     opts.path = realpath(argv[0], NULL);
 
     if (!opts.host)
-        ds_asprintf(&opts.host, "127.0.0.1");
+        ds_asprintf(&opts.host, "floobits.com");
+
+    if (!opts.api_url)
+        ds_asprintf(&opts.api_url, "https://%s/api/room/", opts.host);
 
     if (!opts.port)
         ds_asprintf(&opts.port, "3148");
