@@ -213,7 +213,7 @@ int apply_patch(buf_t *buf, char *patch_text) {
     char *unescaped;
     char *escaped_data;
     char *escaped_data_end;
-    size_t offset;
+    size_t offset = 0;
     void *op_point;
     while (patch_row != NULL) {
         patch_row++;
