@@ -16,5 +16,6 @@ int api_init();
 void api_cleanup();
 
 int api_create_room();
+int api_delete_room();
 
 #endif

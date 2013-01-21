@@ -32,9 +32,9 @@ void api_cleanup() {
 }
 
 
-int api_create_room() {
-    long http_status;
+static int api_go() {
     CURLcode res;
+    long http_status;
 
     curl_formadd(&(req->p_first),
                  &(req->p_last),
@@ -46,28 +46,8 @@ int api_create_room() {
                  CURLFORM_COPYNAME, "secret",
                  CURLFORM_COPYCONTENTS, opts.secret,
                  CURLFORM_END);
-    curl_formadd(&(req->p_first),
-                 &(req->p_last),
-                 CURLFORM_COPYNAME, "name",
-                 CURLFORM_COPYCONTENTS, opts.room,
-                 CURLFORM_END);
-
-    if (opts.room_perms >= 0) {
-        char *room_perms;
-        ds_asprintf(&room_perms, "%i", opts.room_perms);
-        curl_formadd(&(req->p_first),
-                     &(req->p_last),
-                     CURLFORM_COPYNAME, "perms",
-                     CURLFORM_COPYCONTENTS, room_perms,
-                     CURLFORM_END);
-        free(room_perms);
-    }
-
-    curl_easy_setopt(req->curl, CURLOPT_HTTPPOST, req->p_first);
-    curl_easy_setopt(req->curl, CURLOPT_URL, opts.api_url);
 
     res = curl_easy_perform(req->curl);
-
     if (res)
         die("Request failed: %s", curl_easy_strerror(res));
 
@@ -88,4 +68,41 @@ int api_create_room() {
 
     curl_formfree(req->p_first);
     return 0;
+}
+
+
+int api_create_room() {
+    curl_formadd(&(req->p_first),
+                 &(req->p_last),
+                 CURLFORM_COPYNAME, "name",
+                 CURLFORM_COPYCONTENTS, opts.room,
+                 CURLFORM_END);
+
+    if (opts.room_perms >= 0) {
+        char *room_perms;
+        ds_asprintf(&room_perms, "%i", opts.room_perms);
+        curl_formadd(&(req->p_first),
+                     &(req->p_last),
+                     CURLFORM_COPYNAME, "perms",
+                     CURLFORM_COPYCONTENTS, room_perms,
+                     CURLFORM_END);
+        free(room_perms);
+    }
+
+    curl_easy_setopt(req->curl, CURLOPT_HTTPPOST, req->p_first);
+    curl_easy_setopt(req->curl, CURLOPT_URL, opts.api_url);
+    return api_go();
+}
+
+
+int api_delete_room() {
+    char *url;
+    ds_asprintf(&url, "%s%s/%s/", opts.api_url, opts.room, opts.owner);
+    curl_easy_setopt(req->curl, CURLOPT_HTTPPOST, req->p_first);
+    curl_easy_setopt(req->curl, CURLOPT_URL, url);
+    free(url);
+
+    curl_easy_setopt(req->curl, CURLOPT_CUSTOMREQUEST, "DELETE");
+
+    return api_go();
 }

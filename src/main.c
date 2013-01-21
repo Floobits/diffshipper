@@ -82,6 +82,11 @@ int main(int argc, char **argv) {
     parse_opts(argc, argv);
     path = opts.path;
 
+    if (opts.delete_room) {
+        rv = api_delete_room();
+        if (rv)
+            die("Couldn't delete room");
+    }
     if (opts.create_room) {
         rv = api_create_room();
         if (rv)

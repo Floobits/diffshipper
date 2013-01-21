@@ -52,6 +52,7 @@ void parse_opts(int argc, char **argv) {
         {"host", required_argument, NULL, 'h'},
         {"owner", required_argument, NULL, 'o'},
         {"port", required_argument, NULL, 'p'},
+        {"recreate-room", no_argument, NULL, 0},
         {"room", required_argument, NULL, 'r'},
         {"room-perms", required_argument, NULL, 0},
         {"secret", required_argument, NULL, 's'},
@@ -95,6 +96,9 @@ void parse_opts(int argc, char **argv) {
                     opts.api_url = optarg;
                 } else if (strcmp(long_opt, "help") == 0) {
                     usage();
+                } else if (strcmp(long_opt, "recreate-room") == 0) {
+                    opts.create_room = 1;
+                    opts.delete_room = 1;
                 } else if (strcmp(long_opt, "room-perms") == 0) {
                     opts.room_perms = atoi(optarg);
                 } else {
