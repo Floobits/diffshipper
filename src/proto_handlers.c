@@ -135,7 +135,7 @@ static void on_patch(json_t *json_obj) {
         return;
     }
     if (strcmp(buf->md5, md5_after) != 0) {
-        log_err("Expected md5 %s but got %s after patching", md5_after, buf->md5);
+        die("Expected md5 %s but got %s after patching", md5_after, buf->md5);
         send_json("{s:s s:i}", "name", "get_buf", "id", buf_id);
         return;
     }

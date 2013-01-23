@@ -7,12 +7,15 @@
 \fBdiffshipper\fR \- Floobits diff shipper\. The mediocre fall\-back solution for people with unsupported editors\.
 .
 .SH "SYNOPSIS"
-\fBdiffshipper \-r ROOM_NAME \-o ROOM_OWNER \-u USERNAME \-s API_SECRET PATH\fR
+\fBdiffshipper \-r ROOM_NAME \-o ROOM_OWNER \-u USERNAME \-s API_SECRET [OPTIONS] PATH\fR
 .
 .SH "DESCRIPTION"
 Join a Floobits room and monitor files in PATH for changes\.
 .
 .SH "OPTIONS"
+.
+.IP "\(bu" 4
+\fB\-\-api\-url URL\fR Defaults to floobits\.com\. This is only needed for debugging/development\.
 .
 .IP "\(bu" 4
 \fB\-\-create\-room\fR Create a room and add PATH
@@ -33,7 +36,10 @@ Join a Floobits room and monitor files in PATH for changes\.
 \fB\-r ROOMNAME\fR Room to join
 .
 .IP "\(bu" 4
-\fB\-\-room\-perms PERM\fR Used with \fB\-\-create\-room\fR\. 0 is private, 1 is readable by anyone, 2 is writeable by anyone
+\fB\-\-recreate\-room\fR Delete the room if it exists, then create it again
+.
+.IP "\(bu" 4
+\fB\-\-room\-perms PERM\fR Used with \-\-[re]create\-room\. 0 = private, 1 = readable by anyone, 2 = writeable by anyone
 .
 .IP "\(bu" 4
 \fB\-s SECRET\fR API secret
