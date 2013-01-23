@@ -16,14 +16,15 @@ static void print_version() {
 static void usage() {
     printf("Usage: diffshipper [OPTIONS] PATH\n\
 \n\
+    --api-url URL       Defaults to floobits.com. This is only needed for debugging/development.\n\
     --create-room       Create a room and add PATH\n\
     -D                  Enable debug output\n\
     -h HOST             Host\n\
     -o OWNER            Room owner\n\
     -p PORT             Port\n\
     -r ROOMNAME         Room to join\n\
-    --room-perms PERM   Used with --create-room. 0 = private, 1 = readable by anyone, 2 = writeable by anyone\n\
-    --api-url URL       Defaults to floobits.com. This is only needed for debugging/development.\n\
+    --recreate-room     Delete the room if it exists, then create it again\n\
+    --room-perms PERM   Used with --[re]create-room. 0 = private, 1 = readable by anyone, 2 = writeable by anyone\n\
     -s SECRET           API secret\n\
     -u USERNAME         Username\n\
     -v                  Print version and exit\n\

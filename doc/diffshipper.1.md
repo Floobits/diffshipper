@@ -3,7 +3,7 @@ diffshipper(1) -- Floobits diff shipper. The mediocre fall-back solution for peo
 
 ## SYNOPSIS
 
-`diffshipper -r ROOM_NAME -o ROOM_OWNER -u USERNAME -s API_SECRET PATH`
+`diffshipper -r ROOM_NAME -o ROOM_OWNER -u USERNAME -s API_SECRET [OPTIONS] PATH`
 
 
 ## DESCRIPTION
@@ -13,13 +13,15 @@ Join a Floobits room and monitor files in PATH for changes.
 
 ## OPTIONS
 
+  * `--api-url URL`       Defaults to floobits.com. This is only needed for debugging/development.
   * `--create-room`       Create a room and add PATH
   * `-D`                  Enable debug output
   * `-h HOST`             Host
   * `-o OWNER`            Room owner
   * `-p PORT`             Port
   * `-r ROOMNAME`         Room to join
-  * `--room-perms PERM`   Used with `--create-room`. 0 is private, 1 is readable by anyone, 2 is writeable by anyone
+  * `--recreate-room`     Delete the room if it exists, then create it again
+  * `--room-perms PERM`   Used with --[re]create-room. 0 = private, 1 = readable by anyone, 2 = writeable by anyone
   * `-s SECRET`           API secret
   * `-u USERNAME`         Username
   * `-v`                  Print version and exit
