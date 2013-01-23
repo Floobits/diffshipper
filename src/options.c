@@ -14,7 +14,7 @@ static void print_version() {
 
 
 static void usage() {
-    printf("Usage: diffshipper [OPTIONS] PATH\n\
+    printf("Usage: diffshipper -r ROOM_NAME -o ROOM_OWNER -u USERNAME -s API_SECRET [OPTIONS] PATH\n\
 \n\
     --api-url URL       Defaults to floobits.com. This is only needed for debugging/development.\n\
     --create-room       Create a room and add PATH\n\
