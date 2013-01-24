@@ -16,12 +16,13 @@ static void print_version() {
 static void usage() {
     printf("Usage: diffshipper -r ROOM_NAME -o ROOM_OWNER -u USERNAME -s API_SECRET [OPTIONS] PATH\n\
 \n\
-    --api-url URL       Defaults to floobits.com. This is only needed for debugging/development.\n\
+    --api-url URL       For debugging/development. Defaults to https://floobits.com/api/room/\n\
     --create-room       Create a room and add PATH\n\
+    --delete-room       Delete a room. Can be used with --create-room.\n\
     -D                  Enable debug output\n\
-    -h HOST             Host\n\
+    -h HOST             For debugging/development. Defaults to floobits.com.\n\
     -o OWNER            Room owner\n\
-    -p PORT             Port\n\
+    -p PORT             For debugging/development. Defaults to 3148.\n\
     -r ROOMNAME         Room to join\n\
     --recreate-room     Delete the room if it exists, then create it again\n\
     --room-perms PERM   Used with --[re]create-room. 0 = private, 1 = readable by anyone, 2 = writeable by anyone\n\
@@ -48,6 +49,7 @@ void parse_opts(int argc, char **argv) {
     struct option longopts[] = {
         {"api-url", required_argument, NULL, 0},
         {"create-room", no_argument, NULL, 'c'},
+        {"delete-room", no_argument, NULL, 0},
         {"debug", no_argument, NULL, 'D'},
         {"help", no_argument, NULL, 0},
         {"host", required_argument, NULL, 'h'},
@@ -95,6 +97,8 @@ void parse_opts(int argc, char **argv) {
                 long_opt = longopts[opt_index].name;
                 if (strcmp(long_opt, "api-url") == 0) {
                     opts.api_url = optarg;
+                } else if (strcmp(long_opt, "delete-room") == 0) {
+                    opts.delete_room = 1;
                 } else if (strcmp(long_opt, "help") == 0) {
                     usage();
                 } else if (strcmp(long_opt, "recreate-room") == 0) {

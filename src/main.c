@@ -82,6 +82,10 @@ int main(int argc, char **argv) {
         rv = api_delete_room();
         if (rv && !opts.create_room)
             die("Couldn't delete room");
+        if (!opts.create_room) {
+            log_msg("Deleted room %s owned by %s", opts.room, opts.owner);
+            return 0;
+        }
     }
     if (opts.create_room) {
         rv = api_create_room();
