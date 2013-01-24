@@ -68,15 +68,19 @@ static int api_go() {
       } else if (http_status == 409) {
           log_err("HTTP Status 409: Conflict. A room with the same name and owner already exists.");
       }
+      curl_formfree(req->p_first);
+      api_cleanup();
       return -1;
     }
 
     curl_formfree(req->p_first);
+    api_cleanup();
     return 0;
 }
 
 
 int api_create_room() {
+    api_init();
     curl_formadd(&(req->p_first),
                  &(req->p_last),
                  CURLFORM_COPYNAME, "name",
@@ -105,6 +109,7 @@ int api_delete_room() {
     char *escaped_secret = curl_escape(opts.secret, 0);
     char *escaped_username = curl_escape(opts.username, 0);
 
+    api_init();
     ds_asprintf(&url, "%s%s/%s/?username=%s&secret=%s",
                 opts.api_url, opts.owner, opts.room, escaped_username, escaped_secret);
 

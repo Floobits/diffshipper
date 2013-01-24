@@ -47,9 +47,6 @@ void init() {
 
     set_log_level(LOG_LEVEL_DEBUG);
 
-    if (api_init())
-        die("api_init failed!");
-
     if (pthread_cond_init(&server_conn_ready, NULL))
         die("pthread_cond_init failed!");
     if (pthread_mutex_init(&server_conn_mtx, NULL))
@@ -63,7 +60,6 @@ void init() {
 
 
 void cleanup() {
-    api_cleanup();
     cleanup_bufs();
     free(opts.path);
     pthread_cond_destroy(&server_conn_ready);
@@ -84,7 +80,7 @@ int main(int argc, char **argv) {
 
     if (opts.delete_room) {
         rv = api_delete_room();
-        if (rv)
+        if (rv && !opts.create_room)
             die("Couldn't delete room");
     }
     if (opts.create_room) {
