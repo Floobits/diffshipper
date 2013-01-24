@@ -13,15 +13,16 @@ int api_init() {
     curl_global_init(CURL_GLOBAL_ALL);
     req = calloc(1, sizeof(api_req_t));
     req->curl = curl_easy_init();
-    curl_easy_setopt(req->curl, CURLOPT_USERAGENT, user_agent);
     curl_easy_setopt(req->curl, CURLOPT_FOLLOWLOCATION, 1);
     curl_easy_setopt(req->curl, CURLOPT_MAXREDIRS, 5);
-    curl_easy_setopt(req->curl, CURLOPT_REDIR_PROTOCOLS, CURLPROTO_HTTP | CURLPROTO_HTTPS);
     curl_easy_setopt(req->curl, CURLOPT_POSTREDIR, CURL_REDIR_POST_ALL);
+    curl_easy_setopt(req->curl, CURLOPT_REDIR_PROTOCOLS, CURLPROTO_HTTP | CURLPROTO_HTTPS);
+    curl_easy_setopt(req->curl, CURLOPT_TIMEOUT, 30);
+    curl_easy_setopt(req->curl, CURLOPT_USERAGENT, user_agent);
 
     /* TODO: verify cert! */
-    curl_easy_setopt(req->curl, CURLOPT_SSL_VERIFYPEER, 0L);
     curl_easy_setopt(req->curl, CURLOPT_SSL_VERIFYHOST, 0L);
+    curl_easy_setopt(req->curl, CURLOPT_SSL_VERIFYPEER, 0L);
     curl_easy_setopt(req->curl, CURLOPT_VERBOSE, 1);
 
     free(user_agent);
