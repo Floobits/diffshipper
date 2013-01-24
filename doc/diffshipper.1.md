@@ -13,12 +13,13 @@ Join a Floobits room and monitor files in PATH for changes.
 
 ## OPTIONS
 
-  * `--api-url URL`       Defaults to floobits.com. This is only needed for debugging/development.
+  * `--api-url URL`       For debugging/development. Defaults to https://floobits.com/api/room/
   * `--create-room`       Create a room and add PATH
+  * `--delete-room`       Delete a room. Can be used with --create-room.
   * `-D`                  Enable debug output
-  * `-h HOST`             Host
+  * `-h HOST`             For debugging/development. Defaults to floobits.com.
   * `-o OWNER`            Room owner
-  * `-p PORT`             Port
+  * `-p PORT`             For debugging/development. Defaults to 3148.
   * `-r ROOMNAME`         Room to join
   * `--recreate-room`     Delete the room if it exists, then create it again
   * `--room-perms PERM`   Used with --[re]create-room. 0 = private, 1 = readable by anyone, 2 = writeable by anyone
