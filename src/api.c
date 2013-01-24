@@ -97,7 +97,7 @@ int api_create_room() {
 
 int api_delete_room() {
     char *url;
-    ds_asprintf(&url, "%s%s/%s/", opts.api_url, opts.room, opts.owner);
+    ds_asprintf(&url, "%s%s/%s/", opts.api_url, opts.owner, opts.room);
     curl_easy_setopt(req->curl, CURLOPT_HTTPPOST, req->p_first);
     curl_easy_setopt(req->curl, CURLOPT_URL, url);
     free(url);
