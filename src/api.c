@@ -106,16 +106,20 @@ int api_create_room() {
 
 int api_delete_room() {
     char *url;
+    char *escaped_owner = curl_escape(opts.owner, 0);
+    char *escaped_room = curl_escape(opts.room, 0);
     char *escaped_secret = curl_escape(opts.secret, 0);
     char *escaped_username = curl_escape(opts.username, 0);
 
     api_init();
     ds_asprintf(&url, "%s%s/%s/?username=%s&secret=%s",
-                opts.api_url, opts.owner, opts.room, escaped_username, escaped_secret);
+                opts.api_url, escaped_owner, escaped_room, escaped_username, escaped_secret);
 
     curl_easy_setopt(req->curl, CURLOPT_HTTPPOST, req->p_first);
     curl_easy_setopt(req->curl, CURLOPT_URL, url);
 
+    free(escaped_owner);
+    free(escaped_room);
     free(escaped_secret);
     free(escaped_username);
     free(url);
