@@ -59,9 +59,9 @@ static int api_go() {
       if (http_status == 401) {
           log_err("Access denied. Probably a bad username or API secret.");
       } else if (http_status == 403) {
-          log_err("You don't have permission to create this room.");
+          log_err("HTTP Status 403: Your credentials are valid, but you don't have permission.");
       } else if (http_status == 409) {
-          log_err("You already have a room with the same name!");
+          log_err("HTTP Status 409: Conflict. A room with the same name and owner already exists.");
       }
       return -1;
     }
