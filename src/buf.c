@@ -215,6 +215,7 @@ int apply_patch(buf_t *buf, char *patch_text) {
     char *escaped_data;
     char *escaped_data_end;
     size_t offset = 0;
+    size_t change_offset = 0;
     void *op_point;
     while (patch_row != NULL) {
         patch_row++;
@@ -230,7 +231,7 @@ int apply_patch(buf_t *buf, char *patch_text) {
 
         switch (patch_row[0]) {
             case ' ':
-                offset = strlen(unescaped);
+                offset = strlen(unescaped) + change_offset;
                 log_debug("offset: %lu", offset);
             break;
             case '+':
@@ -239,6 +240,7 @@ int apply_patch(buf_t *buf, char *patch_text) {
                     return -1; /* make static analyzer happy */
                 }
                 add_len = strlen(unescaped);
+                change_offset = add_len;
                 add_off += offset;
                 buf->len += add_len;
                 log_debug("new buf len is %lu", buf->len);
