@@ -40,6 +40,7 @@ static void on_delete_buf(json_t *json_obj) {
 
 static void on_get_buf(json_t *json_obj) {
     buf_t *buf;
+    buf_t *new_buf = calloc(1, sizeof(buf_t));
     buf_t tmp;
 
     parse_json(json_obj, "{s:i s:s s:s s:s}",
@@ -49,30 +50,28 @@ static void on_get_buf(json_t *json_obj) {
         "path", &(tmp.path)
     );
 
+    new_buf->id = tmp.id;
+    /* Strings from parse_json disappear once json_obj has 0 refcount.
+     * This happens at the end of the loop in remote_change_worker.
+     */
+    new_buf->buf = strdup(tmp.buf);
+    new_buf->md5 = strdup(tmp.md5);
+    new_buf->path = strdup(tmp.path);
+
     buf = get_buf_by_id(tmp.id);
-    if (buf == NULL) {
-        buf = calloc(1, sizeof(buf_t));
-        buf->id = tmp.id;
-        /* Strings from parse_json disappear once json_obj has 0 refcount.
-         * This happens at the end of the loop in remote_change_worker.
-         */
-        buf->buf = strdup(tmp.buf);
-        buf->md5 = strdup(tmp.md5);
-        buf->path = strdup(tmp.path);
+    if (buf) {
+        log_debug("old buf: %s", buf->buf);
+        log_debug("new buf: %s", new_buf->buf);
+        free(buf->buf);
+        buf->buf = new_buf->buf;
+        free(buf->md5);
+        buf->md5 = new_buf->md5;
+        free(buf->path);
+        buf->path = new_buf->path;
+    } else {
+        buf = new_buf;
         add_buf_to_bufs(buf);
     }
-    if (buf->buf)
-        free(buf->buf);
-    if (buf->md5)
-        free(buf->md5);
-    if (buf->path)
-        free(buf->path);
-
-    buf->id = tmp.id;
-    buf->buf = strdup(tmp.buf);
-    buf->md5 = strdup(tmp.md5);
-    buf->path = strdup(tmp.path);
-
     save_buf(buf);
 }
 
@@ -136,7 +135,7 @@ static void on_patch(json_t *json_obj) {
     }
     if (strcmp(buf->md5, md5_after) != 0) {
         /* TODO: remove this once patching code is stable */
-        die("Expected md5 %s but got %s after patching", md5_after, buf->md5);
+        /*die("Expected md5 %s but got %s after patching", md5_after, buf->md5);*/
         send_json("{s:s s:i}", "name", "get_buf", "id", buf_id);
         return;
     }
