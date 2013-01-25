@@ -2,7 +2,7 @@
 
 For OS X and Linux.
 
-## Development status: Unstable. Incomplete. Not ready for general use.
+## Development status: Usable, but still has a few bugs.
 
 This program monitors a directory for changed files using [FSEvents](http://en.wikipedia.org/wiki/FSEvents) or [inotify](http://en.wikipedia.org/wiki/Inotify). When any file changes, it calculates the [operational transformation](http://en.wikipedia.org/wiki/Operational_transformation) and sends it to a remote server. Likewise, it also does the reverse: applies operational transformations sent from the remote server to local files.
 
@@ -32,14 +32,19 @@ Building requires Jansson version 2.4 or greater. If you have an older version o
 
 ## Usage
 
-Running the diffshipper requires certain arguments: `-r` is the room name, `-o` is the room owner, `-u` is your Floobits username, and `-s` is your Floobits API secret. You can find (and reset) your secret on [your settings page](https://floobits.com/dash/settings/).
+Running the diffshipper requires a few arguments: `-r` is the room name, `-o` is the room owner, `-u` is your Floobits username, and `-s` is your Floobits API secret. You can find (and reset) your secret on [your settings page](https://floobits.com/dash/settings/).
 
 ### Join a room
 
-    diffshipper -r test -o ownername -u myusername -s 6kht3k8t4 /path/to/where/files/are/saved
+    diffshipper -r testing -o ownername -u myuser -s gii9Ka8aZei3ej1eighu2vi8D ~/code/repo
 
 ### Create a room from an existing directory
 
-    diffshipper --create-room --room-perms 2 -r new_room -o myusername -u myusername -s 6kht3k8t4 ~/code/project
+    diffshipper --create-room --room-perms 2 -r testing -o ownername -u myuser -s gii9Ka8aZei3ej1eighu2vi8D ~/code/repo
+
+### Stomp over an existing room
+
+    diffshipper --recreate-room --room-perms 2 -r testing -o ownername -u myuser -s gii9Ka8aZei3ej1eighu2vi8D ~/code/repo
+
 
 `man diffshipper` for more info and examples.
