@@ -258,6 +258,12 @@ int apply_patch(buf_t *buf, char *patch_text) {
                 log_debug("new buf len is %lu", buf->len);
                 buf->buf = realloc(buf->buf, buf->len);
             break;
+            case '@':
+                /* Multi-patch. Someone did a big search-and-replace. */
+                apply_patch(buf, patch_row);
+                free(unescaped);
+                free(escaped_data);
+                goto done_patching;
             default:
                 die("BAD PATCH");
         }
@@ -266,6 +272,7 @@ int apply_patch(buf_t *buf, char *patch_text) {
         patch_row = strchr(patch_row, '\n');
     }
 
+    done_patching:;
     if (buf->buf[buf->len] != '\0') {
         log_debug("buf: %s", buf->buf);
         log_err("OMG buf isn't null terminated");
