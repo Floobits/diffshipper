@@ -68,6 +68,7 @@ static void on_get_buf(json_t *json_obj) {
         buf->md5 = new_buf->md5;
         free(buf->path);
         buf->path = new_buf->path;
+        free(new_buf);
     } else {
         buf = new_buf;
         add_buf_to_bufs(buf);
