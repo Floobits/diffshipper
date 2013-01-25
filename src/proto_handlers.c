@@ -131,6 +131,7 @@ static void on_patch(json_t *json_obj) {
     }
     rv = apply_patch(buf, patch_str);
     if (rv != 1) {
+        log_err("Couldn't apply patch. Re-fetching buffer %i (%s)", buf_id, buf->path);
         send_json("{s:s s:i}", "name", "get_buf", "id", buf_id);
         return;
     }
