@@ -192,11 +192,11 @@ int apply_patch(buf_t *buf, char *patch_text) {
 
     rv = sscanf(patch_header, "@@ -%lu,%lu +%lu,%lu @@", &del_off, &del_len, &add_off, &add_len);
     if (rv != 4) {
-        rv = sscanf(patch_header, "@@ -%lu +%lu,%lu @@", &del_len, &add_off, &add_len);
-        del_off = 1;
+        rv = sscanf(patch_header, "@@ -%lu +%lu,%lu @@", &del_off, &add_off, &add_len);
+        del_len = 1;
         if (rv != 3) {
-            rv = sscanf(patch_header, "@@ -%lu,%lu +%lu @@", &del_off, &del_len, &add_len);
-            add_off = 1;
+            rv = sscanf(patch_header, "@@ -%lu,%lu +%lu @@", &del_off, &del_len, &add_off);
+            add_len = 1;
         }
         if (rv != 3)
             die("Couldn't sscanf patch: rv %i @@ -%lu,%lu +%lu,%lu @@", rv, del_off, del_len, add_off, add_len);
