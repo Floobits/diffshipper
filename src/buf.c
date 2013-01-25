@@ -236,7 +236,7 @@ int apply_patch(buf_t *buf, char *patch_text) {
             case '+':
                 if (unescaped == NULL) {
                     die("No data to insert!");
-                    return 0; /* make static analyzer happy */
+                    return -1; /* make static analyzer happy */
                 }
                 add_len = strlen(unescaped);
                 add_off += offset;
