@@ -157,7 +157,7 @@ void save_buf(buf_t *buf) {
     if (strlen(buf_path) > 0) {
         rv = run_cmd("mkdir -p %s", buf_path);
         if (rv)
-            die("error creating temp directory %s", buf_path);
+            die("error creating directory %s", buf_path);
     }
 
     ignore_path(full_path);
@@ -204,6 +204,7 @@ int apply_patch(buf_t *buf, char *patch_text) {
     free(patch_header);
 
     log_debug("rv %i @@ -%i,%i +%i,%i @@", rv, del_off, del_len, add_off, add_len);
+    /* Patch offsets start at 1 */
     add_off--;
     del_off--;
     log_debug("patching %s: adding %lu bytes at %lu, deleting %lu bytes at %lu", buf->path, add_len, add_off, del_len, del_off);
