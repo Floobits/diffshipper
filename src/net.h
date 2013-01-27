@@ -10,6 +10,7 @@
 struct addrinfo *server_info;
 int server_sock;
 pthread_cond_t server_conn_ready;
+pthread_cond_t server_conn_done;
 pthread_mutex_t server_conn_mtx;
 
 void *net_buf;

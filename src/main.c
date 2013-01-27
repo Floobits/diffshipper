@@ -50,6 +50,8 @@ void init() {
 
     if (pthread_cond_init(&server_conn_ready, NULL))
         die("pthread_cond_init failed!");
+    if (pthread_cond_init(&server_conn_done, NULL))
+        die("pthread_cond_init failed!");
     if (pthread_mutex_init(&server_conn_mtx, NULL))
         die("pthread_mutex_init failed!");
     if (pthread_mutex_init(&ignore_mtx, NULL))
@@ -64,6 +66,7 @@ void cleanup() {
     cleanup_bufs();
     free(opts.path);
     pthread_cond_destroy(&server_conn_ready);
+    pthread_cond_destroy(&server_conn_done);
     pthread_mutex_destroy(&server_conn_mtx);
     pthread_mutex_destroy(&ignore_mtx);
     net_cleanup();
@@ -99,6 +102,11 @@ int main(int argc, char **argv) {
     rv = server_connect(opts.host, opts.port);
     if (rv)
         die("Couldn't connect to server");
+
+    if (opts.read_only) {
+        pthread_cond_wait(&server_conn_done, &server_conn_mtx);
+        goto main_cleanup;
+    }
 
 #ifdef INOTIFY
     log_debug("Using Inotify to watch for changes.");
@@ -140,7 +148,7 @@ int main(int argc, char **argv) {
 #error "Need FSEvents or Inotify to build this"
 #endif
 
-    /* We never get here */
+    main_cleanup:;
     cleanup();
     return(0);
 }

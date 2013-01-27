@@ -14,6 +14,7 @@
 
 #include "buf.h"
 #include "fs_event_handlers.h"
+#include "ignore.h"
 #include "log.h"
 #include "mmap.h"
 #include "net.h"

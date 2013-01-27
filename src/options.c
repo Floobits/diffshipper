@@ -105,7 +105,7 @@ void parse_opts(int argc, char **argv) {
                 } else if (strcmp(long_opt, "recreate-room") == 0) {
                     opts.create_room = 1;
                     opts.delete_room = 1;
-                } else if (strcmp(long_opt, "read-only") {
+                } else if (strcmp(long_opt, "read-only") == 0) {
                     opts.read_only = 1;
                 } else if (strcmp(long_opt, "room-perms") == 0) {
                     opts.room_perms = atoi(optarg);
