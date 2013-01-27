@@ -119,7 +119,12 @@ void push_changes(const char *base_path, const char *full_path) {
     path = strdup(full_path + strlen(base_path) + 1); /* Skip trailing slash in full_path */
     log_debug("relative path is %s", path);
 
-    results = ds_scandir(full_path, &dir_list, &changed_filter, &full_path);
+    scandir_baton_t baton;
+    baton.ig = root_ignores;
+    baton.base_path = base_path;
+    baton.level = 0;
+
+    results = ds_scandir(full_path, &dir_list, &changed_filter, &baton);
     if (results == -1) {
         log_debug("Error scanning directory %s: %s", full_path, strerror(errno));
         return;

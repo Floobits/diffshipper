@@ -46,7 +46,7 @@ void recurse_create_bufs(char *full_path, int depth) {
     baton.base_path = full_path;
     baton.level = 0;
 
-    results = ds_scandir(full_path, &dir_list, &scandir_filter, &full_path);
+    results = ds_scandir(full_path, &dir_list, &scandir_filter, &baton);
     if (results == -1) {
         log_debug("Error scanning directory %s: %s", full_path, strerror(errno));
         return;
