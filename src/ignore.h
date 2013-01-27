@@ -34,7 +34,6 @@ int is_ignored(const char *path);
 ignores *init_ignore(ignores *parent);
 void cleanup_ignore(ignores *ig);
 
-
 void add_ignore_pattern(ignores *ig, const char* pattern);
 
 void load_ignore_patterns(ignores *ig, const char *path);
