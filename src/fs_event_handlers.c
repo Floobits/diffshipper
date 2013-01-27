@@ -32,8 +32,6 @@ static int changed_filter(const char *path, const struct dirent *d, void *baton)
     char *tmp = NULL;
     int rv;
 
-    log_debug("Examining %s%s", path, d->d_name);
-
     ds_asprintf(&tmp, "%s/%s", path, d->d_name);
     full_path = realpath(tmp, NULL);
     free(tmp);
