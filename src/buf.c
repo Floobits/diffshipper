@@ -11,6 +11,7 @@
 #include "dmp.h"
 
 #include "buf.h"
+#include "ignore.h"
 #include "log.h"
 #include "mmap.h"
 #include "options.h"
