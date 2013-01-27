@@ -190,7 +190,7 @@ static void on_room_info(json_t *json_obj) {
         send_json("{s:s s:i}", "name", "get_buf", "id", atoi(buf_id_str));
     }
     if (opts.create_room) {
-        recurse_create_bufs(opts.path, 0);
+        create_room(opts.path);
     }
 }
 

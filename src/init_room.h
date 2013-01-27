@@ -3,6 +3,6 @@
 
 #define MAX_SEARCH_DEPTH 25
 
-void recurse_create_bufs(char *full_path, int depth);
+void create_room(const char *path);
 
 #endif

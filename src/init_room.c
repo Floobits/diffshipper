@@ -6,6 +6,7 @@
 #include <string.h>
 #include <sys/stat.h>
 
+#include "ignore.h"
 #include "init_room.h"
 #include "log.h"
 #include "mmap.h"
@@ -15,7 +16,7 @@
 #include "util.h"
 
 
-void recurse_create_bufs(char *full_path, int depth) {
+static void recurse_create_bufs(const char *full_path, ignores *ig, int depth) {
     struct dirent **dir_list = NULL;
     struct dirent *dir = NULL;
     int results;
@@ -45,6 +46,22 @@ void recurse_create_bufs(char *full_path, int depth) {
     baton.ig = root_ignores;
     baton.base_path = full_path;
     baton.level = 0;
+
+    char *dir_full_path = NULL;
+    const char *ignore_file = NULL;
+
+    /* find dsignore/gitignore/hgignore/etc files to load ignore patterns from */
+    for (i = 0; ignore_pattern_files[i] != NULL; i++) {
+        ignore_file = ignore_pattern_files[i];
+        ds_asprintf(&dir_full_path, "%s/%s", full_path, ignore_file);
+        if (strcmp(SVN_DIR, ignore_file) == 0) {
+            load_svn_ignore_patterns(ig, dir_full_path);
+        } else {
+            load_ignore_patterns(ig, dir_full_path);
+        }
+        free(dir_full_path);
+        dir_full_path = NULL;
+    }
 
     results = ds_scandir(full_path, &dir_list, &scandir_filter, &baton);
     if (results == -1) {
@@ -78,7 +95,8 @@ void recurse_create_bufs(char *full_path, int depth) {
             }
         }
         if (dir->d_type == DT_DIR) {
-            recurse_create_bufs(file_path, depth + 1);
+            ignores *ig_child = init_ignore(ig);
+            recurse_create_bufs(file_path, ig_child, depth + 1);
             goto cleanup;
         }
 
@@ -118,4 +136,9 @@ void recurse_create_bufs(char *full_path, int depth) {
     }
 
     free(rel_path);
+}
+
+
+void create_room(const char *path) {
+    recurse_create_bufs(path, root_ignores, 0);
 }
