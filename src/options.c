@@ -123,10 +123,12 @@ void parse_opts(int argc, char **argv) {
     argc -= optind;
     argv += optind;
 
-    if (argc < 1)
+    if (argc != 1)
         usage();
 
     opts.path = realpath(argv[0], NULL);
+    if (!opts.path)
+        die("Directory %s doesn't exist!", argv[0]);
 
     if (!opts.host)
         ds_asprintf(&opts.host, "floobits.com");
