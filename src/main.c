@@ -43,8 +43,8 @@ void event_cb(ConstFSEventStreamRef streamRef, void *cb_data, size_t count, void
 
 void init() {
     pthread_t remote_changes;
-    ignored_paths = NULL;
-    ignored_paths_len = 0;
+    ignored_changes = NULL;
+    ignored_changes_len = 0;
 
     set_log_level(LOG_LEVEL_DEBUG);
 
@@ -54,7 +54,7 @@ void init() {
         die("pthread_cond_init failed!");
     if (pthread_mutex_init(&server_conn_mtx, NULL))
         die("pthread_mutex_init failed!");
-    if (pthread_mutex_init(&ignore_mtx, NULL))
+    if (pthread_mutex_init(&ignore_changes_mtx, NULL))
         die("pthread_mutex_init failed!");
 
     init_bufs();
@@ -68,7 +68,7 @@ void cleanup() {
     pthread_cond_destroy(&server_conn_ready);
     pthread_cond_destroy(&server_conn_done);
     pthread_mutex_destroy(&server_conn_mtx);
-    pthread_mutex_destroy(&ignore_mtx);
+    pthread_mutex_destroy(&ignore_changes_mtx);
     net_cleanup();
 }
 

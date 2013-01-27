@@ -175,8 +175,8 @@ static void on_rename_buf(json_t *json_obj) {
     }
     full_path = get_full_path(buf->path);
 
-    ignore_path(full_path);
-    ignore_path(path);
+    ignore_change(full_path);
+    ignore_change(path);
     free(full_path);
 }
 

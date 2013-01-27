@@ -161,7 +161,7 @@ void save_buf(buf_t *buf) {
             die("error creating directory %s", buf_path);
     }
 
-    ignore_path(full_path);
+    ignore_change(full_path);
     fd = open(full_path, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
     if (fd < 0)
         die("Error opening file %s: %s", full_path, strerror(errno));
