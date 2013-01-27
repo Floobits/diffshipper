@@ -14,6 +14,7 @@ typedef struct {
     int create_room;
     int delete_room;
     int room_perms;
+    int read_only;
 } options_t;
 
 options_t opts;
