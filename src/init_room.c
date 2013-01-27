@@ -15,15 +15,6 @@
 #include "util.h"
 
 
-static int scandir_filter(const char *path, const struct dirent *d, void *baton) {
-    log_debug("Examining %s/%s", path, d->d_name);
-    if (d->d_name[0] == '.')
-        return 0;
-
-    return 1;
-}
-
-
 void recurse_create_bufs(char *full_path, int depth) {
     struct dirent **dir_list = NULL;
     struct dirent *dir = NULL;
@@ -49,6 +40,11 @@ void recurse_create_bufs(char *full_path, int depth) {
         ds_asprintf(&rel_path, "%s/", full_path + strlen(opts.path) + 1); /* skip slash */
     }
     log_debug("path is %s", rel_path);
+
+    scandir_baton_t baton;
+    baton.ig = root_ignores;
+    baton.base_path = full_path;
+    baton.level = 0;
 
     results = ds_scandir(full_path, &dir_list, &scandir_filter, &full_path);
     if (results == -1) {

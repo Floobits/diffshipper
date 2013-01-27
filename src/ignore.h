@@ -31,11 +31,15 @@ void ignore_change(const char *path);
 void unignore_change(const char *path);
 int is_ignored(const char *path);
 
+ignores *init_ignore(ignores *parent);
+void cleanup_ignore(ignores *ig);
+
 
 void add_ignore_pattern(ignores *ig, const char* pattern);
 
 void load_ignore_patterns(ignores *ig, const char *path);
 void load_svn_ignore_patterns(ignores *ig, const char *path);
 
+int scandir_filter(const char *path, const struct dirent *dir, void *baton);
 
 #endif

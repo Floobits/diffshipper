@@ -58,12 +58,14 @@ void init() {
         die("pthread_mutex_init failed!");
 
     init_bufs();
+    root_ignores = init_ignore(NULL);
     pthread_create(&remote_changes, NULL, &remote_change_worker, NULL);
 }
 
 
 void cleanup() {
     cleanup_bufs();
+    cleanup_ignore(root_ignores); /* TODO: free the children! */
     free(opts.path);
     pthread_cond_destroy(&server_conn_ready);
     pthread_cond_destroy(&server_conn_done);

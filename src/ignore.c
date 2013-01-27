@@ -314,7 +314,7 @@ static int path_ignore_search(const ignores *ig, const char *path, const char *f
 
 
 /* This function is REALLY HOT. It gets called for every file */
-int filename_filter(const char *path, const struct dirent *dir, void *baton) {
+int scandir_filter(const char *path, const struct dirent *dir, void *baton) {
     const char *filename = dir->d_name;
     size_t i;
     scandir_baton_t *scandir_baton = (scandir_baton_t*) baton;
@@ -380,7 +380,7 @@ int filename_filter(const char *path, const struct dirent *dir, void *baton) {
     scandir_baton->level++;
     if (ig->parent != NULL) {
         scandir_baton->ig = ig->parent;
-        return filename_filter(path, dir, (void *)scandir_baton);
+        return scandir_filter(path, dir, (void *)scandir_baton);
     }
 
     return 1;
