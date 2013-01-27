@@ -49,8 +49,8 @@ char *get_full_path(char *rel_path) {
 }
 
 
-static int binary_search(const int buf_id, int start, int end) {
-    int mid;
+static int buf_binary_search(const int buf_id, unsigned int start, unsigned int end) {
+    unsigned int mid;
 
     if (start == end) {
         return -1;
@@ -59,9 +59,9 @@ static int binary_search(const int buf_id, int start, int end) {
     mid = (start + end) / 2; /* can screw up on arrays with > 2 billion elements */
 
     if (buf_id < bufs[mid]->id) {
-        return binary_search(buf_id, start, mid);
+        return buf_binary_search(buf_id, start, mid);
     } else if (buf_id > bufs[mid]->id) {
-        return binary_search(buf_id, mid + 1, end);
+        return buf_binary_search(buf_id, mid + 1, end);
     }
 
     return mid;
@@ -72,7 +72,7 @@ buf_t *get_buf_by_id(const int buf_id) {
     int index;
     buf_t *buf = NULL;
 
-    index = binary_search(buf_id, 0, bufs_len);
+    index = buf_binary_search(buf_id, 0, bufs_len);
     if (index >= 0) {
         buf = bufs[index];
     }
@@ -122,7 +122,7 @@ void delete_buf(buf_t *buf) {
     int index;
     size_t i;
 
-    index = binary_search(buf->id, 0, bufs_len);
+    index = buf_binary_search(buf->id, 0, bufs_len);
     if (index < 0) {
         die("couldn't find buf id %i", buf->id);
     }

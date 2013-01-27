@@ -1,7 +1,9 @@
+#include <ctype.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <stdarg.h>
+#include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 
 #include "md5.h"
 
@@ -25,6 +27,27 @@ int run_cmd(const char *fmt, ...) {
     free(cmd);
 
     return rv;
+}
+
+
+int binary_search(const char* needle, char **haystack, int start, int end) {
+    int mid;
+    int rc;
+
+    if (start == end) {
+        return -1;
+    }
+
+    mid = (start + end) / 2; /* can screw up on arrays with > 2 billion elements */
+
+    rc = strcmp(needle, haystack[mid]);
+    if (rc < 0) {
+        return binary_search(needle, haystack, start, mid);
+    } else if (rc > 0) {
+        return binary_search(needle, haystack, mid + 1, end);
+    }
+
+    return mid;
 }
 
 
@@ -142,6 +165,46 @@ int is_binary(const void* buf, const int buf_len) {
 }
 
 
+int is_directory(const char *path, const struct dirent *d) {
+#ifdef HAVE_DIRENT_DTYPE
+    /* Some filesystems, e.g. ReiserFS, always return a type DT_UNKNOWN from readdir or scandir. */
+    /* Call lstat if we find DT_UNKNOWN to get the information we need. */
+    if (d->d_type != DT_UNKNOWN) {
+        return (d->d_type == DT_DIR);
+    }
+#endif
+    char *full_path;
+    struct stat s;
+    ds_asprintf(&full_path, "%s/%s", path, d->d_name);
+    if (stat(full_path, &s) != 0) {
+        free(full_path);
+        return 0;
+    }
+    free(full_path);
+    return (S_ISDIR(s.st_mode));
+}
+
+
+int is_symlink(const char *path, const struct dirent *d) {
+#ifdef HAVE_DIRENT_DTYPE
+    /* Some filesystems, e.g. ReiserFS, always return a type DT_UNKNOWN from readdir or scandir. */
+    /* Call lstat if we find DT_UNKNOWN to get the information we need. */
+    if (d->d_type != DT_UNKNOWN) {
+        return (d->d_type == DT_LNK);
+    }
+#endif
+    char *full_path;
+    struct stat s;
+    ds_asprintf(&full_path, "%s/%s", path, d->d_name);
+    if (lstat(full_path, &s) != 0) {
+        free(full_path);
+        return 0;
+    }
+    free(full_path);
+    return (S_ISLNK(s.st_mode));
+}
+
+
 void parse_json(json_t *json_obj, const char *fmt, ...) {
     int rv;
     va_list args;
@@ -156,6 +219,7 @@ void parse_json(json_t *json_obj, const char *fmt, ...) {
         die("Couldn't parse json.");
     }
 }
+
 
 char *md5(void *buf, size_t len) {
     md5_byte_t md5[16];
