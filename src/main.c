@@ -16,6 +16,7 @@
 #include "api.h"
 #include "buf.h"
 #include "fs_event_handlers.h"
+#include "ignore.h"
 #include "log.h"
 #include "net.h"
 #include "proto_handlers.h"

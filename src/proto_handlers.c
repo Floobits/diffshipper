@@ -8,6 +8,7 @@
 #include <jansson.h>
 
 #include "buf.h"
+#include "ignore.h"
 #include "init_room.h"
 #include "log.h"
 #include "net.h"
