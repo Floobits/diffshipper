@@ -157,6 +157,7 @@ void push_changes(const char *base_path, const char *full_path) {
 
         free(md5_after);
         free(patch_text);
+        free(new_text);
 
         buf->buf = realloc(buf->buf, mf->len + 1);
         buf->len = mf->len;
