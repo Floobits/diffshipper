@@ -110,7 +110,6 @@ static void on_patch(json_t *json_obj) {
     char *md5_after;
     char *patch_str;
     char *path;
-    int rv;
 
     parse_json(
         json_obj, "{s:i s:i s:s s:s s:s s:s s:s}",
@@ -130,14 +129,13 @@ static void on_patch(json_t *json_obj) {
         die("we got a patch for a nonexistent buf id: %i", buf_id);
         return;
     }
-    rv = apply_patch(buf, patch_str);
-    if (rv != 1) {
-        die("Couldn't apply patch. Re-fetching buffer %i (%s)", buf_id, buf->path);
+    if (apply_patch(buf, patch_str) != 1) {
+        log_err("Couldn't apply patch. Re-fetching buffer %i (%s)", buf_id, buf->path);
         send_json("{s:s s:i}", "name", "get_buf", "id", buf_id);
         return;
     }
     if (strcmp(buf->md5, md5_after) != 0) {
-        die("Expected md5 %s but got %s after patching", md5_after, buf->md5);
+        log_err("Expected md5 %s but got %s after patching", md5_after, buf->md5);
         send_json("{s:s s:i}", "name", "get_buf", "id", buf_id);
         return;
     }
