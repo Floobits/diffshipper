@@ -17,8 +17,6 @@
 #include <lauxlib.h>
 #include <lualib.h>
 
-lua_State *l;
-
 #include "api.h"
 #include "buf.h"
 #include "fs_event_handlers.h"
@@ -67,13 +65,14 @@ void init() {
     root_ignores = init_ignore(NULL);
     pthread_create(&remote_changes, NULL, &remote_change_worker, NULL);
     l = luaL_newstate();
-    int rv = luaL_loadfile(l, "src/lua/diff_match_patch.lua");
-    if (rv) {
-
-        die("Couldn't load file. rv: %i %s", rv, strerror(errno));
+    luaL_openlibs(l);
+    int rv = luaL_loadfile(l, "src/lua/init.lua");
+    rv = lua_pcall(l, 0, 0, 0);
+    if (rv != 0) {
+        const char* lua_err = lua_tostring(l, -1);
+        die("couldn't require diff_match_patch: %s", lua_err);
     }
-    log_debug("Loaded file. calling lua...");
-    lua_call(l, 1, 0);
+    log_debug("Loaded lua successfully");
 }
 
 

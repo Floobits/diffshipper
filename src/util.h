@@ -5,6 +5,11 @@
 
 #include <jansson.h>
 
+#include <lua.h>
+#include <lauxlib.h>
+#include <lualib.h>
+
+lua_State *l;
 
 typedef long long int lli_t;
 
