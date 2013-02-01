@@ -13,6 +13,12 @@
 #include <CoreServices/CoreServices.h>
 #endif
 
+#include <lua.h>
+#include <lauxlib.h>
+#include <lualib.h>
+
+lua_State *l;
+
 #include "api.h"
 #include "buf.h"
 #include "fs_event_handlers.h"
@@ -60,6 +66,14 @@ void init() {
     init_bufs();
     root_ignores = init_ignore(NULL);
     pthread_create(&remote_changes, NULL, &remote_change_worker, NULL);
+    l = luaL_newstate();
+    int rv = luaL_loadfile(l, "src/lua/diff_match_patch.lua");
+    if (rv) {
+
+        die("Couldn't load file. rv: %i %s", rv, strerror(errno));
+    }
+    log_debug("Loaded file. calling lua...");
+    lua_call(l, 1, 0);
 }
 
 
@@ -72,6 +86,7 @@ void cleanup() {
     pthread_mutex_destroy(&server_conn_mtx);
     pthread_mutex_destroy(&ignore_changes_mtx);
     net_cleanup();
+    lua_close(l);
 }
 
 
