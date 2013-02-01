@@ -8,5 +8,8 @@ diffshipper_LDADD = -ljansson -lpthread -lthriftmd5 -lcurl -llua
 
 man_MANS = doc/diffshipper.1
 
+luadir = $(pkgdatadir)
+lua_DATA = src/lua/diff_match_patch.lua src/lua/init.lua
+
 # Uncomment this line to output gprof profiling info.
 #CFLAGS=-pg
