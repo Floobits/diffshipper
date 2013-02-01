@@ -20,7 +20,7 @@ Since homebrew only has Lua 5.1 right now, OS X users will have to download and 
 
 #### Ubuntu
 
-    apt-get install -y automake build-essential libcurl4-openssl-dev libinotifytools-dev libjansson-dev pkg-config
+    apt-get install -y automake build-essential libcurl4-openssl-dev libinotifytools-dev libjansson-dev liblua5.2-dev pkg-config
 
 ### Building
 
