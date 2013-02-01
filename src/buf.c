@@ -8,7 +8,6 @@
 #include <sys/uio.h>
 #include <unistd.h>
 
-#include "dmp.h"
 #include "lua.h"
 #include "lualib.h"
 #include "lauxlib.h"

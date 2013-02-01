@@ -10,8 +10,8 @@ m4_ifdef(
     [AM_SILENT_RULES([yes])]
 )
 
-CFLAGS="$CFLAGS -Iextern/diff-match-patch-c/src/ -Iextern/md5/ -I/usr/local/include/"
-LDFLAGS="$LDFLAGS -Lextern/diff-match-patch-c/ -Lextern/md5/ -L/usr/local/lib/"
+CFLAGS="$CFLAGS -Iextern/md5/ -I/usr/local/include/"
+LDFLAGS="$LDFLAGS -Lextern/md5/ -L/usr/local/lib/"
 
 AC_CHECK_HEADERS([CoreFoundation/CoreFoundation.h], [
     CFLAGS="$CFLAGS -I /System/Library/Frameworks/CoreFoundation.framework/Headers"
