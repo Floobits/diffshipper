@@ -1,5 +1,6 @@
 dmp = require('src/lua/diff_match_patch')
 
+
 _G.apply_patch = function(buf_text, patch_text)
   local patches = dmp.patch_fromText(patch_text)
   local text, results = dmp.patch_apply(patches, buf_text)
@@ -14,6 +15,7 @@ _G.apply_patch = function(buf_text, patch_text)
 
   return clean_patch, text
 end
+
 
 _G.make_patch = function(a, b)
   local patches = dmp.patch_make(a, b)
