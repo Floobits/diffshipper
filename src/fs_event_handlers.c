@@ -138,6 +138,8 @@ void push_changes(const char *base_path, const char *full_path) {
         log_debug("patch text is %s", patch_text);
         lua_settop(l, 0);
 
+        free(new_text);
+
         if (strlen(patch_text) == 0) {
             log_debug("no change. not sending patch");
             goto diff_cleanup;
@@ -157,7 +159,6 @@ void push_changes(const char *base_path, const char *full_path) {
 
         free(md5_after);
         free(patch_text);
-        free(new_text);
 
         buf->buf = realloc(buf->buf, mf->len + 1);
         buf->len = mf->len;
