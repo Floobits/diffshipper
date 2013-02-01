@@ -203,5 +203,5 @@ int apply_patch(buf_t *buf, char *patch_text) {
 
     log_debug("buf: %s", buf->buf);
 
-    return 1;
+    return clean_patch;
 }
