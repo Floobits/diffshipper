@@ -10,7 +10,7 @@ m4_ifdef(
     [AM_SILENT_RULES([yes])]
 )
 
-PKG_CHECK_MODULES([LUA], [lua5.2], [], [ ])
+PKG_CHECK_MODULES([LUA], [lua5.2], [ LUA_LIBS="$LUA_LIBS -llua5.2" ], [ LUA_LIBS="-llua" ])
 
 CFLAGS="$CFLAGS $LUA_CFLAGS -Iextern/md5/"
 LDFLAGS="$LDFLAGS $LUA_LIBS -Lextern/md5/"
