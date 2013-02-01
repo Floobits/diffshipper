@@ -201,7 +201,5 @@ int apply_patch(buf_t *buf, char *patch_text) {
     free(buf->md5);
     buf->md5 = md5(buf->buf, buf->len);
 
-    log_debug("buf: %s", buf->buf);
-
     return clean_patch;
 }
