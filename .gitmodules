@@ -1,3 +1,0 @@
-[submodule "extern/diff-match-patch-c"]
-	path = extern/diff-match-patch-c
-	url = https://github.com/ggreer/diff-match-patch-c.git

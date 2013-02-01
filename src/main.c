@@ -1,5 +1,6 @@
 #include <pthread.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "config.h"
 
@@ -12,6 +13,10 @@
 #include <CoreFoundation/CoreFoundation.h>
 #include <CoreServices/CoreServices.h>
 #endif
+
+#include <lua.h>
+#include <lauxlib.h>
+#include <lualib.h>
 
 #include "api.h"
 #include "buf.h"
@@ -60,6 +65,19 @@ void init() {
     init_bufs();
     root_ignores = init_ignore(NULL);
     pthread_create(&remote_changes, NULL, &remote_change_worker, NULL);
+    l = luaL_newstate();
+    luaL_openlibs(l);
+    int rv = luaL_loadfile(l, "src/lua/init.lua");
+    if (rv) {
+        const char* lua_err = lua_tostring(l, -1);
+        die("couldn't load init.lua: %s", lua_err);
+    }
+    rv = lua_pcall(l, 0, 0, 0);
+    if (rv) {
+        const char* lua_err = lua_tostring(l, -1);
+        die("couldn't require diff_match_patch: %s", lua_err);
+    }
+    log_debug("Loaded lua successfully");
 }
 
 
@@ -72,6 +90,7 @@ void cleanup() {
     pthread_mutex_destroy(&server_conn_mtx);
     pthread_mutex_destroy(&ignore_changes_mtx);
     net_cleanup();
+    lua_close(l);
 }
 
 

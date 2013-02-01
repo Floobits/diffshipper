@@ -55,58 +55,12 @@ static int changed_filter(const char *path, const struct dirent *d, void *baton)
 }
 
 
-static int make_patch(void *baton, dmp_operation_t op, const void *data, uint32_t len) {
-    diff_info_t *di = (diff_info_t*)baton;
-    buf_t *buf = di->buf;
-    off_t offset;
-    char *action_str = NULL;
-    char *cur_patch_str;
-    char *escaped_data = NULL;
-    size_t patch_len;
-
-    switch (op) {
-        case DMP_DIFF_EQUAL:
-            return 0;
-        break;
-
-        case DMP_DIFF_DELETE:
-            offset = data - (void *)buf->buf;
-            escaped_data = escape_data(data, len);
-            ds_asprintf(&action_str, "@@ -%u,%lld +%u @@", (lli_t)offset, len, (lli_t)offset);
-            ds_asprintf(&cur_patch_str, "%s\n-%s\n", action_str, escaped_data);
-        break;
-
-        case DMP_DIFF_INSERT:
-            offset = data - di->mf->buf;
-            escaped_data = escape_data(data, len);
-            ds_asprintf(&action_str, "@@ -%u +%u,%lld @@", (lli_t)offset, (lli_t)offset, len);
-            ds_asprintf(&cur_patch_str, "%s\n+%s\n", action_str, escaped_data);
-        break;
-
-        default:
-            die("WTF?!?!");
-    }
-    log_debug("cur_patch_str: %s", cur_patch_str);
-    patch_len = strlen(cur_patch_str) + strlen(di->patch) + 1;
-    if (patch_len > di->patch_size) {
-        di->patch = realloc(di->patch, patch_len);
-        di->patch_size = patch_len;
-    }
-    strcat(di->patch, cur_patch_str);
-    if (escaped_data)
-        free(escaped_data);
-    free(action_str);
-    return 0;
-}
-
-
 void push_changes(const char *base_path, const char *full_path) {
     struct dirent **dir_list = NULL;
     struct dirent *dir = NULL;
     int results;
     int i;
     int rv;
-    diff_info_t di;
     char *path;
 
     if (strncmp(base_path, full_path, strlen(base_path)) != 0)
@@ -133,7 +87,6 @@ void push_changes(const char *base_path, const char *full_path) {
 
     char *file_path;
     char *file_path_rel;
-    struct stat dir_info;
     for (i = 0; i < results; i++) {
         dir = dir_list[i];
         ds_asprintf(&file_path, "%s%s", full_path, dir->d_name);
@@ -144,16 +97,7 @@ void push_changes(const char *base_path, const char *full_path) {
             goto cleanup;
         }
 
-        /* If a link points to a directory then we need to treat it as a directory. */
-        if (dir->d_type == DT_LNK) {
-            if (stat(file_path, &dir_info) == -1) {
-                log_err("stat() failed on %s", file_path);
-                /* If stat fails we may as well carry on and hope for the best. */
-            } else if (S_ISDIR(dir_info.st_mode)) {
-                dir->d_type = DT_DIR;
-            }
-        }
-        if (dir->d_type == DT_DIR) {
+        if (is_directory(full_path, dir)) {
             /* TODO: figure out if we need to recurse */
             goto cleanup;
         }
@@ -165,9 +109,6 @@ void push_changes(const char *base_path, const char *full_path) {
         }
 
         const char *f2 = file_path;
-        dmp_diff *diff = NULL;
-        dmp_options opts;
-        dmp_options_init(&opts);
 
         mmapped_file_t *mf;
         struct stat file_stats;
@@ -185,25 +126,21 @@ void push_changes(const char *base_path, const char *full_path) {
             goto diff_cleanup;
         }
 
-        if (dmp_diff_new(&(diff), &opts, buf->buf, buf->len, mf->buf, mf->len) != 0)
-            die("dmp_diff_new failed");
-
-        if (!diff) {
-            log_err("diff is null. I guess someone wrote the exact same bytes to this file?");
-            goto diff_cleanup;
+        char *new_text = strndup(mf->buf, mf->len);
+        lua_getglobal(l, "make_patch");
+        lua_pushstring(l, buf->buf);
+        lua_pushstring(l, new_text);
+        rv = lua_pcall(l, 2, 1, 0);
+        if (rv) {
+            die("error calling lua: %s", lua_tostring(l, -1));
         }
+        char *patch_text = strdup(lua_tostring(l, -1));
+        log_debug("patch text is %s", patch_text);
+        lua_settop(l, 0);
 
-        di.buf = buf;
-        di.mf = mf;
-        di.patch_size = 100;
-        di.patch = malloc(di.patch_size);
-        strcpy(di.patch, "");
+        free(new_text);
 
-        dmp_diff_print_raw(stdout, diff);
-
-        dmp_diff_foreach(diff, make_patch, &di);
-
-        if (strlen(di.patch) == 0) {
+        if (strlen(patch_text) == 0) {
             log_debug("no change. not sending patch");
             goto diff_cleanup;
         }
@@ -214,22 +151,20 @@ void push_changes(const char *base_path, const char *full_path) {
             "{s:s s:i s:s s:s s:s s:s}",
             "name", "patch",
             "id", buf->id,
-            "patch", di.patch,
+            "patch", patch_text,
             "path", buf->path,
             "md5_before", buf->md5,
             "md5_after", md5_after
         );
 
         free(md5_after);
-        free(di.patch);
+        free(patch_text);
 
         buf->buf = realloc(buf->buf, mf->len + 1);
         buf->len = mf->len;
         memcpy(buf->buf, mf->buf, buf->len);
 
         diff_cleanup:;
-        if (diff)
-            dmp_diff_free(diff);
         munmap_file(mf);
         free(mf);
         cleanup:;

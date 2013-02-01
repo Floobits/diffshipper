@@ -3,8 +3,6 @@
 
 #include <dirent.h>
 
-#include "dmp.h"
-
 #include "buf.h"
 #include "mmap.h"
 
