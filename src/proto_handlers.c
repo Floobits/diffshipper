@@ -15,6 +15,7 @@
 #include "options.h"
 #include "proto_handlers.h"
 #include "util.h"
+#include "dmp_lua.h"
 
 
 static void on_delete_buf(json_t *json_obj) {

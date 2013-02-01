@@ -21,7 +21,7 @@
 #include "options.h"
 #include "scandir.h"
 #include "util.h"
-
+#include "dmp_lua.h"
 
 struct timeval now;
 
@@ -126,19 +126,12 @@ void push_changes(const char *base_path, const char *full_path) {
             goto diff_cleanup;
         }
 
-        char *new_text = strndup(mf->buf, mf->len);
-        lua_getglobal(l, "make_patch");
-        lua_pushstring(l, buf->buf);
-        lua_pushstring(l, new_text);
-        rv = lua_pcall(l, 2, 1, 0);
-        if (rv) {
-            die("error calling lua: %s", lua_tostring(l, -1));
-        }
-        char *patch_text = strdup(lua_tostring(l, -1));
-        log_debug("patch text is %s", patch_text);
-        lua_settop(l, 0);
 
-        free(new_text);
+        char *new_text = strndup(mf->buf, mf->len);
+
+        char *patch_text = make_patch(buf->buf, new_text);
+
+        free((void* )new_text);
 
         if (strlen(patch_text) == 0) {
             log_debug("no change. not sending patch");
@@ -157,8 +150,8 @@ void push_changes(const char *base_path, const char *full_path) {
             "md5_after", md5_after
         );
 
-        free(md5_after);
-        free(patch_text);
+        free((void* )md5_after);
+        free((void* )patch_text);
 
         buf->buf = realloc(buf->buf, mf->len + 1);
         buf->len = mf->len;

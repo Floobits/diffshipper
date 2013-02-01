@@ -14,10 +14,7 @@
 #include <CoreServices/CoreServices.h>
 #endif
 
-#include <lua.h>
-#include <lauxlib.h>
-#include <lualib.h>
-
+#include "dmp_lua.h"
 #include "api.h"
 #include "buf.h"
 #include "fs_event_handlers.h"
