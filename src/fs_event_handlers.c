@@ -133,7 +133,6 @@ void push_changes(const char *base_path, const char *full_path) {
 
     char *file_path;
     char *file_path_rel;
-    struct stat dir_info;
     for (i = 0; i < results; i++) {
         dir = dir_list[i];
         ds_asprintf(&file_path, "%s%s", full_path, dir->d_name);
@@ -144,16 +143,7 @@ void push_changes(const char *base_path, const char *full_path) {
             goto cleanup;
         }
 
-        /* If a link points to a directory then we need to treat it as a directory. */
-        if (dir->d_type == DT_LNK) {
-            if (stat(file_path, &dir_info) == -1) {
-                log_err("stat() failed on %s", file_path);
-                /* If stat fails we may as well carry on and hope for the best. */
-            } else if (S_ISDIR(dir_info.st_mode)) {
-                dir->d_type = DT_DIR;
-            }
-        }
-        if (dir->d_type == DT_DIR) {
+        if (is_directory(full_path, dir)) {
             /* TODO: figure out if we need to recurse */
             goto cleanup;
         }

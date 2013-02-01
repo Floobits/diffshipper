@@ -1,5 +1,6 @@
 AC_INIT([diffshipper], [0.1], [https://github.com/Floobits/diffshipper/issues], [diffshipper], [https://github.com/Floobits/diffshipper])
 AC_PROG_CC
+AM_PROG_CC_C_O
 AC_PREREQ([2.59])
 
 AM_INIT_AUTOMAKE([no-define foreign subdir-objects])
@@ -11,8 +12,6 @@ m4_ifdef(
 
 CFLAGS="$CFLAGS -Iextern/diff-match-patch-c/src/ -Iextern/md5/"
 LDFLAGS="$LDFLAGS -Lextern/diff-match-patch-c/ -Lextern/md5/"
-
-AC_CHECK_HEADERS([pthread.h])
 
 AC_CHECK_HEADERS([CoreFoundation/CoreFoundation.h], [
     CFLAGS="$CFLAGS -I /System/Library/Frameworks/CoreFoundation.framework/Headers"
@@ -33,6 +32,13 @@ AC_CHECK_HEADERS([sys/inotify.h], [
 
 # I know D_GNU_SOURCE is frowned upon, but it's needed to use asprintf() on linux
 CFLAGS="$CFLAGS -Wall -Wextra -D_GNU_SOURCE -g"
+LDFLAGS="$LDFLAGS"
+
+AC_CHECK_HEADERS([pthread.h, lua.h, lualib.h, lauxlib.h])
+
+AC_CHECK_MEMBER([struct dirent.d_type], [AC_DEFINE([HAVE_DIRENT_DTYPE], [], [Have dirent struct member d_type])], [], [[#include <dirent.h>]])
+
+AC_CHECK_FUNCS(vasprintf getline strndup)
 
 AC_CONFIG_FILES([Makefile])
 AC_CONFIG_HEADERS([src/config.h])

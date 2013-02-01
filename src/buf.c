@@ -9,6 +9,9 @@
 #include <unistd.h>
 
 #include "dmp.h"
+#include "lua.h"
+#include "lualib.h"
+#include "lauxlib.h"
 
 #include "buf.h"
 #include "ignore.h"
