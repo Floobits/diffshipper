@@ -10,8 +10,8 @@ m4_ifdef(
     [AM_SILENT_RULES([yes])]
 )
 
-CFLAGS="$CFLAGS -Iextern/diff-match-patch-c/src/ -Iextern/md5/"
-LDFLAGS="$LDFLAGS -Lextern/diff-match-patch-c/ -Lextern/md5/"
+CFLAGS="$CFLAGS -Iextern/diff-match-patch-c/src/ -Iextern/md5/ -I/usr/local/include/"
+LDFLAGS="$LDFLAGS -Lextern/diff-match-patch-c/ -Lextern/md5/ -L/usr/local/lib/"
 
 AC_CHECK_HEADERS([CoreFoundation/CoreFoundation.h], [
     CFLAGS="$CFLAGS -I /System/Library/Frameworks/CoreFoundation.framework/Headers"
@@ -34,7 +34,7 @@ AC_CHECK_HEADERS([sys/inotify.h], [
 CFLAGS="$CFLAGS -Wall -Wextra -D_GNU_SOURCE -g"
 LDFLAGS="$LDFLAGS"
 
-AC_CHECK_HEADERS([pthread.h, lua.h, lualib.h, lauxlib.h])
+AC_CHECK_HEADERS([pthread.h lua.h lualib.h lauxlib.h])
 
 AC_CHECK_MEMBER([struct dirent.d_type], [AC_DEFINE([HAVE_DIRENT_DTYPE], [], [Have dirent struct member d_type])], [], [[#include <dirent.h>]])
 
