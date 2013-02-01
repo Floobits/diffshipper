@@ -206,8 +206,7 @@ void *remote_change_worker() {
     while (1) {
         json_obj = recv_json();
         parse_json(json_obj, "{s:s}", "name", &name);
-        log_debug("name: %s", name);
-        /* TODO: handle create/rename/delete buf */
+
         if (strcmp(name, "room_info") == 0) {
             on_room_info(json_obj);
         } else if (strcmp(name, "create_buf") == 0) {
@@ -216,6 +215,8 @@ void *remote_change_worker() {
             on_delete_buf(json_obj);
         } else if (strcmp(name, "get_buf") == 0) {
             on_get_buf(json_obj);
+        } else if (strcmp(name, "highlight") == 0) {
+            /* Don't print anything. Highlights are super-spammy. */
         } else if (strcmp(name, "join") == 0) {
             on_join(json_obj);
         } else if (strcmp(name, "msg") == 0) {
