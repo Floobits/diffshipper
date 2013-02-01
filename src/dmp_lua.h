@@ -1,10 +1,11 @@
 #ifndef DMPLUA_H
 #define DMPLUA_H
 
-
 #include <lua.h>
 #include <lauxlib.h>
 #include <lualib.h>
+
+#include "buf.h"
 
 lua_State *l;
 

@@ -1,11 +1,16 @@
+#include <string.h>
+
 #include <lua.h>
 #include <lualib.h>
 #include <lauxlib.h>
 
+#include "buf.h"
 #include "dmp_lua.h"
+#include "log.h"
 #include "util.h"
 
 const char* make_patch(const char* old, const char* new) {
+    int rv;
     lua_getglobal(l, "make_patch");
     lua_pushstring(l, old);
     lua_pushstring(l, new);
@@ -16,9 +21,9 @@ const char* make_patch(const char* old, const char* new) {
     const char *patch_text = strdup(lua_tostring(l, -1));
     log_debug("patch text is %s", patch_text);
     lua_settop(l, 0);
-    free(new_text);
     return patch_text;
 };
+
 
 int apply_patch(buf_t *buf, char *patch_text) {
     const char *new_text;
