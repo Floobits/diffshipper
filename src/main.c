@@ -67,8 +67,12 @@ void init() {
     l = luaL_newstate();
     luaL_openlibs(l);
     int rv = luaL_loadfile(l, "src/lua/init.lua");
+    if (rv) {
+        const char* lua_err = lua_tostring(l, -1);
+        die("couldn't load init.lua: %s", lua_err);
+    }
     rv = lua_pcall(l, 0, 0, 0);
-    if (rv != 0) {
+    if (rv) {
         const char* lua_err = lua_tostring(l, -1);
         die("couldn't require diff_match_patch: %s", lua_err);
     }
