@@ -190,15 +190,15 @@ int apply_patch(buf_t *buf, char *patch_text) {
     if (rv) {
         die("error calling lua: %s", lua_tostring(l, -1));
     }
-
-    int clean_patch = lua_toboolean(l, -1);
-    const char *new_text = lua_tostring(l, -2);
+    int clean_patch = lua_toboolean(l, -2);
+    const char *new_text = lua_tostring(l, -1);
 
     log_debug("clean patch: %i. new text: %s", clean_patch, new_text);
     lua_settop(l, 0);
 
     free(buf->buf);
     buf->buf = strdup(new_text);
+    buf->len = strlen(buf->buf);
     free(buf->md5);
     buf->md5 = md5(buf->buf, buf->len);
 
