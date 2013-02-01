@@ -181,16 +181,16 @@ void save_buf(buf_t *buf) {
 
 
 int apply_patch(buf_t *buf, char *patch_text) {
-    int rv;
+    const char *new_text;
+    int clean_patch;
     lua_getglobal(l, "apply_patch");
     lua_pushstring(l, buf->buf);
     lua_pushstring(l, patch_text);
-    rv = lua_pcall(l, 2, 2, 0);
-    if (rv) {
+    if (lua_pcall(l, 2, 2, 0))
         die("error calling lua: %s", lua_tostring(l, -1));
-    }
-    int clean_patch = lua_toboolean(l, -2);
-    const char *new_text = lua_tostring(l, -1);
+
+    clean_patch = lua_toboolean(l, -2);
+    new_text = lua_tostring(l, -1);
 
     log_debug("clean patch: %i. new text: %s", clean_patch, new_text);
     lua_settop(l, 0);
