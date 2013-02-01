@@ -10,11 +10,13 @@ This program monitors a directory for changed files using [FSEvents](http://en.w
 ## Build Instructions
 
 ### Dependencies
-To build, you'll need automake, [Jansson](http://www.digip.org/jansson/)>=2.4, [libcurl](http://curl.haxx.se/libcurl/), pthreads, and pkg-config. Linux users need libinotifytools-dev. Diffshipper also relies on [diff-match-patch-c](https://github.com/ggreer/diff-match-patch-c), but it comes bundled as a submodule in extern.
+To build, you'll need automake, [Jansson](http://www.digip.org/jansson/)>=2.4, [libcurl](http://curl.haxx.se/libcurl/), pthreads, Lua 5.2 or later, and pkg-config. Linux users need libinotifytools-dev.
 
 #### OS X
 
     brew install automake jannson pkg-config
+
+Since homebrew only has Lua 5.1 right now, OS X users will have to download and install Lua from source.
 
 #### Ubuntu
 
@@ -24,7 +26,6 @@ To build, you'll need automake, [Jansson](http://www.digip.org/jansson/)>=2.4, [
 
     git clone https://github.com/Floobits/diffshipper.git
     cd diffshipper
-    git submodule update --init
     ./autogen.sh
 
 Building requires Jansson version 2.4 or greater. If you have an older version of Ubuntu, `apt-get` might install an incompatible version of Jansson. If this happens, you'll have to `apt-get purge libjansson-dev` and install [Jansson](http://www.digip.org/jansson/) from source.
