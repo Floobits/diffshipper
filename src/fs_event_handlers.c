@@ -13,6 +13,7 @@
 #include <unistd.h>
 
 #include "buf.h"
+#include "dmp_lua.h"
 #include "fs_event_handlers.h"
 #include "ignore.h"
 #include "log.h"
@@ -21,7 +22,7 @@
 #include "options.h"
 #include "scandir.h"
 #include "util.h"
-#include "dmp_lua.h"
+
 
 struct timeval now;
 

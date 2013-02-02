@@ -8,6 +8,7 @@
 #include <jansson.h>
 
 #include "buf.h"
+#include "dmp_lua.h"
 #include "ignore.h"
 #include "init_room.h"
 #include "log.h"
@@ -15,7 +16,6 @@
 #include "options.h"
 #include "proto_handlers.h"
 #include "util.h"
-#include "dmp_lua.h"
 
 
 static void on_delete_buf(json_t *json_obj) {
