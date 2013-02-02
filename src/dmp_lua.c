@@ -10,15 +10,17 @@
 #include "util.h"
 
 const char* make_patch(const char* old, const char* new) {
-    int rv;
+    const char *patch_text;
+
     lua_getglobal(l, "make_patch");
     lua_pushstring(l, old);
     lua_pushstring(l, new);
-    rv = lua_pcall(l, 2, 1, 0);
-    if (rv) {
+
+    if (lua_pcall(l, 2, 1, 0)) {
         die("error calling lua: %s", lua_tostring(l, -1));
     }
-    const char *patch_text = strdup(lua_tostring(l, -1));
+
+    patch_text = strdup(lua_tostring(l, -1));
     log_debug("patch text is %s", patch_text);
     lua_settop(l, 0);
     return patch_text;
