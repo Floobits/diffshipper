@@ -132,7 +132,7 @@ void push_changes(const char *base_path, const char *full_path) {
 
         char *patch_text = make_patch(buf->buf, new_text);
 
-        free((void* )new_text);
+        free(new_text);
 
         if (strlen(patch_text) == 0) {
             log_debug("no change. not sending patch");
@@ -151,8 +151,8 @@ void push_changes(const char *base_path, const char *full_path) {
             "md5_after", md5_after
         );
 
-        free((void* )md5_after);
-        free((void* )patch_text);
+        free(md5_after);
+        free(patch_text);
 
         buf->buf = realloc(buf->buf, mf->len + 1);
         buf->len = mf->len;

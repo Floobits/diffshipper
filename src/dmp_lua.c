@@ -9,8 +9,8 @@
 #include "log.h"
 #include "util.h"
 
-const char* make_patch(const char* old, const char* new) {
-    const char *patch_text;
+char *make_patch(const char *old, const char *new) {
+    char *patch_text;
 
     lua_getglobal(l, "make_patch");
     lua_pushstring(l, old);
