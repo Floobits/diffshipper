@@ -11,6 +11,7 @@
 #include "scandir.h"
 #include "util.h"
 
+
 const char *evil_hardcoded_ignore_files[] = {
     ".",
     "..",
@@ -293,9 +294,7 @@ static int filename_ignore_search(const ignores *ig, const char *filename) {
             log_debug("file %s ignored because name matches regex pattern %s", filename, ig->regexes[i]);
             return 1;
         }
-        log_debug("pattern %s doesn't match file %s", ig->regexes[i], filename);
     }
-    log_debug("file %s not ignored", filename);
     return 0;
 }
 
@@ -360,6 +359,7 @@ int scandir_filter(const char *path, const struct dirent *dir, void *baton) {
 
     /* TODO: copy-pasted from above */
     if (scandir_baton->level == 0) {
+        /* Obey .gitignore patterns that start with a / */
         char *temp2; /* horrible variable name, I know */
         ds_asprintf(&temp, "/%s", filename);
         if (path_ignore_search(ig, path_start, temp)) {
