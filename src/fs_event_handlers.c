@@ -13,6 +13,7 @@
 #include <unistd.h>
 
 #include "buf.h"
+#include "dmp_lua.h"
 #include "fs_event_handlers.h"
 #include "ignore.h"
 #include "log.h"
@@ -126,17 +127,10 @@ void push_changes(const char *base_path, const char *full_path) {
             goto diff_cleanup;
         }
 
+
         char *new_text = strndup(mf->buf, mf->len);
-        lua_getglobal(l, "make_patch");
-        lua_pushstring(l, buf->buf);
-        lua_pushstring(l, new_text);
-        rv = lua_pcall(l, 2, 1, 0);
-        if (rv) {
-            die("error calling lua: %s", lua_tostring(l, -1));
-        }
-        char *patch_text = strdup(lua_tostring(l, -1));
-        log_debug("patch text is %s", patch_text);
-        lua_settop(l, 0);
+
+        char *patch_text = make_patch(buf->buf, new_text);
 
         free(new_text);
 

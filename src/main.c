@@ -14,18 +14,15 @@
 #include <CoreServices/CoreServices.h>
 #endif
 
-#include <lua.h>
-#include <lauxlib.h>
-#include <lualib.h>
-
 #include "api.h"
 #include "buf.h"
+#include "dmp_lua.h"
 #include "fs_event_handlers.h"
 #include "ignore.h"
 #include "log.h"
 #include "net.h"
-#include "proto_handlers.h"
 #include "options.h"
+#include "proto_handlers.h"
 #include "util.h"
 
 

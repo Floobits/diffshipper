@@ -8,6 +8,7 @@
 #include <jansson.h>
 
 #include "buf.h"
+#include "dmp_lua.h"
 #include "ignore.h"
 #include "init_room.h"
 #include "log.h"
