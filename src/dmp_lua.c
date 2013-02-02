@@ -16,9 +16,8 @@ char *make_patch(const char *old, const char *new) {
     lua_pushstring(l, old);
     lua_pushstring(l, new);
 
-    if (lua_pcall(l, 2, 1, 0)) {
+    if (lua_pcall(l, 2, 1, 0))
         die("error calling lua: %s", lua_tostring(l, -1));
-    }
 
     patch_text = strdup(lua_tostring(l, -1));
     log_debug("patch text is %s", patch_text);
