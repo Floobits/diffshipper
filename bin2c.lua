@@ -1,5 +1,8 @@
 -- From http://lua-users.org/lists/lua-l/2008-11/msg00453.html
 -- Written by Mildred Ki'Lya
+-- Invocation: lua bin2c.lua c_symbol [static] <input_file.lua >output_file.c
+
+-- lua bin2c.lua lua_diff_match_patch_str < src/lua/diff_match_patch.lua > src/dmp_lua_str.h
 
 local name, static = ...
 
