@@ -7,9 +7,12 @@
 
 #include "buf.h"
 
-lua_State *l;
+lua_State *l_ap;
+lua_State *l_mp;
 
-char *make_patch(const char *old, const char *new);
+lua_State *init_lua_state();
+
 int apply_patch(buf_t *buf, char *patch_text);
+char *make_patch(const char *old, const char *new);
 
 #endif

@@ -62,19 +62,8 @@ void init() {
     init_bufs();
     root_ignores = init_ignore(NULL);
     pthread_create(&remote_changes, NULL, &remote_change_worker, NULL);
-    l = luaL_newstate();
-    luaL_openlibs(l);
-    int rv = luaL_loadfile(l, "src/lua/init.lua");
-    if (rv) {
-        const char* lua_err = lua_tostring(l, -1);
-        die("couldn't load init.lua: %s", lua_err);
-    }
-    rv = lua_pcall(l, 0, 0, 0);
-    if (rv) {
-        const char* lua_err = lua_tostring(l, -1);
-        die("couldn't require diff_match_patch: %s", lua_err);
-    }
-    log_debug("Loaded lua successfully");
+    l_ap = init_lua_state();
+    l_mp = init_lua_state();
 }
 
 
@@ -87,7 +76,8 @@ void cleanup() {
     pthread_mutex_destroy(&server_conn_mtx);
     pthread_mutex_destroy(&ignore_changes_mtx);
     net_cleanup();
-    lua_close(l);
+    lua_close(l_ap);
+    lua_close(l_mp);
 }
 
 
