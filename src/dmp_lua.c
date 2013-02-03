@@ -25,23 +25,24 @@ lua_State *init_lua_state() {
         die("couldn't require diff_match_patch: %s", lua_err);
     }
     log_debug("Loaded lua successfully");
+    return l;
 }
 
 
-int apply_patch(buf_t *buf, char *patch_text) {
+int apply_patch(lua_State *l, buf_t *buf, char *patch_text) {
     const char *new_text;
     int clean_patch;
-    lua_getglobal(l_ap, "apply_patch");
-    lua_pushstring(l_ap, buf->buf);
-    lua_pushstring(l_ap, patch_text);
-    if (lua_pcall(l_ap, 2, 2, 0))
-        die("error calling lua: %s", lua_tostring(l_ap, -1));
+    lua_getglobal(l, "apply_patch");
+    lua_pushstring(l, buf->buf);
+    lua_pushstring(l, patch_text);
+    if (lua_pcall(l, 2, 2, 0))
+        die("error calling lua: %s", lua_tostring(l, -1));
 
-    clean_patch = lua_toboolean(l_ap, -2);
-    new_text = lua_tostring(l_ap, -1);
+    clean_patch = lua_toboolean(l, -2);
+    new_text = lua_tostring(l, -1);
 
     log_debug("clean patch: %i. new text: %s", clean_patch, new_text);
-    lua_settop(l_ap, 0);
+    lua_settop(l, 0);
 
     free(buf->buf);
     buf->buf = strdup(new_text);
@@ -53,18 +54,18 @@ int apply_patch(buf_t *buf, char *patch_text) {
 };
 
 
-char *make_patch(const char *old, const char *new) {
+char *make_patch(lua_State *l, const char *old, const char *new) {
     char *patch_text;
 
-    lua_getglobal(l_mp, "make_patch");
-    lua_pushstring(l_mp, old);
-    lua_pushstring(l_mp, new);
+    lua_getglobal(l, "make_patch");
+    lua_pushstring(l, old);
+    lua_pushstring(l, new);
 
-    if (lua_pcall(l_mp, 2, 1, 0))
-        die("error calling lua: %s", lua_tostring(l_mp, -1));
+    if (lua_pcall(l, 2, 1, 0))
+        die("error calling lua: %s", lua_tostring(l, -1));
 
-    patch_text = strdup(lua_tostring(l_mp, -1));
+    patch_text = strdup(lua_tostring(l, -1));
     log_debug("patch text is %s", patch_text);
-    lua_settop(l_mp, 0);
+    lua_settop(l, 0);
     return patch_text;
 };
