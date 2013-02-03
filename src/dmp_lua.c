@@ -14,10 +14,10 @@ lua_State *init_lua_state() {
     int rv;
     lua_State *l = luaL_newstate();
     luaL_openlibs(l);
-    rv = luaL_loadfile(l, "src/lua/init.lua");
+    rv = luaL_loadfile(l, "src/lua/diff_match_patch.lua");
     if (rv) {
         const char* lua_err = lua_tostring(l, -1);
-        die("couldn't load init.lua: %s", lua_err);
+        die("couldn't load diff_match_patch.lua: %s", lua_err);
     }
     rv = lua_pcall(l, 0, 0, 0);
     if (rv) {
@@ -32,7 +32,7 @@ lua_State *init_lua_state() {
 int apply_patch(lua_State *l, buf_t *buf, char *patch_text) {
     const char *new_text;
     int clean_patch;
-    lua_getglobal(l, "apply_patch");
+    lua_getglobal(l, "floo_apply_patch");
     lua_pushstring(l, buf->buf);
     lua_pushstring(l, patch_text);
     if (lua_pcall(l, 2, 2, 0))
@@ -57,7 +57,7 @@ int apply_patch(lua_State *l, buf_t *buf, char *patch_text) {
 char *make_patch(lua_State *l, const char *old, const char *new) {
     char *patch_text;
 
-    lua_getglobal(l, "make_patch");
+    lua_getglobal(l, "floo_make_patch");
     lua_pushstring(l, old);
     lua_pushstring(l, new);
 
