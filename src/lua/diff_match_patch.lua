@@ -2194,4 +2194,25 @@ _M.patch_splitMax = _patch_splitMax
 _M.patch_addPadding = _patch_addPadding
 _M.settings = settings
 
+_G.floo_apply_patch = function(buf_text, patch_text)
+  local patches = patch_fromText(patch_text)
+  local text, results = patch_apply(patches, buf_text)
+  local clean_patch = true
+
+  for k,v in ipairs(results) do
+    if v == false then
+      clean_patch = false
+      break
+    end
+  end
+
+  return clean_patch, text
+end
+
+
+_G.floo_make_patch = function(a, b)
+  local patches = patch_make(a, b)
+  return patch_toText(patches)
+end
+
 return _M
