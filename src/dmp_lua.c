@@ -9,12 +9,13 @@
 #include "log.h"
 #include "util.h"
 
+#include "dmp_lua_str.h"
 
 lua_State *init_lua_state() {
     int rv;
     lua_State *l = luaL_newstate();
     luaL_openlibs(l);
-    rv = luaL_loadfile(l, "src/lua/diff_match_patch.lua");
+    rv = luaL_loadbuffer(l, lua_diff_match_patch_str, lua_diff_match_patch_str_size, "diff_match_patch");
     if (rv) {
         const char* lua_err = lua_tostring(l, -1);
         die("couldn't load diff_match_patch.lua: %s", lua_err);
