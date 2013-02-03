@@ -14,4 +14,5 @@ autoconf && \
 autoheader && \
 automake --add-missing && \
 ./configure && \
+lua bin2c.lua lua_diff_match_patch_str < src/lua/diff_match_patch.lua > src/dmp_lua_str.h && \
 make
