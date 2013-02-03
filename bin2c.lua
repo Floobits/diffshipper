@@ -1,3 +1,5 @@
+#!/usr/bin/env lua
+
 -- From http://lua-users.org/lists/lua-l/2008-11/msg00453.html
 -- Written by Mildred Ki'Lya
 -- Invocation: lua bin2c.lua c_symbol [static] <input_file.lua >output_file.c
