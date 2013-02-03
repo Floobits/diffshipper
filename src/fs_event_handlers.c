@@ -46,7 +46,6 @@ static int changed_filter(const char *path, const struct dirent *d, void *baton)
         log_debug("file %s modified in the last %u seconds. GO TIME!", full_path, opts.mtime);
         rv = 1;
     } else {
-        log_debug("skipping d.mtime %li now %li opts %li", dir_info.st_mtime, now.tv_sec, opts.mtime);
         rv = 0;
     }
 
