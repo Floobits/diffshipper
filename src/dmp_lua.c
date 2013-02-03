@@ -11,6 +11,7 @@
 
 #include "dmp_lua_str.h"
 
+
 lua_State *init_lua_state() {
     int rv;
     lua_State *l = luaL_newstate();
