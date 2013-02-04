@@ -76,7 +76,6 @@ void cleanup() {
     pthread_mutex_destroy(&server_conn_mtx);
     pthread_mutex_destroy(&ignore_changes_mtx);
     net_cleanup();
-    lua_close(l_ap);
     lua_close(l_mp);
 }
 

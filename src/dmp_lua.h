@@ -7,6 +7,15 @@
 
 #include "buf.h"
 
+#define LUA_BITLIBNAME "bit"
+
+LUALIB_API int luaopen_bit(lua_State *L);
+
+static const luaL_Reg bitop_lib[] = {
+  {LUA_BITLIBNAME, luaopen_bit},
+  {NULL, NULL},
+};
+
 lua_State *l_ap;
 lua_State *l_mp;
 

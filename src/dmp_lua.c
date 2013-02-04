@@ -1,19 +1,19 @@
 #include <string.h>
 
-#include <lua.h>
-#include <lualib.h>
-#include <lauxlib.h>
+#include "lualib.h"
+#include "lua.h"
+#include "lauxlib.h"
 
 #include "buf.h"
 #include "dmp_lua.h"
 #include "log.h"
 #include "util.h"
 
-
 lua_State *init_lua_state() {
     int rv;
     lua_State *l = luaL_newstate();
     luaL_openlibs(l);
+    luaL_openlib(l, "bitop", bitop_lib, 0);
     rv = luaL_loadfile(l, "src/lua/init.lua");
     if (rv) {
         const char* lua_err = lua_tostring(l, -1);
