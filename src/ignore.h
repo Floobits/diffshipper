@@ -28,7 +28,7 @@ typedef struct {
 } ignored_change_t;
 
 
-char **ignored_changes;
+ignored_change_t *ignored_changes;
 int ignored_changes_len;
 pthread_mutex_t ignore_changes_mtx;
 

@@ -5,6 +5,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <sys/time.h>
+#include <time.h>
 
 #include "ignore.h"
 #include "log.h"
@@ -33,18 +35,22 @@ const int fnmatch_flags = 0 & FNM_PATHNAME;
 
 void ignore_change(const char *path) {
     int i;
+    struct timeval now;
 
     pthread_mutex_lock(&ignore_changes_mtx);
     ignored_changes_len++;
-    ignored_changes = realloc(ignored_changes, ignored_changes_len * sizeof(char*));
+    ignored_changes = realloc(ignored_changes, ignored_changes_len * sizeof(ignored_change_t));
     /* TODO: do a binary search to figure out the position */
     for (i = ignored_changes_len - 1; i > 0; i--) {
-        if (strcmp(path, ignored_changes[i-1]) > 0) {
+        if (strcmp(path, ignored_changes[i-1].path) > 0) {
             break;
         }
-        ignored_changes[i] = ignored_changes[i-1];
+        ignored_changes[i].path = ignored_changes[i-1].path;
+        ignored_changes[i].changed_at = ignored_changes[i-1].changed_at;
     }
-    ignored_changes[i] = strdup(path);
+    ignored_changes[i].path = strdup(path);
+    gettimeofday(&now, NULL);
+    ignored_changes[i].changed_at = now.tv_sec;
     log_debug("ignoring path %s", path);
     pthread_mutex_unlock(&ignore_changes_mtx);
 }
@@ -56,12 +62,13 @@ void unignore_change(const char *path) {
     pthread_mutex_lock(&ignore_changes_mtx);
     /* totally unsafe */
     for (i = 0; i < ignored_changes_len - 1; i++) {
-        if (strcmp(path, ignored_changes[i]) >= 0) {
-            ignored_changes[i] = ignored_changes[i+1];
+        if (strcmp(path, ignored_changes[i].path) >= 0) {
+            ignored_changes[i].path = ignored_changes[i+1].path;
+            ignored_changes[i].changed_at = ignored_changes[i+1].changed_at;
         }
     }
     ignored_changes_len--;
-    ignored_changes = realloc(ignored_changes, ignored_changes_len * sizeof(char*));
+    ignored_changes = realloc(ignored_changes, ignored_changes_len * sizeof(ignored_change_t));
     log_debug("unignoring path %s", path);
     pthread_mutex_unlock(&ignore_changes_mtx);
 }
@@ -73,7 +80,7 @@ int is_ignored(const char *path) {
     pthread_mutex_lock(&ignore_changes_mtx);
     /* TODO: binary search */
     for (i = 0; i < ignored_changes_len; i++) {
-        if (strcmp(ignored_changes[i], path) == 0) {
+        if (strcmp(ignored_changes[i].path, path) == 0) {
             rv = 1;
             break;
         }
