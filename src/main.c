@@ -69,6 +69,7 @@ void init() {
 
 
 void cleanup() {
+    /* TODO: free() ignored_changes */
     cleanup_bufs();
     cleanup_ignore(root_ignores); /* TODO: free the children! */
     free(opts.path);
