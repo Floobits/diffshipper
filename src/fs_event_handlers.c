@@ -46,7 +46,6 @@ static int changed_filter(const char *path, const struct dirent *d, void *baton)
         log_debug("file %s modified in the last %u seconds. GO TIME!", full_path, opts.mtime);
         rv = 1;
     } else {
-        log_debug("skipping d.mtime %li now %li opts %li", dir_info.st_mtime, now.tv_sec, opts.mtime);
         rv = 0;
     }
 
@@ -56,7 +55,7 @@ static int changed_filter(const char *path, const struct dirent *d, void *baton)
 }
 
 
-void push_changes(const char *base_path, const char *full_path) {
+void push_changes(lua_State *l, const char *base_path, const char *full_path) {
     struct dirent **dir_list = NULL;
     struct dirent *dir = NULL;
     int results;
@@ -130,7 +129,7 @@ void push_changes(const char *base_path, const char *full_path) {
 
         char *new_text = strndup(mf->buf, mf->len);
 
-        char *patch_text = make_patch(buf->buf, new_text);
+        char *patch_text = make_patch(l, buf->buf, new_text);
 
         free(new_text);
 

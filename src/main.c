@@ -25,6 +25,8 @@
 #include "proto_handlers.h"
 #include "util.h"
 
+lua_State *l_mp;
+
 
 #ifdef FSEVENTS
 void event_cb(ConstFSEventStreamRef streamRef, void *cb_data, size_t count, void *paths,
@@ -37,7 +39,7 @@ void event_cb(ConstFSEventStreamRef streamRef, void *cb_data, size_t count, void
         path = ((char**)paths)[i];
         /* flags are unsigned long, IDs are uint64_t */
         log_debug("Change %llu in %s, flags %lu", ids[i], path, (long)flags[i]);
-        push_changes(base_path, path);
+        push_changes(l_mp, base_path, path);
     }
 }
 #endif
@@ -62,12 +64,12 @@ void init() {
     init_bufs();
     root_ignores = init_ignore(NULL);
     pthread_create(&remote_changes, NULL, &remote_change_worker, NULL);
-    l_ap = init_lua_state();
     l_mp = init_lua_state();
 }
 
 
 void cleanup() {
+    /* TODO: free() ignored_changes */
     cleanup_bufs();
     cleanup_ignore(root_ignores); /* TODO: free the children! */
     free(opts.path);
@@ -134,7 +136,7 @@ int main(int argc, char **argv) {
         inotifytools_printf(event, "%T %w%f %e\n");
         full_path = inotifytools_filename_from_wd(event->wd);
         log_debug("Change in %s", full_path);
-        push_changes(path, full_path);
+        push_changes(l_mp, path, full_path);
     } while (event);
 #elif FSEVENTS
     log_debug("Using FSEvents to watch for changes.");

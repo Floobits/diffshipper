@@ -4,6 +4,7 @@
 .deps
 .dirstamp
 .DS_Store
+/Makefile
 aclocal.m4
 autom4te.cache
 cachegrind.out.*
@@ -17,8 +18,8 @@ depcomp
 diffshipper
 gmon.out
 install-sh
-/Makefile
 Makefile.in
 missing
 src/config.h*
+src/dmp_lua_str.h
 stamp-h1

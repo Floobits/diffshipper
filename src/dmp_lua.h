@@ -21,7 +21,7 @@ lua_State *l_mp;
 
 lua_State *init_lua_state();
 
-int apply_patch(buf_t *buf, char *patch_text);
-char *make_patch(const char *old, const char *new);
+int apply_patch(lua_State *l, buf_t *buf, char *patch_text);
+char *make_patch(lua_State *l, const char *old, const char *new);
 
 #endif

@@ -103,7 +103,7 @@ static void on_part(json_t *json_obj) {
 }
 
 
-static void on_patch(json_t *json_obj) {
+static void on_patch(lua_State *l, json_t *json_obj) {
     int buf_id;
     int user_id;
     char *username;
@@ -130,7 +130,7 @@ static void on_patch(json_t *json_obj) {
         die("we got a patch for a nonexistent buf id: %i", buf_id);
         return;
     }
-    if (apply_patch(buf, patch_str) != 1) {
+    if (apply_patch(l, buf, patch_str) != 1) {
         log_err("Couldn't apply patch. Re-fetching buffer %i (%s)", buf_id, buf->path);
         send_json("{s:s s:i}", "name", "get_buf", "id", buf_id);
         return;
@@ -201,6 +201,7 @@ void *remote_change_worker() {
     pthread_mutex_unlock(&server_conn_mtx);
 
     json_t *json_obj;
+    lua_State *l_ap = init_lua_state();
 
     while (1) {
         json_obj = recv_json();
@@ -223,7 +224,7 @@ void *remote_change_worker() {
         } else if (strcmp(name, "part") == 0) {
             on_part(json_obj);
         } else if (strcmp(name, "patch") == 0) {
-            on_patch(json_obj);
+            on_patch(l_ap, json_obj);
         } else if (strcmp(name, "rename_buf") == 0) {
             on_rename_buf(json_obj);
         } else {
@@ -233,6 +234,7 @@ void *remote_change_worker() {
         json_decref(json_obj);
     }
 
+    lua_close(l_ap);
     pthread_exit(NULL);
     return NULL;
 }

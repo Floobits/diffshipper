@@ -26,6 +26,4 @@ void add_buf_to_bufs(buf_t *buf);
 void delete_buf(buf_t *buf);
 void save_buf(buf_t *buf);
 
-int apply_patch(buf_t *buf, char *patch_text);
-
 #endif

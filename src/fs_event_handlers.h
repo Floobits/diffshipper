@@ -13,6 +13,6 @@ typedef struct {
   size_t patch_size;
 } diff_info_t;
 
-void push_changes(const char *base_path, const char *full_path);
+void push_changes(lua_State *l, const char *base_path, const char *full_path);
 
 #endif

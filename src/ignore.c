@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <ctype.h>
 #include <dirent.h>
 #include <fnmatch.h>
@@ -5,10 +6,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <sys/time.h>
+#include <time.h>
 
 #include "ignore.h"
 #include "log.h"
 #include "scandir.h"
+#include "options.h"
 #include "util.h"
 
 
@@ -18,9 +22,8 @@ const char *evil_hardcoded_ignore_files[] = {
     NULL
 };
 
-/* Warning: changing the first string will break skip_vcs_ignores. */
+/* Warning: changing the first string will break skip_vcs_ignores_t. */
 const char *ignore_pattern_files[] = {
-    ".agignore",
     ".dsignore",
     ".gitignore",
     ".git/info/exclude",
@@ -33,48 +36,85 @@ const int fnmatch_flags = 0 & FNM_PATHNAME;
 
 
 void ignore_change(const char *path) {
-    int i;
+    size_t i;
+    struct timeval now;
 
+    if (is_ignored(path)) {
+        log_debug("%s is already ignored", path);
+        return;
+    }
     pthread_mutex_lock(&ignore_changes_mtx);
     ignored_changes_len++;
-    ignored_changes = realloc(ignored_changes, ignored_changes_len * sizeof(char*));
+    ignored_changes = realloc(ignored_changes, ignored_changes_len * sizeof(ignored_change_t));
     /* TODO: do a binary search to figure out the position */
     for (i = ignored_changes_len - 1; i > 0; i--) {
-        if (strcmp(path, ignored_changes[i-1]) > 0) {
+        if (strcmp(path, ignored_changes[i-1].path) > 0) {
             break;
         }
-        ignored_changes[i] = ignored_changes[i-1];
+        ignored_changes[i].path = ignored_changes[i-1].path;
+        ignored_changes[i].changed_at = ignored_changes[i-1].changed_at;
     }
-    ignored_changes[i] = strdup(path);
+    ignored_changes[i].path = strdup(path);
+    gettimeofday(&now, NULL);
+    ignored_changes[i].changed_at = now.tv_sec;
     log_debug("ignoring path %s", path);
     pthread_mutex_unlock(&ignore_changes_mtx);
 }
 
 
+static void delete_ignore(const size_t pos) {
+    size_t i;
+    log_debug("deleting %s from ignores", ignored_changes[pos].path);
+    free(ignored_changes[pos].path);
+    assert(pos <= ignored_changes_len);
+    for (i = pos; i < ignored_changes_len - 1; i++) {
+        ignored_changes[i].path = ignored_changes[i+1].path;
+        ignored_changes[i].changed_at = ignored_changes[i+1].changed_at;
+    }
+    ignored_changes_len--;
+    ignored_changes = realloc(ignored_changes, ignored_changes_len * sizeof(ignored_change_t));
+}
+
+
 void unignore_change(const char *path) {
-    int i;
+    size_t i;
+    int rv;
     /* TODO: do a binary search to figure out the position */
     pthread_mutex_lock(&ignore_changes_mtx);
     /* totally unsafe */
     for (i = 0; i < ignored_changes_len - 1; i++) {
-        if (strcmp(path, ignored_changes[i]) >= 0) {
-            ignored_changes[i] = ignored_changes[i+1];
+        rv = strcmp(path, ignored_changes[i].path);
+        if (rv == 0) {
+            delete_ignore(i);
+            break;
         }
     }
-    ignored_changes_len--;
-    ignored_changes = realloc(ignored_changes, ignored_changes_len * sizeof(char*));
     log_debug("unignoring path %s", path);
     pthread_mutex_unlock(&ignore_changes_mtx);
 }
 
 
+static void prune_ignores() {
+    size_t i;
+    struct timeval now;
+    gettimeofday(&now, NULL);
+
+    for (i = 0; i < ignored_changes_len; i++) {
+        if (now.tv_sec >= ignored_changes[i].changed_at + opts.mtime) {
+            delete_ignore(i);
+        }
+    }
+}
+
+
 int is_ignored(const char *path) {
-    int i;
+    size_t i;
     int rv = 0;
     pthread_mutex_lock(&ignore_changes_mtx);
+    prune_ignores();
     /* TODO: binary search */
     for (i = 0; i < ignored_changes_len; i++) {
-        if (strcmp(ignored_changes[i], path) == 0) {
+        if (strcmp(ignored_changes[i].path, path) == 0) {
             rv = 1;
             break;
         }
@@ -89,8 +129,8 @@ int is_ignored(const char *path) {
 }
 
 
-ignores *init_ignore(ignores *parent) {
-    ignores *ig = malloc(sizeof(ignores));
+ignores_t *init_ignore(ignores_t *parent) {
+    ignores_t *ig = malloc(sizeof(ignores_t));
     ig->names = NULL;
     ig->names_len = 0;
     ig->regexes = NULL;
@@ -100,7 +140,7 @@ ignores *init_ignore(ignores *parent) {
 }
 
 
-void cleanup_ignore(ignores *ig) {
+void cleanup_ignore(ignores_t *ig) {
     size_t i;
 
     if (ig) {
@@ -135,7 +175,7 @@ static int is_fnmatch(const char* filename) {
 }
 
 
-void add_ignore_pattern(ignores *ig, const char* pattern) {
+void add_ignore_pattern(ignores_t *ig, const char* pattern) {
     int i;
     int pattern_len;
 
@@ -152,7 +192,7 @@ void add_ignore_pattern(ignores *ig, const char* pattern) {
     }
 
     if (pattern_len == 0) {
-        log_debug("Pattern is empty. Not adding any ignores.");
+        log_debug("Pattern is empty. Not adding any ignores_t.");
         return;
     }
 
@@ -179,7 +219,7 @@ void add_ignore_pattern(ignores *ig, const char* pattern) {
 
 
 /* For loading git/svn/hg ignore patterns */
-void load_ignore_patterns(ignores *ig, const char *path) {
+void load_ignore_patterns(ignores_t *ig, const char *path) {
     FILE *fp = NULL;
     fp = fopen(path, "r");
     if (fp == NULL) {
@@ -206,7 +246,7 @@ void load_ignore_patterns(ignores *ig, const char *path) {
 }
 
 
-void load_svn_ignore_patterns(ignores *ig, const char *path) {
+void load_svn_ignore_patterns(ignores_t *ig, const char *path) {
     FILE *fp = NULL;
     char *dir_prop_base;
     ds_asprintf(&dir_prop_base, "%s/%s", path, SVN_DIR_PROP_BASE);
@@ -275,7 +315,7 @@ void load_svn_ignore_patterns(ignores *ig, const char *path) {
 }
 
 
-static int filename_ignore_search(const ignores *ig, const char *filename) {
+static int filename_ignore_search(const ignores_t *ig, const char *filename) {
     size_t i;
     int match_pos;
 
@@ -299,7 +339,7 @@ static int filename_ignore_search(const ignores *ig, const char *filename) {
 }
 
 
-static int path_ignore_search(const ignores *ig, const char *path, const char *filename) {
+static int path_ignore_search(const ignores_t *ig, const char *path, const char *filename) {
     char *temp;
 
     if (filename_ignore_search(ig, filename)) {
@@ -317,7 +357,7 @@ int scandir_filter(const char *path, const struct dirent *dir, void *baton) {
     const char *filename = dir->d_name;
     size_t i;
     scandir_baton_t *scandir_baton = (scandir_baton_t*) baton;
-    const ignores *ig = scandir_baton->ig;
+    const ignores_t *ig = scandir_baton->ig;
     const char *base_path = scandir_baton->base_path;
     const char *path_start = path;
     char *temp;
