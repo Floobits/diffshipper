@@ -120,15 +120,17 @@ void push_changes(lua_State *l, const char *base_path, const char *full_path) {
         }
         f2_size = file_stats.st_size;
 
+        if (f2_size == 0) {
+            log_debug("%s is empty");
+            goto cleanup;
+        }
         mf = mmap_file(f2, f2_size, 0, 0);
         if (is_binary(mf->buf, mf->len)) {
             log_debug("%s is binary. skipping", file_path);
             goto diff_cleanup;
         }
 
-
         char *new_text = strndup(mf->buf, mf->len);
-
         char *patch_text = make_patch(l, buf->buf, new_text);
 
         free(new_text);
