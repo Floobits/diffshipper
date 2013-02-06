@@ -29,7 +29,7 @@ typedef struct {
 
 
 ignored_change_t *ignored_changes;
-int ignored_changes_len;
+size_t ignored_changes_len;
 pthread_mutex_t ignore_changes_mtx;
 
 void ignore_change(const char *path);
