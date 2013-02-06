@@ -4,7 +4,7 @@
 #include "ignore.h"
 
 typedef struct {
-    const ignores *ig;
+    const ignores_t *ig;
     const char *base_path;
     int level;
 } scandir_baton_t;

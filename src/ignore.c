@@ -18,7 +18,7 @@ const char *evil_hardcoded_ignore_files[] = {
     NULL
 };
 
-/* Warning: changing the first string will break skip_vcs_ignores. */
+/* Warning: changing the first string will break skip_vcs_ignores_t. */
 const char *ignore_pattern_files[] = {
     ".dsignore",
     ".gitignore",
@@ -88,8 +88,8 @@ int is_ignored(const char *path) {
 }
 
 
-ignores *init_ignore(ignores *parent) {
-    ignores *ig = malloc(sizeof(ignores));
+ignores_t *init_ignore(ignores_t *parent) {
+    ignores_t *ig = malloc(sizeof(ignores_t));
     ig->names = NULL;
     ig->names_len = 0;
     ig->regexes = NULL;
@@ -99,7 +99,7 @@ ignores *init_ignore(ignores *parent) {
 }
 
 
-void cleanup_ignore(ignores *ig) {
+void cleanup_ignore(ignores_t *ig) {
     size_t i;
 
     if (ig) {
@@ -134,7 +134,7 @@ static int is_fnmatch(const char* filename) {
 }
 
 
-void add_ignore_pattern(ignores *ig, const char* pattern) {
+void add_ignore_pattern(ignores_t *ig, const char* pattern) {
     int i;
     int pattern_len;
 
@@ -151,7 +151,7 @@ void add_ignore_pattern(ignores *ig, const char* pattern) {
     }
 
     if (pattern_len == 0) {
-        log_debug("Pattern is empty. Not adding any ignores.");
+        log_debug("Pattern is empty. Not adding any ignores_t.");
         return;
     }
 
@@ -178,7 +178,7 @@ void add_ignore_pattern(ignores *ig, const char* pattern) {
 
 
 /* For loading git/svn/hg ignore patterns */
-void load_ignore_patterns(ignores *ig, const char *path) {
+void load_ignore_patterns(ignores_t *ig, const char *path) {
     FILE *fp = NULL;
     fp = fopen(path, "r");
     if (fp == NULL) {
@@ -205,7 +205,7 @@ void load_ignore_patterns(ignores *ig, const char *path) {
 }
 
 
-void load_svn_ignore_patterns(ignores *ig, const char *path) {
+void load_svn_ignore_patterns(ignores_t *ig, const char *path) {
     FILE *fp = NULL;
     char *dir_prop_base;
     ds_asprintf(&dir_prop_base, "%s/%s", path, SVN_DIR_PROP_BASE);
@@ -274,7 +274,7 @@ void load_svn_ignore_patterns(ignores *ig, const char *path) {
 }
 
 
-static int filename_ignore_search(const ignores *ig, const char *filename) {
+static int filename_ignore_search(const ignores_t *ig, const char *filename) {
     size_t i;
     int match_pos;
 
@@ -298,7 +298,7 @@ static int filename_ignore_search(const ignores *ig, const char *filename) {
 }
 
 
-static int path_ignore_search(const ignores *ig, const char *path, const char *filename) {
+static int path_ignore_search(const ignores_t *ig, const char *path, const char *filename) {
     char *temp;
 
     if (filename_ignore_search(ig, filename)) {
@@ -316,7 +316,7 @@ int scandir_filter(const char *path, const struct dirent *dir, void *baton) {
     const char *filename = dir->d_name;
     size_t i;
     scandir_baton_t *scandir_baton = (scandir_baton_t*) baton;
-    const ignores *ig = scandir_baton->ig;
+    const ignores_t *ig = scandir_baton->ig;
     const char *base_path = scandir_baton->base_path;
     const char *path_start = path;
     char *temp;

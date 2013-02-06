@@ -16,7 +16,7 @@
 #include "util.h"
 
 
-static void recurse_create_bufs(const char *full_path, ignores *ig, int depth) {
+static void recurse_create_bufs(const char *full_path, ignores_t *ig, int depth) {
     struct dirent **dir_list = NULL;
     struct dirent *dir = NULL;
     int results;
@@ -95,7 +95,7 @@ static void recurse_create_bufs(const char *full_path, ignores *ig, int depth) {
             }
         }
         if (dir->d_type == DT_DIR) {
-            ignores *ig_child = init_ignore(ig);
+            ignores_t *ig_child = init_ignore(ig);
             recurse_create_bufs(file_path, ig_child, depth + 1);
             goto cleanup;
         }
