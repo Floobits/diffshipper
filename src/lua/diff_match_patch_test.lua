@@ -1010,10 +1010,10 @@ function testPatchMake()
   assertEquals(expectedPatch, dmp.patch_toText(patches))
 
   -- Character encoding.
-  patches = dmp.patch_make('`1234567890-=[]\\;\',./', '~!@#$%^&*()_+{}|="<>?')
-  assertEquals('@@ -1,21 +1,21 @@\n'
+  patches = dmp.patch_make('`1234567890-=[]\\;\',./', '~!@#$%^&*()_+{}|="<>?:')
+  assertEquals('@@ -1,21 +1,22 @@\n'
       .. '-%601234567890-=%5B%5D%5C;\',./\n'
-      .. '+~!@#$%25%5E&*()_+%7B%7D%7C=%22%3C%3E?\n', dmp.patch_toText(patches))
+      .. '+~!@#$%25%5E&*()_+%7B%7D%7C=%22%3C%3E?:\n', dmp.patch_toText(patches))
 
   -- Character decoding.
   diffs = {
