@@ -47,7 +47,7 @@ local clock = os.clock
 
 -- Utility functions.
 
-local percentEncode_pattern = '[^A-Za-z0-9%-=;\',./~!@#$%&*%(%)_%+ %?]'
+local percentEncode_pattern = '[^A-Za-z0-9%-=;:\',./~!@#$%&*%(%)_%+ %?]'
 local function percentEncode_replace(v)
   return strformat('%%%02X', strbyte(v))
 end
