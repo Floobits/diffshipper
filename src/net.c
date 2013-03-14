@@ -1,5 +1,6 @@
 #include <errno.h>
 #include <netdb.h>
+#include <netinet/tcp.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -20,6 +21,7 @@ int server_connect(const char *host, const char *port) {
     int rv;
     struct addrinfo hints;
     int keepalive = 1;
+    int keepalive_interval = 30;
     struct timeval timeout;
     socklen_t optlen;
 
@@ -37,6 +39,11 @@ int server_connect(const char *host, const char *port) {
 
     optlen = sizeof(keepalive);
     rv = setsockopt(server_sock, SOL_SOCKET, SO_KEEPALIVE, &keepalive, optlen);
+    if (rv < 0)
+        die("setsockopt() SO_KEEPALIVE error: %s", strerror(errno));
+
+    optlen = sizeof(keepalive_interval);
+    rv = setsockopt(server_sock, IPPROTO_TCP, TCP_KEEPALIVE, &keepalive_interval, optlen);
     if (rv < 0)
         die("setsockopt() SO_KEEPALIVE error: %s", strerror(errno));
 
