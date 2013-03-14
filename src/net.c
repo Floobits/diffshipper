@@ -5,6 +5,7 @@
 #include <string.h>
 #include <sys/select.h>
 #include <sys/socket.h>
+#include <sys/time.h>
 #include <sys/types.h>
 #include <unistd.h>
 
@@ -18,6 +19,9 @@
 int server_connect(const char *host, const char *port) {
     int rv;
     struct addrinfo hints;
+    int keepalive = 1;
+    struct timeval timeout;
+    socklen_t optlen;
 
     memset(&hints, 0, sizeof(hints));
     hints.ai_family = AF_UNSPEC;
@@ -28,12 +32,28 @@ int server_connect(const char *host, const char *port) {
         die("getaddrinfo() error: %s", strerror(errno));
 
     server_sock = socket(server_info->ai_family, server_info->ai_socktype, server_info->ai_protocol);
-    if (server_sock == -1)
+    if (server_sock < 0)
         die("socket() error: %s", strerror(errno));
+
+    optlen = sizeof(keepalive);
+    rv = setsockopt(server_sock, SOL_SOCKET, SO_KEEPALIVE, &keepalive, optlen);
+    if (rv < 0)
+        die("setsockopt() SO_KEEPALIVE error: %s", strerror(errno));
+
+    timeout.tv_sec = 30;
+    timeout.tv_usec = 0;
+    optlen = sizeof(timeout);
+    rv = setsockopt(server_sock, SOL_SOCKET, SO_RCVTIMEO, &timeout, optlen);
+    if (rv < 0)
+        die("setsockopt() SO_RCVTIMEO error: %s", strerror(errno));
+
+    rv = setsockopt(server_sock, SOL_SOCKET, SO_SNDTIMEO, &timeout, optlen);
+    if (rv < 0)
+        die("setsockopt() SO_SNDTIMEO error: %s", strerror(errno));
 
     log_debug("Connecting to %s:%s...", host, port);
     rv = connect(server_sock, server_info->ai_addr, server_info->ai_addrlen);
-    if (rv == -1)
+    if (rv < 0)
         die("connect() error: %s", strerror(errno));
 
     log_debug("Connected to %s:%s", host, port);
@@ -60,7 +80,7 @@ static ssize_t send_bytes(const void *buf, const size_t len) {
         return 0;
     }
     ssize_t bytes_sent = send(server_sock, buf, len, 0);
-    if (bytes_sent == -1)
+    if (bytes_sent < 0)
         die("send() error: %s", strerror(errno));
     return bytes_sent;
 }
@@ -79,8 +99,10 @@ static ssize_t recv_bytes(char **buf) {
         net_buf_left = net_buf_size - net_buf_len;
         bytes_received = recv(server_sock, net_buf_end, net_buf_left, 0);
         net_buf_len += bytes_received;
-        log_debug("received %u bytes. net_buf_len %i", bytes_received, net_buf_len);
-        if (bytes_received == 0) {
+        log_debug("received %i bytes. net_buf_len %i", bytes_received, net_buf_len);
+        if (bytes_received < 0) {
+            die("recv() failed", strerror(errno));
+        } else if (bytes_received == 0) {
             log_debug("no bytes received");
             return 0;
         } else if (bytes_received == net_buf_left) {

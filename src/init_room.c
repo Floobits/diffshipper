@@ -31,6 +31,7 @@ static void recurse_create_bufs(const char *full_path, ignores_t *ig, int depth)
 
     if (strlen(opts.path) > strlen(full_path)) {
         die("Base path %s is longer than full path %s!", opts.path, full_path);
+        return;
     } else if (strcmp(opts.path, full_path) == 0) {
         log_debug("base path and full path are both %s", opts.path);
         rel_path = strdup("");
