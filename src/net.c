@@ -94,13 +94,15 @@ static ssize_t recv_bytes(char **buf) {
     void *line_end;
 
     line_end = memchr(net_buf, '\n', net_buf_len);
-    while(line_end == NULL) {
+    while (line_end == NULL) {
         net_buf_end = net_buf + net_buf_len;
         net_buf_left = net_buf_size - net_buf_len;
         bytes_received = recv(server_sock, net_buf_end, net_buf_left, 0);
-        net_buf_len += bytes_received;
         log_debug("received %i bytes. net_buf_len %i", bytes_received, net_buf_len);
         if (bytes_received < 0) {
+            if (errno == EAGAIN) {
+                continue;
+            }
             die("recv() failed", strerror(errno));
         } else if (bytes_received == 0) {
             log_debug("no bytes received");
@@ -110,6 +112,7 @@ static ssize_t recv_bytes(char **buf) {
             log_debug("reallocating net_buf to %i bytes", net_buf_size);
             net_buf = realloc(net_buf, net_buf_size);
         }
+        net_buf_len += bytes_received;
         line_end = memchr(net_buf, '\n', net_buf_len);
     }
 
