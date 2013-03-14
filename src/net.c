@@ -12,6 +12,7 @@
 
 #include <jansson.h>
 
+#include "config.h"
 #include "log.h"
 #include "net.h"
 #include "options.h"
@@ -22,6 +23,7 @@ int server_connect(const char *host, const char *port) {
     struct addrinfo hints;
     int keepalive = 1;
     int keepalive_interval = 30;
+    int keepalive_interval_flag;
     struct timeval timeout;
     socklen_t optlen;
 
@@ -43,7 +45,12 @@ int server_connect(const char *host, const char *port) {
         die("setsockopt() SO_KEEPALIVE error: %s", strerror(errno));
 
     optlen = sizeof(keepalive_interval);
-    rv = setsockopt(server_sock, IPPROTO_TCP, TCP_KEEPALIVE, &keepalive_interval, optlen);
+#ifdef USE_TCP_KEEPALIVE
+    keepalive_interval_flag = TCP_KEEPALIVE;
+#else
+    keepalive_interval_flag = TCP_KEEPINTVL;
+#endif
+    rv = setsockopt(server_sock, IPPROTO_TCP, keepalive_interval_flag, &keepalive_interval, optlen);
     if (rv < 0)
         die("setsockopt() SO_KEEPALIVE error: %s", strerror(errno));
 

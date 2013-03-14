@@ -38,6 +38,8 @@ LDFLAGS="$LDFLAGS"
 
 AC_CHECK_HEADERS([pthread.h lua.h lualib.h lauxlib.h])
 
+AC_CHECK_DECL([TCP_KEEPALIVE], [AC_DEFINE([USE_TCP_KEEPALIVE], [], [Use TCP_KEEPALIVE flag])], [], [#include <netinet/tcp.h>])
+
 AC_CHECK_MEMBER([struct dirent.d_type], [AC_DEFINE([HAVE_DIRENT_DTYPE], [], [Have dirent struct member d_type])], [], [[#include <dirent.h>]])
 
 AC_CHECK_FUNCS(vasprintf getline strndup)
