@@ -1,13 +1,13 @@
 .\" generated with Ronn/v0.7.3
 .\" http://github.com/rtomayko/ronn/tree/0.7.3
 .
-.TH "DIFFSHIPPER" "1" "January 2013" "" ""
+.TH "DIFFSHIPPER" "1" "March 2013" "" ""
 .
 .SH "NAME"
 \fBdiffshipper\fR \- Floobits diff shipper\. The mediocre fall\-back solution for people with unsupported editors\.
 .
 .SH "SYNOPSIS"
-\fBdiffshipper \-r ROOM_NAME \-o ROOM_OWNER \-u USERNAME \-s API_SECRET [OPTIONS] PATH\fR
+\fBdiffshipper \-r ROOM_NAME \-o ROOM_OWNER [OPTIONS] PATH\fR
 .
 .SH "DESCRIPTION"
 Join a Floobits room and monitor files in PATH for changes\.
@@ -54,6 +54,23 @@ Join a Floobits room and monitor files in PATH for changes\.
 \fB\-v\fR Print version and exit
 .
 .IP "" 0
+.
+.P
+If USERNAME and API_SECRET are not specified, they will be read from ~/\.floorc\. The format for floorc is:
+.
+.IP "" 4
+.
+.nf
+
+username USERNAME
+secret API_SECRET
+.
+.fi
+.
+.IP "" 0
+.
+.P
+Empty lines are ignored\. Lines starting with # are ignored\.
 .
 .SH "EXAMPLES"
 \fBdiffshipper \-r testroom \-o myuser \-u myuser \-s ve3aiCoo ~/code/collab_project/\fR
