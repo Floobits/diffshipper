@@ -15,7 +15,7 @@ static char *parse_value(char *value) {
         value++;
     }
     end = value;
-    while (!isspace(*end), *end != '\0') {
+    while (!isspace(*end) && *end != '\0') {
         end++;
     }
     *end = '\0';
