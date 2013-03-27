@@ -51,10 +51,6 @@ int parse_conf() {
         if (line_len == 0 || line[0] == '\n' || line[0] == '#') {
             continue;
         }
-        if (line[line_len-1] == '\n') {
-            line[line_len-1] = '\0'; /* kill the \n */
-        }
-
         if (strncmp(line, "username ", 9) == 0) {
             opts.username = parse_value(line + 9);
             if (!opts.username) {
