@@ -10,9 +10,15 @@
 
 
 static char *parse_value(char *value) {
-    while (isspace(value[0])) {
+    char *end;
+    while (isspace(*value)) {
         value++;
     }
+    end = value;
+    while (!isspace(*end), *end != '\0') {
+        end++;
+    }
+    *end = '\0';
 
     return strdup(value);
 }
