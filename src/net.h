@@ -5,7 +5,8 @@
 
 #include <jansson.h>
 
-#define DS_PROTO_VERSION "0.01"
+#define DS_PROTO_VERSION "0.02"
+#define DS_CLIENT_NAME "diffshipper"
 
 struct addrinfo *server_info;
 int server_sock;
