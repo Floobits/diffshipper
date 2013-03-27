@@ -24,14 +24,15 @@ static char *parse_value(char *value) {
 }
 
 int parse_conf() {
+    int rv = 0;
     int i;
-    FILE *fp = NULL;
     char *line = NULL;
     size_t line_cap;
     ssize_t line_len;
+    FILE *fp = NULL;
     char *path = NULL;
-    char *home = getenv("HOME");
-    int rv = 0;
+    /* We're not leaking this. Stuff returned from getenv() shouldn't be freed */
+    const char *home = getenv("HOME");
 
     if (!home) {
         log_err("HOME environment variable isn't set. Not parsing config.");
