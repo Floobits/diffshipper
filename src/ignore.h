@@ -39,7 +39,7 @@ int is_ignored(const char *path);
 ignores_t *init_ignore(ignores_t *parent);
 void cleanup_ignore(ignores_t *ig);
 
-void add_ignore_pattern(ignores_t *ig, const char* pattern);
+void add_ignore_pattern(ignores_t *ig, const char *pattern);
 
 void load_ignore_patterns(ignores_t *ig, const char *path);
 void load_svn_ignore_patterns(ignores_t *ig, const char *path);

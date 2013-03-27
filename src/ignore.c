@@ -161,7 +161,7 @@ void cleanup_ignore(ignores_t *ig) {
 }
 
 
-static int is_fnmatch(const char* filename) {
+static int is_fnmatch(const char *filename) {
     char fnmatch_chars[] = {
         '!',
         '*',
@@ -175,7 +175,7 @@ static int is_fnmatch(const char* filename) {
 }
 
 
-void add_ignore_pattern(ignores_t *ig, const char* pattern) {
+void add_ignore_pattern(ignores_t *ig, const char *pattern) {
     int i;
     int pattern_len;
 

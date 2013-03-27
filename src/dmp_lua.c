@@ -18,12 +18,12 @@ lua_State *init_lua_state() {
     luaL_openlibs(l);
     rv = luaL_loadbuffer(l, lua_diff_match_patch_str, lua_diff_match_patch_str_size, "diff_match_patch");
     if (rv) {
-        const char* lua_err = lua_tostring(l, -1);
+        const char *lua_err = lua_tostring(l, -1);
         die("couldn't load diff_match_patch.lua: %s", lua_err);
     }
     rv = lua_pcall(l, 0, 0, 0);
     if (rv) {
-        const char* lua_err = lua_tostring(l, -1);
+        const char *lua_err = lua_tostring(l, -1);
         die("couldn't require diff_match_patch: %s", lua_err);
     }
     log_debug("Loaded lua successfully");

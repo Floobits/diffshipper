@@ -30,7 +30,7 @@ int run_cmd(const char *fmt, ...) {
 }
 
 
-int binary_search(const char* needle, char **haystack, int start, int end) {
+int binary_search(const char *needle, char **haystack, int start, int end) {
     int mid;
     int rc;
 
