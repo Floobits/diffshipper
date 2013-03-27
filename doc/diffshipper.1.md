@@ -3,7 +3,7 @@ diffshipper(1) -- Floobits diff shipper. The mediocre fall-back solution for peo
 
 ## SYNOPSIS
 
-`diffshipper -r ROOM_NAME -o ROOM_OWNER -u USERNAME -s API_SECRET [OPTIONS] PATH`
+`diffshipper -r ROOM_NAME -o ROOM_OWNER [OPTIONS] PATH`
 
 
 ## DESCRIPTION
@@ -26,6 +26,14 @@ Join a Floobits room and monitor files in PATH for changes.
   * `-s SECRET`           API secret
   * `-u USERNAME`         Username
   * `-v`                  Print version and exit
+
+
+If USERNAME and API_SECRET are not specified, they will be read from ~/.floorc. The format for floorc is:
+
+    username USERNAME
+    secret API_SECRET
+
+Empty lines are ignored. Lines starting with # are ignored.
 
 
 ## EXAMPLES

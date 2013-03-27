@@ -16,6 +16,7 @@
 
 #include "api.h"
 #include "buf.h"
+#include "conf.h"
 #include "dmp_lua.h"
 #include "fs_event_handlers.h"
 #include "ignore.h"
@@ -88,6 +89,10 @@ int main(int argc, char **argv) {
 
     init();
     init_opts();
+    rv = parse_conf();
+    if (rv) {
+        die("Couldn't parse config file.");
+    }
     parse_opts(argc, argv);
     path = opts.path;
 

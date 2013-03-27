@@ -9,7 +9,7 @@ typedef long long int lli_t;
 
 int run_cmd(const char *fmt, ...);
 
-int binary_search(const char* needle, char **haystack, int start, int end);
+int binary_search(const char *needle, char **haystack, int start, int end);
 
 char *escape_data(const char *data, int len);
 char *unescape_data(char *escaped);
