@@ -33,7 +33,7 @@ AC_CHECK_HEADERS([sys/inotify.h], [
 )
 
 # I know D_GNU_SOURCE is frowned upon, but it's needed to use asprintf() on linux
-CFLAGS="$CFLAGS -Wall -Wextra -D_GNU_SOURCE -g"
+CFLAGS="$CFLAGS -Wall -Wextra -D_GNU_SOURCE -g -lm"
 LDFLAGS="$LDFLAGS"
 
 AC_CHECK_HEADERS([pthread.h lua.h lualib.h lauxlib.h])
