@@ -118,7 +118,7 @@ static ssize_t recv_bytes(char **buf) {
             if (errno == EAGAIN) {
                 continue;
             }
-            die("recv() failed", strerror(errno));
+            die("recv() failed: %s", strerror(errno));
         } else if (bytes_received == 0) {
             log_debug("no bytes received");
             return 0;
